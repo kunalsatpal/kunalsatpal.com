@@ -1,0 +1,115 @@
+{
+  "environment": "Local headless Chrome; mobile viewport 390x844, DPR 3, touch emulation; actual host GPU; no CPU throttling",
+  "runs": [
+    {
+      "page": "http://127.0.0.1:8765/.universe-baseline.html",
+      "mode": "planet",
+      "startupLongTasks": [
+        {
+          "start": 146.89999997615814,
+          "duration": 318
+        }
+      ],
+      "frames": [
+        {
+          "frames": 181,
+          "p50": 16.699999999999818,
+          "p95": 16.700000000000728,
+          "over33": 0
+        },
+        {
+          "frames": 180,
+          "p50": 16.69999999999891,
+          "p95": 16.799999999999272,
+          "over33": 0
+        },
+        {
+          "frames": 181,
+          "p50": 16.69999999999891,
+          "p95": 16.799999999999272,
+          "over33": 0
+        }
+      ],
+      "cpuMs": {
+        "TaskDuration": 987.98,
+        "ScriptDuration": 302.35,
+        "LayoutDuration": 110.74,
+        "RecalcStyleDuration": 134.62
+      }
+    },
+    {
+      "page": "http://127.0.0.1:8765/.universe-baseline.html",
+      "mode": "scroll",
+      "startupLongTasks": [
+        {
+          "start": 27.09999990463257,
+          "duration": 286
+        }
+      ],
+      "frames": [
+        {
+          "frames": 583,
+          "p50": 16.699999999999818,
+          "p95": 33.399999999999636,
+          "over33": 29
+        }
+      ],
+      "cpuMs": {
+        "TaskDuration": 1905.66,
+        "ScriptDuration": 574.02,
+        "LayoutDuration": 208.12,
+        "RecalcStyleDuration": 347.27
+      }
+    },
+    {
+      "page": "http://127.0.0.1:8765/universe.html",
+      "mode": "planet",
+      "startupLongTasks": [],
+      "frames": [
+        {
+          "frames": 181,
+          "p50": 16.699999999999818,
+          "p95": 16.700000000000728,
+          "over33": 0
+        },
+        {
+          "frames": 181,
+          "p50": 16.69999999999891,
+          "p95": 16.700000000000728,
+          "over33": 0
+        },
+        {
+          "frames": 181,
+          "p50": 16.69999999999891,
+          "p95": 16.799999999999272,
+          "over33": 0
+        }
+      ],
+      "cpuMs": {
+        "TaskDuration": 829.11,
+        "ScriptDuration": 266.07,
+        "LayoutDuration": 0.6,
+        "RecalcStyleDuration": 63.31
+      }
+    },
+    {
+      "page": "http://127.0.0.1:8765/universe.html",
+      "mode": "scroll",
+      "startupLongTasks": [],
+      "frames": [
+        {
+          "frames": 602,
+          "p50": 16.699999999999818,
+          "p95": 33.399999999999636,
+          "over33": 29
+        }
+      ],
+      "cpuMs": {
+        "TaskDuration": 1414.73,
+        "ScriptDuration": 546.9,
+        "LayoutDuration": 20.75,
+        "RecalcStyleDuration": 162.18
+      }
+    }
+  ]
+}

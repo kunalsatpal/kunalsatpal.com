@@ -1,0 +1,50 @@
+[
+  {
+    "theme": "real",
+    "scene": "hero",
+    "mean_channel_difference": 0.0,
+    "pixels_diff_over_10_percent": 0.0
+  },
+  {
+    "theme": "real",
+    "scene": "hinge",
+    "mean_channel_difference": 0.0,
+    "pixels_diff_over_10_percent": 0.0
+  },
+  {
+    "theme": "real",
+    "scene": "transition",
+    "mean_channel_difference": 0.0,
+    "pixels_diff_over_10_percent": 0.0
+  },
+  {
+    "theme": "real",
+    "scene": "galaxy",
+    "mean_channel_difference": 0.0,
+    "pixels_diff_over_10_percent": 0.0
+  },
+  {
+    "theme": "toon",
+    "scene": "hero",
+    "mean_channel_difference": 0.0,
+    "pixels_diff_over_10_percent": 0.0
+  },
+  {
+    "theme": "toon",
+    "scene": "hinge",
+    "mean_channel_difference": 0.0,
+    "pixels_diff_over_10_percent": 0.0
+  },
+  {
+    "theme": "toon",
+    "scene": "transition",
+    "mean_channel_difference": 0.0,
+    "pixels_diff_over_10_percent": 0.0
+  },
+  {
+    "theme": "toon",
+    "scene": "galaxy",
+    "mean_channel_difference": 0.0,
+    "pixels_diff_over_10_percent": 0.0
+  }
+]

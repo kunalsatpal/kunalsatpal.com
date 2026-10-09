@@ -1,0 +1,118 @@
+{
+  "checks": [
+    "390: hero shader renders at full quality",
+    "390: hidden animations pause at hero",
+    "390: hidden animations pause at about",
+    "390: hidden animations pause at hinge",
+    "390: hidden animations pause at gojek",
+    "390: hidden animations pause at cult",
+    "390: hidden animations pause at galaxy",
+    "390: hidden animations pause at writing",
+    "390: hidden animations pause at life",
+    "390: hidden animations pause at hello",
+    "390: hero shader pauses after leaving hero",
+    "390: stationary contact scene releases the page animation loop",
+    "390: an in-between position settles exactly on Hinge Health",
+    "390: hard wheel momentum advances exactly one scene",
+    "390: route navigation lands on its exact requested scene",
+    "A hard mobile swipe advances exactly one scene",
+    "390: cartoon transition completes",
+    "390: hidden realistic sky stops in cartoon theme",
+    "390: opaque overview stops page frame loop",
+    "390: overview pauses all shaders",
+    "390: realistic sky resumes after theme switch",
+    "390: constellation canvas follows height-only resize",
+    "390: pagehide pauses rendering",
+    "390: no uncaught browser errors",
+    "1440: hero shader renders at full quality",
+    "1440: hidden animations pause at hero",
+    "1440: hidden animations pause at about",
+    "1440: hidden animations pause at hinge",
+    "1440: hidden animations pause at gojek",
+    "1440: hidden animations pause at cult",
+    "1440: hidden animations pause at galaxy",
+    "1440: hidden animations pause at writing",
+    "1440: hidden animations pause at life",
+    "1440: hidden animations pause at hello",
+    "1440: hero shader pauses after leaving hero",
+    "1440: stationary contact scene releases the page animation loop",
+    "1440: an in-between position settles exactly on Hinge Health",
+    "1440: hard wheel momentum advances exactly one scene",
+    "1440: route navigation lands on its exact requested scene",
+    "1440: cartoon transition completes",
+    "1440: hidden realistic sky stops in cartoon theme",
+    "1440: opaque overview stops page frame loop",
+    "1440: overview pauses all shaders",
+    "1440: realistic sky resumes after theme switch",
+    "1440: constellation canvas follows height-only resize",
+    "1440: pagehide pauses rendering",
+    "1440: no uncaught browser errors",
+    "Direct cartoon scene does not initialize invisible shaders",
+    "Direct cartoon scene skips the unused shader bundle",
+    "Realistic theme can initialize lazily after a direct cartoon entry",
+    "Generated texture requests succeed",
+    "Actual case-study navigation and browser Back restore the flight"
+  ],
+  "assets": [
+    {
+      "name": "http://127.0.0.1:8765/site/textures/universe/sphere.png",
+      "status": 200
+    },
+    {
+      "name": "http://127.0.0.1:8765/site/textures/universe/hinge-surface.jpg",
+      "status": 200
+    },
+    {
+      "name": "http://127.0.0.1:8765/site/textures/universe/hinge-clouds.png",
+      "status": 200
+    },
+    {
+      "name": "http://127.0.0.1:8765/site/textures/universe/hinge-lights.png",
+      "status": 200
+    },
+    {
+      "name": "http://127.0.0.1:8765/site/textures/universe/gojek-surface.jpg",
+      "status": 200
+    },
+    {
+      "name": "http://127.0.0.1:8765/site/textures/universe/gojek-clouds.png",
+      "status": 200
+    },
+    {
+      "name": "http://127.0.0.1:8765/site/textures/universe/cult-surface.jpg",
+      "status": 200
+    },
+    {
+      "name": "http://127.0.0.1:8765/site/textures/universe/cult-clouds.png",
+      "status": 200
+    },
+    {
+      "name": "http://127.0.0.1:8765/site/textures/universe/mini-img.jpg",
+      "status": 200
+    },
+    {
+      "name": "http://127.0.0.1:8765/site/textures/universe/mini-pibit.jpg",
+      "status": 200
+    },
+    {
+      "name": "http://127.0.0.1:8765/site/textures/universe/mini-stockroom.jpg",
+      "status": 200
+    },
+    {
+      "name": "http://127.0.0.1:8765/site/textures/universe/mini-cult.jpg",
+      "status": 200
+    },
+    {
+      "name": "http://127.0.0.1:8765/site/textures/universe/mini-west.jpg",
+      "status": 200
+    },
+    {
+      "name": "http://127.0.0.1:8765/site/textures/universe/mini-mobily.jpg",
+      "status": 200
+    },
+    {
+      "name": "http://127.0.0.1:8765/site/textures/universe/mini-pipeline.jpg",
+      "status": 200
+    }
+  ]
+}

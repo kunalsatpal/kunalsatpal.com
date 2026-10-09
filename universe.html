@@ -691,6 +691,13 @@ html.theme-toon .rolechip { border: 2px solid #15132a; background: #1f1757; }
   .styletoggle .st-toon svg { color: rgba(255,255,255,.55); }
   .styletoggle[aria-pressed="true"] .st-toon svg { color: #ffd36b; }
   @media (max-width: 560px) { nav { gap: 12px !important; padding-left: 14px !important; } nav a[href*="resume"] { display: none; } .sep { display: none; } }
+
+  /* Pause only animation that cannot contribute visible pixels. */
+  .scene.render-paused *, .scene.render-paused *::before, .scene.render-paused *::after,
+  .stage.render-suspended *, .stage.render-suspended *::before, .stage.render-suspended *::after,
+  html.settled:not(.theme-toon) .toonwrap *,
+  html.theme-toon.settled .planet *, html.theme-toon.settled .ringsvg *,
+  html.theme-toon .mini .msurf { animation-play-state: paused !important; }
 </style>
 </head>
 <body class="arriving">
@@ -753,84 +760,18 @@ html.theme-toon .rolechip { border: 2px solid #15132a; background: #1f1757; }
 
 <script type="module">
   import Lenis from './vendor/lenis.mjs'
-  import { createShader, isWebGPUSupported } from './vendor/shaders.bundle.js'
+  import { NOW, PLANETS, MAJOR, STOPS } from './site/js/universe-data.js'
+  import { createUniverseShaders } from './site/js/universe-shaders.js'
+  import { createSceneSnap } from './site/js/universe-scroll.js?v=2'
+  performance.mark('universe:boot')
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches
   const $ = id => document.getElementById(id)
-  const NOW = 2026.8
 
   // =====================================================================================
   // Content
   // =====================================================================================
   // Companies, newest first (the route flies back in time). Size = tenure (start → end). Moons = projects and results; each opens a modal.
   // Colours approximate each brand. Figures come from Kunal's site and résumé — confirm before publishing.
-  const PLANETS_BY_TIME = [
-    { key: 'pibit', minor: true, name: 'Pibit', start: 2017.0, end: 2017.6, years: '2017', role: 'Founding Product Designer', glow: '#ffa45a', spin: 16, sig: 'offers',
-      blurb: 'A local-merchant offers platform, designed from zero.',
-      palette: ['#2b1203', '#7a3407', '#d8661a', '#ffb067', '#ffe6cc'],
-      moons: [{ open: true, t: '22 clients', stat: '22 clients · 10,000+ users', s: 'Grew a local-merchant offers platform from the first screen.',
-                body: 'My first product role: founding designer at Pibit, designing an offers platform for local merchants from scratch.',
-                list: ['Designed the merchant and customer experiences end to end', 'Grew to 22 clients and 10,000+ users'],
-                img: './site/img/blog_pibit.png', href: './blog.html?c=Pibit&home=cinematic-proof', cta: 'Read the story →' }] },
-    { key: 'iit', minor: true, name: 'IIT Roorkee · IMG', start: 2017.6, end: 2020.5, years: '2017 – 2020', role: 'Head of Design', glow: '#7d9bff', spin: 26, sig: 'circuit',
-      blurb: 'Led design at the Information Management Group, building products for 10,000+ students.',
-      palette: ['#070c2c', '#142266', '#2c4bb0', '#7f9cff', '#dfe6ff'],
-      moons: [{ open: true, t: 'Placement portal', stat: '200K daily visits at peak', s: 'The portal every student used during placement season.',
-                body: 'Redesigned the campus placement portal that serves students through placement and internship season.',
-                list: ['Peak traffic of 200K daily visits', 'Designed for students, recruiters and the placement office'], img: './site/img/team_iit.jpg' },
-              { t: '12+ designers', stat: 'A team of 12+', s: 'Built and led the design team.',
-                body: 'As Head of Design at IMG, I led a team of 12+ designers building products for 10,000+ students.',
-                list: ['Set up design reviews and a shared process', 'Mentored designers who went on to product roles'], img: './site/img/team_iit.jpg' }] },
-    { key: 'cult', name: 'Cult.fit', start: 2020.5, end: 2022.5, years: '2020 – 2022', role: 'Product Designer 2 → Senior Product Designer', glow: '#ff5a85', spin: 22, sig: 'track',
-      blurb: 'Fitness and health platform. Co-built the company\'s first app and web design system.',
-      palette: ['#1a0610', '#4a0d24', '#a3173f', '#ff3d6e', '#ffd0dc'],
-      moons: [{ open: true, t: 'Fitclub V2', stat: 'Loyalty, rebuilt', s: 'A loyalty program built to lift retention and cross-sell.',
-                body: 'Designed Fitclub V2, Cult.fit\'s loyalty program, to increase retention first and cross-sell products second.',
-                list: ['Rewards, streaks and plan selection in one journey', 'Built with product, engineering and marketing'], img: './site/img/fitclub.png', href: './case.html?c=Fitclub&home=cinematic-proof' },
-              { open: true, t: 'Cart abandonment', stat: 'Day-two recovery', s: 'Bringing people back after they leave a cart.',
-                body: 'Designed nudges to increase purchases on day two and after, once a user has abandoned their cart.',
-                list: ['Price-drop and low-stock reminders', 'Recovered 4% of abandoned carts'], img: './site/img/cart.png', href: './case.html?c=cart_abandonment&home=cinematic-proof' },
-              { open: true, t: 'Design system', stat: 'The first one', s: 'App and web system, built with a team of four.',
-                body: 'Co-built Cult.fit\'s first app and web design system with a team of four designers.',
-                list: ['Shared components across app and web', 'Category icon system across fitness, food and care'], img: './site/img/proof_icons.png' },
-              { t: '70% faster onboarding', stat: '10–15 days → 3–4', s: 'Partner onboarding, redesigned.',
-                body: 'Redesigned marketplace onboarding for fitness and health professionals.',
-                list: ['Partner turnaround cut from 10–15 days to 3–4 (about 70% faster)', 'Lower cost to onboard each partner'] }] },
-    { key: 'gojek', name: 'Gojek', start: 2022.5, end: 2023.9, years: '2022 – 2023', role: 'Senior Product Designer, GoFood Growth', glow: '#3fe05a', spin: 14, spot: '#ee2737', clouds: .3, sig: 'route',
-      blurb: 'Led design for GoFood growth and promotions, owning activation and retention for 600K daily users.',
-      palette: ['#002f07', '#00620f', '#00aa13', '#4fd35c', '#c8f6cc'],
-      moons: [{ open: true, t: 'Promo discovery', stat: '4% conversions · 5× ad revenue', s: 'Streamlining the promo journey.',
-                body: 'Streamlined how people discover and use GoFood promotions.',
-                list: ['4% incremental session conversions', '5× ad revenue'], img: './site/img/proof_promo.jpg', href: './case.html?c=promo&home=cinematic-proof' },
-              { t: '2.5× page visits', stat: '2.5× visits · 2× conversion', s: 'The promotions experience, end to end.',
-                body: 'Redesigned the promotions experience end to end.', list: ['2.5× page visits', '2× page conversion'], img: './site/img/proof_promo.jpg' },
-              { t: '20+ experiments', stat: '20+ in a year', s: 'Testing our way to better promos.',
-                body: 'Ran more than 20 experiments in a year on promotions.', list: ['Promo redemption up 2%', 'Better perception of promos'] }] },
-    { key: 'hinge', name: 'Hinge Health', start: 2023.9, end: NOW, years: '2023 – now', role: 'Staff Product Designer', glow: '#5fe0a3', spin: 18, lights: '#9fffd0', sig: 'ecg',
-      blurb: 'Digital care for joint and muscle pain. I lead design for CareHub, the platform therapists and coaches use every day.',
-      palette: ['#06221f', '#124a42', '#24806d', '#6cc7ad', '#d6f2e8'],
-      moons: [{ soon: true, t: 'CareHub 2.0', stat: 'Used by every PT and coach', s: 'The member record, queue and AI actions.',
-                body: 'Owned the design of CareHub 2.0\'s core: the member record, the queue and AI actions.', list: ['Now used by every physical therapist and coach', 'Case study coming soon'], img: './site/img/proof_carehub.png' },
-              { soon: true, t: 'AI next-best-action', stat: 'Case study coming soon', s: 'AI recommendations care teams can trust.',
-                body: 'Set the strategy and roadmap for AI next-best-action recommendations.',
-                list: ['Cut clinician time per member 6–12%', 'Reframed the AI care assistant as a clinical recommendation tool, aligning clinical, data and engineering on safety gates'] },
-              { soon: true, t: 'Up to 16% less time', stat: '8% PTs · 16% coaches', s: 'Simplified care-team workflows.',
-                body: 'Simplified care-team workflows across CareHub.', list: ['Time per member down 8% for PTs and 16% for coaches'] },
-              { soon: true, t: 'Video visits', stat: 'Recording 53% → 95%', s: 'A redesigned video visit.',
-                body: 'Redesigned video visits between members and their care team.', list: ['Recording rates up from 53% to 95%', 'Visit time down 4.5%'] }] },
-  ]
-  const PLANETS = [...PLANETS_BY_TIME].reverse()  // Hinge → Gojek → Cult.fit → IIT → Pibit
-  const MAJOR = PLANETS.filter(p => !p.minor)       // the three that get their own planet scene
-  // Earlier stops, shown together in one galaxy. x/y place them in the view (%); size is relative.
-  // Notes for the last three are placeholders — confirm what each engagement was.
-  const STOPS = [
-    { mark: 'img', name: 'IIT Roorkee · IMG', years: '2017 – 2020', note: 'Head of Design. Led 12+ designers building products for 10,000+ students.', c: '#7d9bff', size: 1, x: 30, y: 40, planet: 'iit', moon: 0 },
-    { mark: 'pibit', name: 'Pibit', years: '2017', note: 'Founding product designer on a local-merchant offers platform.', c: '#ffa45a', size: .72, x: 63, y: 26, planet: 'pibit', moon: 0 },
-    { mark: 'stockroom', name: 'stockroom.io', years: '', note: 'A B2B platform for curating candidates for recruiters.', c: '#a99bff', size: .62, x: 80, y: 62 },
-    { mark: 'cult', name: 'Cult.fit internships', years: '2018 · 2019', note: 'Two design internships before joining full time.', c: '#ff5a85', size: .56, x: 50, y: 74 },
-    { mark: 'west', name: 'West Agile Labs', years: '', note: 'Contract design work.', c: '#5fd0c5', size: .5, x: 13, y: 72 },
-    { mark: 'mobily', name: 'Mobily Invited', years: '', note: 'Freelance product design.', c: '#e6e9f0', size: .44, x: 90, y: 24 },
-    { mark: 'pipeline', name: 'Pipeline Security', years: '', note: 'Freelance product design.', c: '#c9a0ff', size: .44, x: 10, y: 22 },
-  ]
   const HATS = [
     { role: 'product designer', proof: 'CareHub, GoFood promos, Fitclub: product design end to end.', shape: 'nib' },
     { role: 'mentor', proof: 'I coach designers through crits and reviews, and helped many at IIT Roorkee into product roles.', shape: 'spiral' },
@@ -916,13 +857,14 @@ html.theme-toon .rolechip { border: 2px solid #15132a; background: #1f1757; }
   // =====================================================================================
   // Sky
   // =====================================================================================
-  if (isWebGPUSupported()) {
-    createShader($('auroraC'), { components: [{ type: 'Aurora', id: 'sky', props: {
+  const shaders = createUniverseShaders()
+  const skyDefinitions = {
+    aurora: { components: [{ type: 'Aurora', id: 'sky', props: {
       colorA: '#5a6bc4', colorB: '#8fdcc4', colorC: '#6f9fd6', balance: 50, intensity: 70, curtainCount: 4,
-      speed: reduce ? 0 : 2.5, waviness: 50, rayDensity: 22, height: 140, seed: 7 } }] }).catch(e => console.warn('[aurora]', e))
-    createShader($('farC'), { components: [{ type: 'FloatingParticles', id: 'far', props: {
+      speed: reduce ? 0 : 2.5, waviness: 50, rayDensity: 22, height: 140, seed: 7 } }] },
+    far: { components: [{ type: 'FloatingParticles', id: 'far', props: {
       particleColor: '#dfe8ff', count: 380, particleSize: 0.55, softness: 0.35, speed: reduce ? 0 : 0.03, angle: 180,
-      speedVariance: 0.5, angleVariance: 20, randomness: 0.1, twinkle: 1, cursorStrength: 0.1 } }] }).catch(e => console.warn('[far]', e))
+      speedVariance: 0.5, angleVariance: 20, randomness: 0.1, twinkle: 1, cursorStrength: 0.1 } }] },
   }
   function starTile(seed, n, rMax) {
     let r = seed; const rnd = () => (r = (r * 16807) % 2147483647) / 2147483647
@@ -947,115 +889,30 @@ html.theme-toon .rolechip { border: 2px solid #15132a; background: #1f1757; }
   $('sparkfield').style.backgroundImage = sparkleTile(5, 60)
 
   // =====================================================================================
-  // The mark: glitches between shader materials
+  // The mark: retain its original Chrome material and full rendering quality.
   // =====================================================================================
-  const obj = $('object')
-  const shape = { shapeSdfUrl: './mark.sdf.bin', scale: 1.28 }
-  const MATERIALS = [
-    { type: 'Chrome', props: { ...shape, tint: '#eef2ff', warmColor: '#b9c6ff', coolColor: '#5b7cd6', bevelWidth: 0.05, bevelShape: 0.72,
-        curvature: 0.7, waviness: 0.03, environment: 1.25, envRotation: 30, softness: 0.2, spectral: 0.8, dispersion: 0.4, shadows: 0.75, speed: 0.25, edgeSoftness: 0.015 } },
-    { type: 'LiquidMetal', props: { ...shape } }, { type: 'Holographic', props: { ...shape } },
-    { type: 'Obsidian', props: { ...shape } }, { type: 'ThinFilm', props: { ...shape } },
-  ]
-  const markCanvases = []; let active = 0
-  async function mountMark() {
-    if (!isWebGPUSupported()) return
-    for (const m of MATERIALS) {
-      const c = document.createElement('canvas'); obj.appendChild(c)
-      try { await createShader(c, { components: [{ type: m.type, id: 'mark', props: m.props }] }); markCanvases.push(c)
-        if (markCanvases.length === 1) { c.classList.add('on'); obj.classList.add('live') } } catch (e) { c.remove() }
-      break  // chrome only; the material glitch is switched off
-    }
-  }
+  const obj = $('object'), markCanvas = document.createElement('canvas')
+  obj.appendChild(markCanvas)
+  shaders.register('mark', markCanvas, { components: [{ type: 'Chrome', id: 'mark', props: {
+    shapeSdfUrl: './mark.sdf.bin', scale: 1.28, tint: '#eef2ff', warmColor: '#b9c6ff', coolColor: '#5b7cd6', bevelWidth: 0.05, bevelShape: 0.72,
+    curvature: 0.7, waviness: 0.03, environment: 1.25, envRotation: 30, softness: 0.2, spectral: 0.8, dispersion: 0.4, shadows: 0.75, speed: 0.25, edgeSoftness: 0.015,
+  } }] }, ready => { markCanvas.classList.toggle('on', ready); obj.classList.toggle('live', ready) })
+  shaders.register('aurora', $('auroraC'), skyDefinitions.aurora)
+  shaders.register('far', $('farC'), skyDefinitions.far)
   const glitchEl = el => { el.classList.remove('glitch'); void el.offsetWidth; el.classList.add('glitch') }
-  function glitchMark() {
-    if (markCanvases.length < 2) return
-    glitchEl(obj)
-    setTimeout(() => { markCanvases[active].classList.remove('on'); active = (active + 1) % markCanvases.length; markCanvases[active].classList.add('on') }, 190)
-  }
-  const loop = () => setTimeout(() => { if (!document.hidden) glitchMark(); loop() }, 2600 + Math.random() * 1800)
-  mountMark()
 
   // =====================================================================================
   // Planets
   // =====================================================================================
-  function noise2(seed) {
-    const p = new Uint8Array(512); let r = seed; for (let i = 0; i < 256; i++) p[i] = i
-    for (let i = 255; i > 0; i--) { r = (r * 16807) % 2147483647; const j = r % (i + 1); [p[i], p[j]] = [p[j], p[i]] }
-    for (let i = 0; i < 256; i++) p[i + 256] = p[i]
-    const h = (x, y) => p[p[x & 255] + (y & 255)] / 255, f = t => t * t * (3 - 2 * t)
-    return (x, y) => { const xi = Math.floor(x), yi = Math.floor(y), xf = f(x - xi), yf = f(y - yi)
-      const a = h(xi, yi), b = h(xi + 1, yi), c = h(xi, yi + 1), d = h(xi + 1, yi + 1)
-      return a + (b - a) * xf + (c - a) * yf + (a - b - c + d) * xf * yf }
-  }
-  const hex = c => [1, 3, 5].map(i => parseInt(c.slice(i, i + 2), 16))
-  function surface(pl, seed) {
-    const W = 512, H = 256, cv = document.createElement('canvas'); cv.width = W; cv.height = H
-    const ctx = cv.getContext('2d'), img = ctx.createImageData(W, H), n = noise2(seed), pal = pl.palette.map(hex)
-    const fbm = (x, y) => { let v = 0, a = .5, fx = 1; for (let o = 0; o < 4; o++) { v += a * n(x * fx, y * fx); a *= .5; fx *= 2 } return v }
-    for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
-      const u = x / W, wx = Math.cos(u * Math.PI * 2) * 6, wy = Math.sin(u * Math.PI * 2) * 6   // wraps seamlessly
-      const turb = fbm(wx + 20, y / 18 + wy * .4)
-      let v = 0.5 + 0.5 * Math.sin(y / H * Math.PI * 9 + turb * 5.5)
-      v = Math.min(.999, Math.max(0, v * 0.75 + fbm(wx * 2 + 9, y / 9 + wy) * 0.35))
-      const k = v * (pal.length - 1), i0 = Math.floor(k), t = k - i0, c0 = pal[i0], c1 = pal[Math.min(pal.length - 1, i0 + 1)], o = (y * W + x) * 4
-      img.data[o] = c0[0] + (c1[0] - c0[0]) * t; img.data[o + 1] = c0[1] + (c1[1] - c0[1]) * t; img.data[o + 2] = c0[2] + (c1[2] - c0[2]) * t; img.data[o + 3] = 255
-    }
-    ctx.putImageData(img, 0, 0)
-    if (pl.spot) for (const sx of [0.22, 0.72]) {  // GoFood's red storm, twice so one always faces you
-      ctx.save(); ctx.translate(W * sx, H * .64); ctx.scale(2, 1)
-      const g = ctx.createRadialGradient(0, 0, 1, 0, 0, 22); g.addColorStop(0, '#ffd1d6'); g.addColorStop(.25, pl.spot); g.addColorStop(.75, pl.spot + 'cc'); g.addColorStop(1, pl.spot + '00')
-      ctx.fillStyle = g; ctx.beginPath(); ctx.arc(0, 0, 22, 0, 7); ctx.fill(); ctx.restore()
-    }
-    return cv.toDataURL('image/jpeg', .9)
-  }
+  // The original procedural textures are generated offline with the same Canvas algorithms.
+  const textureURL = name => `./site/textures/universe/${name}`
+  const sphere = document.createElementNS('http://www.w3.org/2000/svg', 'svg')
+  sphere.setAttribute('width', '0'); sphere.setAttribute('height', '0'); sphere.style.position = 'absolute'
+  sphere.innerHTML = `<filter id="sphere" primitiveUnits="objectBoundingBox" x="0" y="0" width="1" height="1" color-interpolation-filters="sRGB">
+    <feImage href="${textureURL('sphere.png')}" x="0" y="0" width="1" height="1" preserveAspectRatio="none" result="map"/>
+    <feDisplacementMap in="SourceGraphic" in2="map" scale="0.5" xChannelSelector="R" yChannelSelector="G"/></filter>`
+  document.body.appendChild(sphere)
 
-  // Sphere wrap: a displacement map that bends a flat texture around a ball (orthographic projection).
-  ;(() => {
-    const N = 256, cv = document.createElement('canvas'); cv.width = cv.height = N
-    const ctx = cv.getContext('2d'), img = ctx.createImageData(N, N), SCALE = 0.5
-    for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) {
-      const nx = (x + .5) / N * 2 - 1, ny = (y + .5) / N * 2 - 1, r2 = nx * nx + ny * ny, o = (y * N + x) * 4
-      let dx = 0, dy = 0
-      if (r2 < 1) { const nz = Math.sqrt(1 - r2), lon = Math.atan2(nx, nz) / (Math.PI / 2), lat = Math.asin(ny) / (Math.PI / 2)
-        dx = (lon - nx) * 0.5 / SCALE; dy = (lat - ny) * 0.5 / SCALE }
-      img.data[o] = 128 + dx * 255; img.data[o + 1] = 128 + dy * 255; img.data[o + 2] = 128; img.data[o + 3] = 255
-    }
-    ctx.putImageData(img, 0, 0)
-    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg')
-    svg.setAttribute('width', '0'); svg.setAttribute('height', '0'); svg.style.position = 'absolute'
-    svg.innerHTML = `<filter id="sphere" primitiveUnits="objectBoundingBox" x="0" y="0" width="1" height="1" color-interpolation-filters="sRGB">
-      <feImage href="${cv.toDataURL()}" x="0" y="0" width="1" height="1" preserveAspectRatio="none" result="map"/>
-      <feDisplacementMap in="SourceGraphic" in2="map" scale="${SCALE}" xChannelSelector="R" yChannelSelector="G"/></filter>`
-    document.body.appendChild(svg)
-  })()
-
-  // Clouds: soft white wisps with transparency, seamless horizontally.
-  function cloudTexture(seed, density) {
-    const W = 512, H = 256, cv = document.createElement('canvas'); cv.width = W; cv.height = H
-    const ctx = cv.getContext('2d'), img = ctx.createImageData(W, H), n = noise2(seed)
-    for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
-      const u = x / W, wx = Math.cos(u * Math.PI * 2) * 5, wy = Math.sin(u * Math.PI * 2) * 5
-      let v = 0, a = .5, f = 1; for (let o = 0; o < 5; o++) { v += a * n(wx * f + 40, (y / 22 + wy * .5) * f); a *= .5; f *= 2 }
-      const al = Math.max(0, Math.min(1, (v - (1 - density)) * 3.2)), o = (y * W + x) * 4
-      img.data[o] = img.data[o + 1] = img.data[o + 2] = 255; img.data[o + 3] = al * 255 * Math.sin(Math.PI * y / H)
-    }
-    ctx.putImageData(img, 0, 0); return cv.toDataURL('image/png')
-  }
-  // City lights for the night side: clustered warm points.
-  function lightsTexture(seed, color) {
-    const W = 512, H = 256, cv = document.createElement('canvas'); cv.width = W; cv.height = H
-    const ctx = cv.getContext('2d'), n = noise2(seed); let r = seed
-    const rnd = () => (r = (r * 16807) % 2147483647) / 2147483647
-    for (let i = 0; i < 1400; i++) {
-      const x = rnd() * W, y = H * (.15 + rnd() * .7), u = x / W
-      if (n(Math.cos(u * 6.283) * 4 + 9, y / 26 + Math.sin(u * 6.283) * 2) < .55) continue
-      const sz = .6 + rnd() * 1.3, g = ctx.createRadialGradient(x, y, 0, x, y, sz * 2.4)
-      g.addColorStop(0, '#fffbe8'); g.addColorStop(.35, color); g.addColorStop(1, 'rgba(0,0,0,0)')
-      ctx.fillStyle = g; ctx.fillRect(x - sz * 3, y - sz * 3, sz * 6, sz * 6)
-    }
-    return cv.toDataURL('image/png')
-  }
   // Rings: banded ellipses; the back half sits behind the planet, the front half over it.
   function ringSVG(color, front) {
     const bands = [[47, .1], [50, .35], [52.5, .55], [54, .18], [56.5, .5], [59, .3], [61, .12]]
@@ -1236,9 +1093,9 @@ html.theme-toon .rolechip { border: 2px solid #15132a; background: #1f1757; }
       <div class="planet"><div class="surface"></div><div class="clouds"></div>${pl.lights ? '<div class="lights"></div>' : ''}<div class="shade"></div></div>
       <div class="atmo"></div><div class="toonwrap">${TOONS[pl.key]()}</div>`
     if (pl.sig) { const [back, front] = sigRing(pl.sig, pl.glow, pl.key, -12); sys.insertAdjacentHTML('afterbegin', back); sys.insertAdjacentHTML('beforeend', front) }
-    sys.querySelector('.surface').style.backgroundImage = `url(${surface(pl, 31 + si * 57)})`
-    sys.querySelector('.clouds').style.backgroundImage = `url(${cloudTexture(77 + si * 13, pl.clouds ?? .42)})`
-    if (pl.lights) sys.querySelector('.lights').style.backgroundImage = `url(${lightsTexture(5 + si, pl.lights)})`
+    sys.querySelector('.surface').style.backgroundImage = `url(${textureURL(`${pl.key}-surface.jpg`)})`
+    sys.querySelector('.clouds').style.backgroundImage = `url(${textureURL(`${pl.key}-clouds.png`)})`
+    if (pl.lights) sys.querySelector('.lights').style.backgroundImage = `url(${textureURL(`${pl.key}-lights.png`)})`
     const moons = []
     const orbits = document.createElementNS('http://www.w3.org/2000/svg', 'svg')
     orbits.setAttribute('class', 'morbits'); orbits.setAttribute('viewBox', '0 0 100 100'); orbits.setAttribute('aria-hidden', 'true')
@@ -1276,8 +1133,9 @@ html.theme-toon .rolechip { border: 2px solid #15132a; background: #1f1757; }
   // =====================================================================================
   // Moon modal: dive in, read, return to orbit
   // =====================================================================================
-  const modal = $('modal'), camera = $('camera'); let lastFocus = null, lenis = null
+  const modal = $('modal'), camera = $('camera'); let lastFocus = null, lenis = null, sceneSnap = null, navigatingAway = false
   function land(pl, m, fromEl) {
+    sceneSnap?.cancel()
     lastFocus = fromEl
     const r = (fromEl.querySelector('i') || fromEl).getBoundingClientRect()
     camera.style.transformOrigin = `${r.left + r.width / 2}px ${r.top + r.height / 2}px`
@@ -1301,7 +1159,7 @@ html.theme-toon .rolechip { border: 2px solid #15132a; background: #1f1757; }
   function leave() {
     if (!modal.classList.contains('open')) return
     modal.classList.remove('open'); modal.setAttribute('aria-hidden', 'true')
-    camera.classList.remove('diving'); lenis?.start(); lastFocus?.focus({ preventScroll: true })
+    camera.classList.remove('diving'); lenis?.start(); lastFocus?.focus({ preventScroll: true }); sceneSnap?.resume()
   }
   modal.querySelectorAll('[data-close]').forEach(el => el.addEventListener('click', leave))
   modal.addEventListener('keydown', e => {  // keep focus inside the dialog
@@ -1357,15 +1215,17 @@ html.theme-toon .rolechip { border: 2px solid #15132a; background: #1f1757; }
   }
   $('hatsky').addEventListener('click', () => setHat((hatIdx + 1) % HATS.length))
   setHat(0)
+  let lastHatFrame = null
   function drawHats(t) {
+    const hatDt = lastHatFrame === null ? 1000 / 60 : Math.min(50, t - lastHatFrame); lastHatFrame = t
     const dpr = Math.min(2, devicePixelRatio)
     if (!LC.hat.width || !LC.hat.height) return
-    if (hatCanvas.width !== Math.round(LC.hat.width * dpr)) { hatCanvas.width = Math.round(LC.hat.width * dpr); hatCanvas.height = Math.round(LC.hat.height * dpr) }
+    if (hatCanvas.width !== Math.round(LC.hat.width * dpr) || hatCanvas.height !== Math.round(LC.hat.height * dpr)) { hatCanvas.width = Math.round(LC.hat.width * dpr); hatCanvas.height = Math.round(LC.hat.height * dpr) }
     const W = hatCanvas.width, H = hatCanvas.height, S = Math.min(W, H) * .92, ox = (W - S) / 2, oy = (H - S) / 2
     hctx.clearRect(0, 0, W, H)
     const since = t - hatChanged
     hstars.forEach(s => { const k = reduce ? 1 : Math.min(1, Math.max(0, (since - s.delay) / 900)), e = 1 - Math.pow(1 - k, 3)
-      s.x += (s.tx - s.x) * (reduce ? 1 : .06 + e * .12); s.y += (s.ty - s.y) * (reduce ? 1 : .06 + e * .12) })
+      const blend = reduce ? 1 : 1 - Math.pow(1 - (.06 + e * .12), hatDt / (1000 / 60)); s.x += (s.tx - s.x) * blend; s.y += (s.ty - s.y) * blend })
     // Constellation lines between neighbours on the same stroke, fading in once the stars settle.
     const settle = reduce ? 1 : Math.min(1, Math.max(0, (since - 500) / 600))
     hctx.lineWidth = 1 * dpr; hctx.strokeStyle = `rgba(159,232,210,${.32 * settle})`; hctx.beginPath()
@@ -1400,7 +1260,6 @@ html.theme-toon .rolechip { border: 2px solid #15132a; background: #1f1757; }
       <span class="log-no">LOG ${String(i + 1).padStart(2, '0')}</span></div><h3>${p.t}</h3><div class="log-foot"><span>${p.tag}</span><span class="read">Read ↗</span></div>`
     logs.appendChild(a)
   })
-  function drawComets() {}
 
 
   // =====================================================================================
@@ -1465,9 +1324,7 @@ html.theme-toon .rolechip { border: 2px solid #15132a; background: #1f1757; }
     el.innerHTML = `<i><span class="msurf"></span><span class="mshade"></span><span class="mbadge${st.mark === 'pipeline' ? ' wide' : ''}"><img src="./site/img/marks/${st.mark}.png" alt="" /></span></i><b>${st.name}</b>${st.years ? `<small>${st.years}</small>` : ''}<span class="tip" role="tooltip">${st.note}</span>`
     if (href) el.setAttribute('aria-label', `${st.name}: read the story`)
     // Same look as the big planets: a banded texture wrapped on a sphere, shaded from the upper left.
-    const base = hex(st.c), mix = (a, b, t) => '#' + a.map((v, k) => Math.round(v + (b[k] - v) * t).toString(16).padStart(2, '0')).join('')
-    const palette = [mix(base, [4, 5, 12], .82), mix(base, [4, 5, 12], .55), st.c, mix(base, [255, 255, 255], .35), mix(base, [255, 255, 255], .75)]
-    el.querySelector('.msurf').style.backgroundImage = `url(${surface({ palette }, 101 + i * 29)})`
+    el.querySelector('.msurf').style.backgroundImage = `url(${textureURL(`mini-${st.mark}.jpg`)})`
     el.querySelector('.msurf').style.animationDuration = `${40 + i * 7}s`
     gal.appendChild(el)
   })
@@ -1524,15 +1381,17 @@ html.theme-toon .rolechip { border: 2px solid #15132a; background: #1f1757; }
   const progress = () => pinned !== null ? +pinned : Math.min(1, Math.max(0, scrollY / (LC.journeyHeight - LC.innerHeight)))
   const cards = [...document.querySelectorAll('.proof')].map(el => ({ el, depth: +el.dataset.depth, dx: 0, dy: 0 }))
   const sceneNodes = SCENES.map(s => ({
-    scene: s.el, hidden: false,
+    scene: s.el, hidden: false, paused: null,
+    svgs: [...s.el.querySelectorAll('svg')].filter(svg => svg.querySelector('animate, animateMotion, animateTransform')),
+    smilPaused: new Map(),
     floats: [...s.el.querySelectorAll('[data-z]')].map(el => ({ el, depth: +el.dataset.z * 0.12 })),
   }))
-  const auroraEl = $('aurora'), farEl = $('far'), nebulaEl = $('nebula'), sparkfieldEl = $('sparkfield')
+  const auroraEl = $('aurora'), farEl = $('far')
   const streaksEl = document.querySelector('.streaks')
   const shipEl = $('ship'), doneEl = $('done')
-  const hatsScene = SCENES.find(s => s.key === 'about'), writingScene = SCENES.find(s => s.key === 'writing'), lifeScene = SCENES.find(s => s.key === 'life')
+  const hatsScene = SCENES.find(s => s.key === 'about'), lifeScene = SCENES.find(s => s.key === 'life')
   let mxp = 0, myp = 0, cx = 0, cy = 0, lastIdx = -1, lastSceneU = NaN, layoutVersion = 0, lastLayoutVersion = -1
-  addEventListener('pointermove', e => { mxp = e.clientX / innerWidth - .5; myp = e.clientY / innerHeight - .5 })
+  addEventListener('pointermove', e => { mxp = e.clientX / LC.innerWidth - .5; myp = e.clientY / LC.innerHeight - .5; requestFrame() }, { passive: true })
 
   let introStart = null
   let heldCard = null
@@ -1567,18 +1426,90 @@ html.theme-toon .rolechip { border: 2px solid #15132a; background: #1f1757; }
       o.moons.forEach((m, mi) => { m.leftOrigin = LC.systems[i].moonWidths[mi] - 11 })
     })
     layoutVersion++
+    sceneSnap?.layoutChanged()
   }
   measure()
-  addEventListener('load', measure, { once: true })
-  addEventListener('resize', measure, { passive: true })
-  if (document.fonts) document.fonts.ready.then(measure)
-  setTimeout(measure, 1500)
+  let measurePending = false
+  const queueMeasure = () => { measurePending = true; requestFrame() }
+  addEventListener('load', queueMeasure, { once: true })
+  addEventListener('resize', queueMeasure, { passive: true })
+  if (document.fonts) document.fonts.ready.then(queueMeasure)
   const writeStyle = (el, property, value) => {
     if (el.style[property] !== value) el.style[property] = value
   }
+  let frameId = 0, previousFrame = null, suspended = false, pageHidden = false, ticking = false, scrollClock = 0
+  const mapDots = [...map.querySelectorAll('.stop .dot')]
+  let lastHudU = NaN, lastShaderState = ''
+  function requestFrame() {
+    if (suspended || frameId || ticking) return
+    previousFrame = null
+    frameId = requestAnimationFrame(frame)
+  }
+  addEventListener('scroll', requestFrame, { passive: true })
+  addEventListener('wheel', requestFrame, { passive: true })
+  addEventListener('touchmove', requestFrame, { passive: true })
+  function syncRendering() {
+    const toon = document.documentElement.classList.contains('theme-toon')
+    const settled = document.documentElement.classList.contains('settled')
+    const state = `${suspended}:${toon}:${SCENES[0].el.style.visibility}`
+    if (state !== lastShaderState) {
+      lastShaderState = state
+      shaders.setActive(suspended ? [] : [
+        ...(SCENES[0].el.style.visibility === 'hidden' ? [] : ['mark']),
+        ...(toon ? [] : ['aurora', 'far']),
+      ])
+    }
+    sceneNodes.forEach(node => {
+      const paused = suspended || node.scene.style.visibility === 'hidden'
+      if (paused !== node.paused) {
+        node.paused = paused
+        node.scene.classList.toggle('render-paused', paused)
+      }
+      node.svgs.forEach(svg => {
+        const inactiveTheme = settled && (toon ? !!svg.closest('.ringsvg') : !!svg.closest('.toonwrap'))
+        const stop = paused || inactiveTheme || reduce
+        const wasPaused = node.smilPaused.has(svg)
+        if (stop === wasPaused || !svg.pauseAnimations) return
+        if (stop) { node.smilPaused.set(svg, performance.now()); svg.pauseAnimations() }
+        else {
+          // Invisible animations catch up before reappearing, without rendering hidden frames.
+          svg.setCurrentTime(svg.getCurrentTime() + (performance.now() - node.smilPaused.get(svg)) / 1000)
+          node.smilPaused.delete(svg)
+          svg.unpauseAnimations()
+        }
+      })
+    })
+  }
+  function syncSuspension() {
+    const next = pageHidden || document.hidden || $('overview').classList.contains('open')
+    if (next !== suspended) {
+      suspended = next
+      stage.classList.toggle('render-suspended', suspended)
+      if (suspended) { sceneSnap?.cancel(); cancelAnimationFrame(frameId); frameId = 0 }
+      else {
+        requestFrame()
+        sceneSnap?.resume()
+      }
+    }
+    syncRendering()
+  }
+  addEventListener('visibilitychange', syncSuspension)
+  addEventListener('pagehide', () => { pageHidden = true; syncSuspension() })
+  addEventListener('pageshow', () => { pageHidden = false; syncSuspension() })
   function frame(t) {
+    frameId = 0
+    if (suspended) return
+    ticking = true
+    const dt = previousFrame === null ? 1000 / 60 : Math.min(50, t - previousFrame)
+    previousFrame = t
+    // An elapsed-time clock avoids a scroll jump when waking from an idle scene.
+    scrollClock += dt
+    lenis?.raf(scrollClock)
+    if (measurePending) { measurePending = false; measure() }
     if (introStart === null) introStart = t
-    cx += (mxp - cx) * 0.05; cy += (myp - cy) * 0.05
+    const smoothing = 1 - Math.pow(0.95, dt / (1000 / 60))
+    cx = Math.abs(mxp - cx) < 0.00001 ? mxp : cx + (mxp - cx) * smoothing
+    cy = Math.abs(myp - cy) < 0.00001 ? myp : cy + (myp - cy) * smoothing
     const p = progress(), u = p * U
 
     writeStyle(auroraEl, 'transform', `translate3d(${cx * -24}px, ${cy * -16 - p * 80}px, 0) scale(${1 + p * 0.25})`)
@@ -1589,7 +1520,7 @@ html.theme-toon .rolechip { border: 2px solid #15132a; background: #1f1757; }
     if (!stage.classList.contains('warping')) writeStyle(streaksEl, 'opacity', reduce ? '0' : ((1 - ia) * .55).toFixed(3))
     else writeStyle(streaksEl, 'opacity', '')
     warps.forEach((w, i) => { const f = (travel + i / warps.length) % 1
-      w.style.transform = `translate3d(${cx * -60}px, ${cy * -40}px, 0) scale(${0.6 + f * f * 3.4})`; w.style.opacity = Math.sin(Math.PI * f) * 0.9 })
+      writeStyle(w, 'transform', `translate3d(${cx * -60}px, ${cy * -40}px, 0) scale(${0.6 + f * f * 3.4})`); writeStyle(w, 'opacity', String(Math.sin(Math.PI * f) * 0.9)) })
 
     if (u !== lastSceneU || layoutVersion !== lastLayoutVersion) {
       sceneNodes.forEach((node, i) => {
@@ -1624,25 +1555,29 @@ html.theme-toon .rolechip { border: 2px solid #15132a; background: #1f1757; }
       })
       lastSceneU = u
       lastLayoutVersion = layoutVersion
+      syncRendering()
     }
 
-    // HUD
-    const idx = readout(u)
-    const shipX = String(ux(u))
-    if (shipEl.getAttribute('cx') !== shipX) shipEl.setAttribute('cx', shipX)
-    if (doneEl.getAttribute('x2') !== shipX) doneEl.setAttribute('x2', shipX)
-    if (idx !== lastIdx) {
-      lastIdx = idx
-      map.querySelectorAll('.stop .dot').forEach((d, j) => {
-        const stroke = j === idx ? '#fff' : 'none'
-        if (d.getAttribute('stroke') !== stroke) d.setAttribute('stroke', stroke)
-        if (d.getAttribute('stroke-width') !== '1.5') d.setAttribute('stroke-width', '1.5')
-      })
+    // HUD changes only with the route position.
+    if (u !== lastHudU) {
+      lastHudU = u
+      const idx = readout(u)
+      const shipX = String(ux(u))
+      if (shipEl.getAttribute('cx') !== shipX) shipEl.setAttribute('cx', shipX)
+      if (doneEl.getAttribute('x2') !== shipX) doneEl.setAttribute('x2', shipX)
+      if (idx !== lastIdx) {
+        lastIdx = idx
+        mapDots.forEach((d, j) => {
+          const stroke = j === idx ? '#fff' : 'none'
+          if (d.getAttribute('stroke') !== stroke) d.setAttribute('stroke', stroke)
+          if (d.getAttribute('stroke-width') !== '1.5') d.setAttribute('stroke-width', '1.5')
+        })
+      }
     }
 
     // Hero cards fly past the camera as you leave the first scene.
     const out = range(u, 0, 0.8)
-    if (u <= 1.2) {
+    if (SCENES[0].el.style.visibility !== 'hidden') {
       cards.forEach((card, i) => {
         const c = card.el
         if (c === heldCard && out < 0.05) return   // hovered: hold still so the hover doesn't flicker
@@ -1686,56 +1621,61 @@ html.theme-toon .rolechip { border: 2px solid #15132a; background: #1f1757; }
     })
 
     if (hatsScene.el.style.visibility !== 'hidden') drawHats(t)
-    if (writingScene.el.style.visibility !== 'hidden') drawComets(t)
     if (lifeScene.el.style.visibility !== 'hidden') drawHobbies(t)
-    requestAnimationFrame(frame)
+    ticking = false
+    const activeMotion = SCENES[0].el.style.visibility !== 'hidden' ||
+      hatsScene.el.style.visibility !== 'hidden' || lifeScene.el.style.visibility !== 'hidden' ||
+      systems.some(o => o.s.el.style.visibility !== 'hidden')
+    const pointerMoving = cx !== mxp || cy !== myp
+    if (activeMotion || pointerMoving || ia < 1 || lenis?.isScrolling || measurePending) frameId = requestAnimationFrame(frame)
   }
-  requestAnimationFrame(frame)
+  requestFrame()
   // Release the arrival once the first frames are painted (skip it when coming back from a case study).
   if (params.has('from')) document.body.classList.remove('arriving')
   else setTimeout(() => document.body.classList.remove('arriving'), 700)
 
   // Auto-cycle hats while that scene is in focus.
-  setInterval(() => { if (!reduce && hatsScene.el.classList.contains('active') && !modal.classList.contains('open')) setHat((hatIdx + 1) % HATS.length) }, 3400)
+  setInterval(() => { if (!suspended && !reduce && hatsScene.el.classList.contains('active') && !modal.classList.contains('open')) setHat((hatIdx + 1) % HATS.length) }, 3400)
 
   // =====================================================================================
   // Navigation: smooth scroll, warp jumps, keyboard
   // =====================================================================================
   const yFor = i => (SCENES[i].u / U) * (LC.journeyHeight - LC.innerHeight)
-  let snapping = false, snapTimer = 0
   if (!reduce) {
     lenis = new Lenis({ lerp: 0.12, smoothWheel: true, wheelMultiplier: 1, syncTouch: false })
-    const raf = t => { lenis.raf(t); requestAnimationFrame(raf) }
-    requestAnimationFrame(raf)
-    // Snap: once the scroll settles, glide to the nearest scene so you never rest between two.
-    if (!TOUCH) {
-      lenis.on('scroll', () => {
-        if (snapping) return
-        clearTimeout(snapTimer)
-        snapTimer = setTimeout(() => {
-          if (modal.classList.contains('open') || $('overview').classList.contains('open')) return
-          if (Math.abs(lenis.velocity) > 0.1) return
-          const i = nearest(progress() * U), y = yFor(i)
-          if (Math.abs(y - lenis.scroll) < 3) return
-          snapping = true
-          lenis.scrollTo(y, { duration: 0.9, easing: x => 1 - Math.pow(1 - x, 3), onComplete: () => { snapping = false } })
-          setTimeout(() => snapping = false, 1200)
-        }, 220)
-      })
-    }
-    addEventListener('wheel', () => {
-      if (!snapping) return
-      snapping = false
-      lenis.scrollTo(lenis.targetScroll ?? scrollY, { immediate: true })
-    }, { passive: true })
+    lenis.on('scroll', requestFrame)
   }
+  sceneSnap = createSceneSnap({
+    getStops: () => SCENES.map((_, i) => yFor(i)),
+    getPosition: () => scrollY,
+    enabled: () => pinned === null && !suspended && !document.hidden && !navigatingAway &&
+      !modal.classList.contains('open') && !camera.classList.contains('diving'),
+    isMoving: () => !!lenis && lenis.isScrolling === 'smooth' && Math.abs(lenis.velocity) > .25,
+    ignoreInput: event => !!event.target.closest?.('.modal, .overview, input, textarea, select, [contenteditable="true"], [data-lenis-prevent]'),
+    stopAnimation: () => {
+      stage.classList.remove('warping')
+      if (lenis) lenis.scrollTo(scrollY, { immediate: true, force: true })
+      else scrollTo({ top: scrollY, behavior: 'instant' })
+      requestFrame()
+    },
+    animateTo: (target, { kind, duration, onComplete }) => {
+      requestFrame()
+      const dist = Math.abs(target - scrollY) / LC.innerHeight
+      if (kind === 'navigate' && dist > 2 && !reduce) stage.classList.add('warping')
+      const complete = () => { stage.classList.remove('warping'); onComplete() }
+      if (!lenis || reduce || duration === 0) {
+        if (lenis) lenis.scrollTo(target, { immediate: true, force: true })
+        else scrollTo({ top: target, behavior: 'instant' })
+        complete()
+      } else lenis.scrollTo(target, {
+        duration: kind === 'navigate' ? Math.min(1.8, .55 + dist * .12) : duration,
+        easing: x => 1 - Math.pow(1 - x, 3),
+        onComplete: complete,
+      })
+    },
+  })
   function warpTo(i) {
-    if (i < 0 || i >= SCENES.length) return
-    const dist = Math.abs(yFor(i) - scrollY) / LC.innerHeight
-    if (!lenis) { scrollTo({ top: yFor(i), behavior: reduce ? 'auto' : 'smooth' }); return }
-    if (dist > 2) stage.classList.add('warping')
-    lenis.scrollTo(yFor(i), { duration: Math.min(2.6, 0.9 + dist * 0.12), easing: x => x < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2,
-      onComplete: () => stage.classList.remove('warping') })
+    if (i >= 0 && i < SCENES.length) sceneSnap.navigate(i)
   }
   const indexOf = key => SCENES.findIndex(s => s.key === key)
   document.querySelectorAll('.proof').forEach(c => { c.removeAttribute('data-go'); c.addEventListener('click', e => e.preventDefault()) })
@@ -1744,7 +1684,7 @@ html.theme-toon .rolechip { border: 2px solid #15132a; background: #1f1757; }
     if (e.key === 'Escape') { leave(); closeOverview(); return }
     if (modal.classList.contains('open') || $('overview').classList.contains('open')) return
     if (e.target.closest('a, button, input, textarea, select, [contenteditable="true"], [role="button"]')) return
-    const here = nearest(progress() * U)
+    const here = sceneSnap.state().targetIndex ?? nearest(progress() * U)
     if (['ArrowDown', 'ArrowRight', 'PageDown'].includes(e.key) || (e.key === ' ' && !e.shiftKey)) { e.preventDefault(); warpTo(here + 1) }
     if (['ArrowUp', 'ArrowLeft', 'PageUp'].includes(e.key) || (e.key === ' ' && e.shiftKey)) { e.preventDefault(); warpTo(here - 1) }
     if (e.key === 'Home') { e.preventDefault(); warpTo(0) } if (e.key === 'End') { e.preventDefault(); warpTo(SCENES.length - 1) }
@@ -1766,8 +1706,8 @@ html.theme-toon .rolechip { border: 2px solid #15132a; background: #1f1757; }
     <p style="margin-top:22px;color:var(--muted)">Also: ${STOPS.slice(2).map(s => s.name).join(', ')}.</p>
     <div class="end"><a class="primary" href="mailto:kunalsatpal1@gmail.com">kunalsatpal1@gmail.com</a><a href="https://kunalsatpal.com/kunalsatpal_resume.pdf">Resume</a><a href="https://www.linkedin.com/in/kunalsatpal1/">LinkedIn</a><button id="backToFlight">Back to the flight</button></div>`
   const overview = $('overview')
-  function openOverview() { overview.classList.add('open'); overview.setAttribute('aria-hidden', 'false'); lenis?.stop(); document.body.style.overflow = 'hidden'; overview.scrollTop = 0; $('backToFlight').focus({ preventScroll: true }); $('skipBtn').textContent = 'Back to the flight' }
-  function closeOverview() { if (!overview.classList.contains('open')) return; overview.classList.remove('open'); overview.setAttribute('aria-hidden', 'true'); lenis?.start(); document.body.style.overflow = ''; $('skipBtn').textContent = 'Skip the flight' }
+  function openOverview() { overview.classList.add('open'); overview.setAttribute('aria-hidden', 'false'); lenis?.stop(); document.body.style.overflow = 'hidden'; overview.scrollTop = 0; $('backToFlight').focus({ preventScroll: true }); $('skipBtn').textContent = 'Back to the flight'; syncSuspension() }
+  function closeOverview() { if (!overview.classList.contains('open')) return; overview.classList.remove('open'); overview.setAttribute('aria-hidden', 'true'); lenis?.start(); document.body.style.overflow = ''; $('skipBtn').textContent = 'Skip the flight'; syncSuspension() }
   $('skipBtn').addEventListener('click', () => overview.classList.contains('open') ? closeOverview() : openOverview())
   $('backToFlight').addEventListener('click', closeOverview)
   if (params.has('overview')) openOverview()
@@ -1783,7 +1723,8 @@ html.theme-toon .rolechip { border: 2px solid #15132a; background: #1f1757; }
     const isToon = document.documentElement.classList.toggle('theme-toon')
     localStorage.universeTheme = isToon ? 'toon' : 'real'
     syncThemeToggle()
-    settleTimer = setTimeout(() => document.documentElement.classList.add('settled'), 850)
+    syncRendering()
+    settleTimer = setTimeout(() => { document.documentElement.classList.add('settled'); syncRendering() }, 850)
   })
   addEventListener('pageshow', e => { if (e.persisted) document.body.classList.remove('swapping') })
   if (params.has('scene')) {
@@ -1801,6 +1742,8 @@ html.theme-toon .rolechip { border: 2px solid #15132a; background: #1f1757; }
     const a = e.target.closest('a[href*="case.html"], a[href*="blog.html"]')
     if (!a || e.metaKey || e.ctrlKey || e.shiftKey) return
     e.preventDefault()
+    navigatingAway = true
+    sceneSnap.cancel()
     if (reduce) { location.href = a.href; return }
     const r = a.getBoundingClientRect()
     camera.style.transformOrigin = `${r.left + r.width / 2}px ${r.top + r.height / 2}px`
@@ -1810,7 +1753,7 @@ html.theme-toon .rolechip { border: 2px solid #15132a; background: #1f1757; }
     document.body.style.transition = 'opacity .8s'; setTimeout(() => document.body.style.opacity = 0, 300)
     setTimeout(() => location.href = a.href, 780)
   })
-  addEventListener('pageshow', e => { if (e.persisted) { document.body.style.opacity = ''; camera.style.transform = ''; camera.style.filter = ''; lenis?.start() } })
+  addEventListener('pageshow', e => { if (e.persisted) { navigatingAway = false; sceneSnap?.resume(); document.body.style.opacity = ''; camera.style.transform = ''; camera.style.filter = ''; lenis?.start() } })
   const fromKey = params.get('from')
   if (fromKey) {
     const i = SCENES.findIndex(s => s.key === fromKey)
@@ -1831,6 +1774,12 @@ html.theme-toon .rolechip { border: 2px solid #15132a; background: #1f1757; }
 
   // ?moon=planetKey:index opens a moon (for previews).
   if (params.has('moon')) { const [k, mi] = params.get('moon').split(':'), sy = systems.find(o => o.pl.key === k); if (sy) setTimeout(() => land(sy.pl, sy.pl.moons[+mi || 0], sy.moons[+mi || 0].el), 600) }
+  if (params.has('perf')) window.universePerformance = () => ({
+    shaders: shaders.status(), suspended, framePending: !!frameId, snap: sceneSnap.state(),
+    visibleScenes: sceneNodes.filter(n => n.scene.style.visibility !== 'hidden').map(n => n.scene.dataset.scene),
+  })
+  performance.mark('universe:ready')
+  performance.measure('universe:setup', 'universe:boot', 'universe:ready')
 </script>
 </body>
 </html>

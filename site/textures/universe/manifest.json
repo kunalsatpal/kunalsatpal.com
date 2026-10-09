@@ -1,0 +1,62 @@
+{
+  "sphere.png": {
+    "bytes": 26088,
+    "sha256": "4e25f2d8ca728ecc63a1182c7b4eeb3bcb1c61484d1e246b08ffa79e95593e37"
+  },
+  "hinge-surface.jpg": {
+    "bytes": 36405,
+    "sha256": "fe64fa0b979e47e5990de7dea3edc4da3f38b687c9d0cf5a680e3c6c0dac1bc0"
+  },
+  "hinge-clouds.png": {
+    "bytes": 58031,
+    "sha256": "8a37fa5659caa2af424f49d89cdedf2fc54992ec9ab2e0090e0d901a20cb82f6"
+  },
+  "hinge-lights.png": {
+    "bytes": 100893,
+    "sha256": "88d454aeda9c89b9f402b1550abae515f6dc25a6e6f2b3d0339ba20cb51d467a"
+  },
+  "gojek-surface.jpg": {
+    "bytes": 38868,
+    "sha256": "ced97577b108709a270eaf1442bd5cdd8aae24f5be2fb43c4f69c9656b604ae1"
+  },
+  "gojek-clouds.png": {
+    "bytes": 20099,
+    "sha256": "3b8e6cd2e7f495d283a527c69dd73daceee16f1f121388d4753cb7413d16049f"
+  },
+  "cult-surface.jpg": {
+    "bytes": 39569,
+    "sha256": "63ee02e17ac76b9363564735cbbbb5f1d040c18824bd3c7cb36a8bd331d12034"
+  },
+  "cult-clouds.png": {
+    "bytes": 73577,
+    "sha256": "12839732b8120a45607d18ff8e1ea49167245c133393d79401175bc17e50a0ee"
+  },
+  "mini-img.jpg": {
+    "bytes": 38311,
+    "sha256": "024938670f3a98c4011c914694a9b73bd0bf6f7722702cd461abd5966d8418da"
+  },
+  "mini-pibit.jpg": {
+    "bytes": 40809,
+    "sha256": "d0cdcef35680e11e23a6e7d10d23a2bc38d5d8da1a2509bf27617d254870d285"
+  },
+  "mini-stockroom.jpg": {
+    "bytes": 37036,
+    "sha256": "efc3cba5620fd5c0dfd883a453e5d86f5b72678454f497681bea4a6517d39e82"
+  },
+  "mini-cult.jpg": {
+    "bytes": 39396,
+    "sha256": "ae39f15add15686fa3aadced560cdd5f16d5e7a2e04e55ce105124452438a9f9"
+  },
+  "mini-west.jpg": {
+    "bytes": 38765,
+    "sha256": "b7fcf4b735ca882e90ae3f76bdfb86f71d0d5a5bd97bee328418a71b64a53332"
+  },
+  "mini-mobily.jpg": {
+    "bytes": 33240,
+    "sha256": "241082e75f283631e8b10d9ad373ff825217474a5e85e7e60db2728864d41bda"
+  },
+  "mini-pipeline.jpg": {
+    "bytes": 38036,
+    "sha256": "133316b5fbce3d6eedbf49f7cdd4e3898c16821df0dd80039b377d3f2ddc6f95"
+  }
+}
