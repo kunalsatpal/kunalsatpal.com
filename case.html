@@ -6,7 +6,7 @@
 <title>Case study — Kunal Satpal</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,500;0,600;1,400&family=Inter+Tight:wght@600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="./node_modules/lenis/dist/lenis.css" />
+<link rel="stylesheet" href="./vendor/lenis.css" />
 <style>
   /* Case study template: you've landed on a moon. The page is its surface; "Back to orbit" zooms out to home.
      One template for every case — content comes from site/cases/<key>.json. ?c=<key>&home=<page>. */
@@ -338,7 +338,7 @@
 </div>
 
 <script type="module">
-  import Lenis from './node_modules/lenis/dist/lenis.mjs'
+  import Lenis from './vendor/lenis.mjs'
   const $ = id => document.getElementById(id)
   const q = new URLSearchParams(location.search)
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches

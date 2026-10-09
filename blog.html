@@ -6,7 +6,7 @@
 <title>Field note — Kunal Satpal</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Inter+Tight:wght@600;700&family=JetBrains+Mono:wght@400;500&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="./node_modules/lenis/dist/lenis.css" />
+<link rel="stylesheet" href="./vendor/lenis.css" />
 <style>
   /* Blog template: an incoming transmission. Quiet, editorial, read in the dark — deliberately unlike the
      case-study moon surfaces. Content: site/cases/<key>.json. ?c=<key>&home=<page>. */
@@ -112,7 +112,7 @@
 </div>
 
 <script type="module">
-  import Lenis from './node_modules/lenis/dist/lenis.mjs'
+  import Lenis from './vendor/lenis.mjs'
   const $ = id => document.getElementById(id)
   const q = new URLSearchParams(location.search)
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches
