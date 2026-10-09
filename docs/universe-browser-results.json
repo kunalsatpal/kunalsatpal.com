@@ -58,7 +58,8 @@
     "Hover preview omits redundant company and action tags",
     "Case-study footer images span the full card width",
     "Case-study footer cards omit decorative tags",
-    "Phone hover previews stay inside every viewport edge"
+    "Phone hover previews stay inside every viewport edge",
+    "Every company logo fits inside its badge safe area"
   ],
   "assets": [
     {

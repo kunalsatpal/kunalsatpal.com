@@ -187,5 +187,13 @@ for scene in ('gojek', 'cult'):
       return results
     })()""")
 check(all(r['left'] >= 11 and r['top'] >= 11 and r['right'] <= 379 and r['bottom'] <= 833 for r in clamped), 'Phone hover previews stay inside every viewport edge')
+
+b.navigate(base + '?scene=galaxy&perf')
+wait_for("[...document.querySelectorAll('.mbadge img')].every(image => image.complete)")
+badges = b.js("""[...document.querySelectorAll('.mbadge')].map(badge => {
+  const image = badge.querySelector('img'), b = badge.getBoundingClientRect(), i = image.getBoundingClientRect()
+  return i.left >= b.left && i.top >= b.top && i.right <= b.right && i.bottom <= b.bottom && getComputedStyle(image).objectFit === 'contain'
+})""")
+check(len(badges) == 7 and all(badges), 'Every company logo fits inside its badge safe area')
 (output / 'results.json').write_text(json.dumps({'checks':checks,'assets':assets}, indent=2) + '\n')
 print(f'Passed {len(checks)} browser checks. Screenshots and report: {output}', flush=True)

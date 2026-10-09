@@ -492,10 +492,14 @@
 
   /* Logo badge: a small white chip on each earlier-stop planet, like a flag planted on it. */
   .mini i { overflow: visible !important; }
-  .mbadge { position: absolute; right: -6%; bottom: -4%; width: 42%; aspect-ratio: 1; min-width: 26px; border-radius: 50%; background: #fff; display: grid; place-items: center; z-index: 2;
+  .mbadge { position: absolute; right: -6%; bottom: -4%; width: clamp(38px, 42%, 54px); aspect-ratio: 1; box-sizing: border-box; overflow: hidden; border-radius: 50%; background: #fff; z-index: 2;
     box-shadow: 0 4px 12px rgba(0,0,0,.45), 0 0 0 2px color-mix(in srgb, var(--c) 60%, transparent); }
-  .mbadge img { width: 66%; height: 66%; object-fit: contain; }
-  .mbadge.wide { width: 74%; aspect-ratio: 2.4; border-radius: 999px; right: -24%; } .mbadge.wide img { width: 86%; }
+  .mbadge img { position: absolute; inset: 7px; display: block; width: calc(100% - 14px); height: calc(100% - 14px); object-fit: contain; }
+  .mbadge.wide { width: clamp(72px, 80%, 94px); aspect-ratio: 3.1; border-radius: 999px; right: -28%; }
+  .mbadge.wide img { inset: 6px 9px; width: calc(100% - 18px); height: calc(100% - 12px); }
+  .mbadge.mark-img img, .mbadge.mark-cult img { transform: translateX(-5%); }
+  .mbadge.mark-mobily img { transform: translateX(-4%); }
+  .mbadge.mark-west img { transform: translateX(-6%); }
 
   /* ---------- Moons, second pass: readable info moons, real-looking moons, focus on case-study orbits ---------- */
   .moon:not(.open) i { width: 16px !important; height: 16px !important; opacity: 1 !important; }
@@ -1343,7 +1347,7 @@ html.theme-toon .rolechip { border: 2px solid #15132a; background: #1f1757; }
     if (href) el.href = href
     el.className = 'mini' + (href ? ' open' : ''); el.style.left = st.x + '%'; el.style.top = st.y + '%'
     el.style.setProperty('--c', st.c); el.style.setProperty('--s', st.size); el.style.animationDelay = `${-i * 1.3}s`
-    el.innerHTML = `<i><span class="msurf"></span><span class="mshade"></span><span class="mbadge${st.mark === 'pipeline' ? ' wide' : ''}"><img src="./site/img/marks/${st.mark}.png" alt="" /></span></i><b>${st.name}</b>${st.years ? `<small>${st.years}</small>` : ''}<span class="tip" role="tooltip">${st.note}</span>`
+    el.innerHTML = `<i><span class="msurf"></span><span class="mshade"></span><span class="mbadge mark-${st.mark}${st.mark === 'pipeline' ? ' wide' : ''}"><img src="./site/img/marks/${st.mark}.png" alt="" /></span></i><b>${st.name}</b>${st.years ? `<small>${st.years}</small>` : ''}<span class="tip" role="tooltip">${st.note}</span>`
     if (href) el.setAttribute('aria-label', `${st.name}: read the story`)
     // Same look as the big planets: a banded texture wrapped on a sphere, shaded from the upper left.
     el.querySelector('.msurf').style.backgroundImage = `url(${textureURL(`mini-${st.mark}.jpg`)})`
