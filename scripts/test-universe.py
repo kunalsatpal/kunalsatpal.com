@@ -201,22 +201,24 @@ wait_for("document.querySelectorAll('.log').length === 4")
 notes = b.js("""[...document.querySelectorAll('.log')].map(note => ({
   fresh: !!note.querySelector('.log-new'),
   icon: note.querySelector('.patch img').getAttribute('src'),
-  fit: getComputedStyle(note.querySelector('.patch img')).objectFit
+  fit: getComputedStyle(note.querySelector('.patch img')).objectFit,
+  background: getComputedStyle(note.querySelector('.patch')).backgroundColor,
+  filter: getComputedStyle(note.querySelector('.patch img')).filter
 }))""")
 check(notes[0]['fresh'] and notes[0]['icon'] == './mark.svg' and notes[0]['fit'] == 'contain', 'First field note carries the Kunal Satpal mark and New tag')
-check(notes[2]['icon'] == './site/img/blog_pibit.png' and notes[2]['fit'] == 'cover', 'Pibit field note uses the blue Pibit logo from the blog')
+check(notes[2]['icon'] == './site/img/marks/pibit.png' and notes[2]['fit'] == 'contain' and notes[2]['background'] == 'rgb(76, 99, 239)' and notes[2]['filter'] == 'brightness(0) invert(1)', 'Pibit field note uses the white mark on a blue badge')
 
 # Legacy incoming URLs may still carry the old home parameter; every return action is canonicalized to Universe.
 b.call('Page.navigate', {'url':'http://127.0.0.1:8765/case.html?c=promo&home=cinematic-proof'})
 wait_for("document.readyState === 'complete' && document.querySelectorAll('.nextmoon').length === 2")
 b.js("document.getElementById('back').click()")
-wait_for("location.pathname.endsWith('/universe.html') && !!window.universePerformance && universePerformance().visibleScenes.includes('gojek')")
+wait_for("location.pathname.endsWith('/universe.html') && !!document.querySelector('[data-scene=\"gojek\"]') && document.querySelector('[data-scene=\"gojek\"]').style.visibility !== 'hidden'")
 check(True, 'Case-study Back to orbit returns to the matching Universe scene')
 
 b.call('Page.navigate', {'url':'http://127.0.0.1:8765/blog.html?c=Pibit&home=cinematic-proof'})
 wait_for("document.readyState === 'complete' && document.getElementById('title').textContent.length > 0")
 b.js("document.getElementById('back').click()")
-wait_for("location.pathname.endsWith('/universe.html') && !!window.universePerformance && universePerformance().visibleScenes.includes('writing')")
+wait_for("location.pathname.endsWith('/universe.html') && !!document.querySelector('[data-scene=\"writing\"]') && document.querySelector('[data-scene=\"writing\"]').style.visibility !== 'hidden'")
 check(True, 'Field-note Back to orbit returns to the Universe writing scene')
 (output / 'results.json').write_text(json.dumps({'checks':checks,'assets':assets}, indent=2) + '\n')
 print(f'Passed {len(checks)} browser checks. Screenshots and report: {output}', flush=True)
