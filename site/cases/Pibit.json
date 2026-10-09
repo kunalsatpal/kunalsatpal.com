@@ -1,0 +1,174 @@
+{
+ "key": "Pibit",
+ "title": "Kunal Satpal | Starting my design journey with Pibit",
+ "blocks": [
+  {
+   "t": "img",
+   "src": "./site/cases/m/4bba2a7ebd.png",
+   "size": "bleed"
+  },
+  {
+   "t": "h3",
+   "text": "A small walk-through of work and my experience at Pibit."
+  },
+  {
+   "t": "p",
+   "html": "It all started with a call from my senior who was working on a product idea. There was no way I could have said no to this opportunity of working with a startup at its nascent days. Also this being at a very early stage of my career, This would be a great learning experience for me."
+  },
+  {
+   "t": "h",
+   "text": "The Idea"
+  },
+  {
+   "t": "p",
+   "html": "Pibit has created an online platform for the offline local merchants where they could connect to potential customers in the real time. Thus, solving the problem of low sales during off-peak hours by luring customers through real-time offers and also keeping a track of their customers to provide them some personalized offers."
+  },
+  {
+   "t": "p",
+   "html": "I joined pibit a few months after the launch of their website. Being the only designer there, I got the experience of working on various fields involved in the process of building and shaping a product (like designing marketing strategies and posters, designing B-Plan to raise funding, etc)."
+  },
+  {
+   "t": "img",
+   "src": "./site/cases/m/57c40c4785.png",
+   "size": "large"
+  },
+  {
+   "t": "h",
+   "text": "Working on the Product"
+  },
+  {
+   "t": "h3",
+   "text": "Understanding Pain Points"
+  },
+  {
+   "t": "p",
+   "html": "I joined pibit a few months after the launch of the website, and we started with a small survey and user interviews for both customers and merchants to know their response and know their experience with the website."
+  },
+  {
+   "t": "p",
+   "html": "The survey and research went really well and we gained some good insights regarding our product. Students in IIT really liked our product and the merchants were also able to increase their sales with the help of pibit but there were a few pain points which were affecting the user experience."
+  },
+  {
+   "t": "list",
+   "ordered": true,
+   "items": [
+    "<b>Significantly large number of steps for subscribing any restaurant:</b> It was almost 4 step long process for the user to subscribe notification of any restaurant nearby. Real-time notifications being the primary feature, these many numbers of steps lead to a huge percentage of dropouts.",
+    "<b>All users were not tech savvy:</b> We realized that all of our users were not able to use the web and all were not comfortable with modern technology. Moreover very few of them used laptops for push notifications.",
+    "<b>Merchants were not able to push offers by their own:</b> Merchants were having problems with the form which they were required to fill because of which they contacted pibit frequently.",
+    "<b>Unavailability of good Internet speed:</b> Data showed us that most of our users visited mobile website and the significant load time of the website leads to a bad experience for the user (Internet data was not cheaper at that time than nowadays. Thanks to Jio)."
+   ]
+  },
+  {
+   "t": "h",
+   "text": "Deciding our next Step"
+  },
+  {
+   "t": "p",
+   "html": "After several discussions on how can we solve all of these problems, we decided our next big step would be to build an android application. <b>Why Android Application?</b>"
+  },
+  {
+   "t": "list",
+   "ordered": true,
+   "items": [
+    "Our surveys and interviews suggested that users are much more active on their smartphones as compared to web and tend to ignore web notification more often than mobile.",
+    "The need for saving offers offline",
+    "Expanding our domain from only food to various different sectors starting from saloons and spas."
+   ]
+  },
+  {
+   "t": "h",
+   "text": "Competitor Analysis"
+  },
+  {
+   "t": "p",
+   "html": "There were many apps on the market already providing offers but there was none providing real-time connectivity and pre-ordering."
+  },
+  {
+   "t": "img",
+   "src": "./site/cases/m/5ad0270a44.jpg",
+   "size": "large"
+  },
+  {
+   "t": "h",
+   "text": "Our Approach"
+  },
+  {
+   "t": "p",
+   "html": "At a nascent stage, we at pibit believed that collaborative work with the agile mindset can differentiate a great final product from a good product. Agile mindset is not limited to a fast, flexible, and iterative process, it means much more than this. Agile mindset promotes collaborative work with discussions, testing, and iterations at every step of the process."
+  },
+  {
+   "t": "img",
+   "src": "./site/cases/m/65b830bf53.png",
+   "size": "large"
+  },
+  {
+   "t": "p",
+   "html": "During my stay at Pibit, I worked on both the ends of the android application and the website."
+  },
+  {
+   "t": "h",
+   "text": "Designing Android Application"
+  },
+  {
+   "t": "h3",
+   "text": "Deciding features for the application"
+  },
+  {
+   "t": "p",
+   "html": "Following the agile mindset, features were all discussed in regularly scheduled meetings with all the members of the team, several market constraints were also to be kept in mind while working on features and based on that features to be included in the MVP were decided. After deciding the features, We worked on flow and wireframes design started."
+  },
+  {
+   "t": "img",
+   "src": "./site/cases/m/eae6ef7636.jpg",
+   "size": "text"
+  },
+  {
+   "t": "p",
+   "html": "We used usability testing method for improving or optimizing our product. It helped in verifying the assumption, gain new insights and when done on focus groups it was based on gathering design suggestions."
+  },
+  {
+   "t": "p",
+   "html": "Users were asked to perform certain tasks and were observed closely to identify if they were facing some problems or any confusion. Results from these testings were used to make the iteration."
+  },
+  {
+   "t": "img",
+   "src": "./site/cases/m/91227966e8.jpg",
+   "size": "large"
+  },
+  {
+   "t": "img",
+   "src": "./site/cases/m/b4a4e7903d.jpg",
+   "size": "large"
+  },
+  {
+   "t": "h3",
+   "text": "Designing the Website"
+  },
+  {
+   "t": "p",
+   "html": "Earlier Pibit used the only website for subscribing restaurants, get notifications, avail offers. So the earlier website completely focussed on making the subscription flow delightful and providing all the features on the web."
+  },
+  {
+   "t": "img",
+   "src": "./site/cases/m/55f28f9259.png",
+   "size": "text"
+  },
+  {
+   "t": "p",
+   "html": "After shifting all the features to the Android application, the web became the main platform for promotion for our current users. The whole shift from web to the Android application can lead to several user dropouts, the landing page should be designed to make sure that the user retention is maximum."
+  },
+  {
+   "t": "img",
+   "src": "./site/cases/m/9fddbf48ba.jpg",
+   "size": "text"
+  },
+  {
+   "t": "h",
+   "text": "Conclusion"
+  },
+  {
+   "t": "p",
+   "html": "My journey at pibit was full of learning and excitement. Working as a core team member of pibit, I learned not only about design but also how to collaborate in a team and work with the vision same as that of your product. It was a great learning experience for me to work with a startup at its early stage and know about the problems faced during the process of making a good product. Not only Product and UI/UX design, I learned a lot about graphic, market strategies and different aspects of design."
+  }
+ ]
+}

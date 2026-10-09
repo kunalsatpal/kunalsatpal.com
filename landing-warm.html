@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Kunal Satpal — Product Designer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=Poppins:wght@600&display=swap" rel="stylesheet" />
+<style>
+  /* Palette sampled from the desk photo so the page continues the wood tone. */
+  :root {
+    --paper: #f3efe8; --wood: #ddd8cc; --ink: #2a251f; --muted: #6f665b; --soft: #9a9083;
+    --line: #e2dbcf; --card: #fbf9f5;
+  }
+  * { box-sizing: border-box; margin: 0; }
+  html { background: var(--paper); }
+  body { color: var(--ink); font: 400 16px/1.55 "Inter", system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+  a { color: inherit; text-decoration: none; }
+  .wrap { max-width: 1280px; margin: 0 auto; padding: 0 56px; }
+
+  /* Hero: the cleaned desk photo, full bleed. Height follows the photo's aspect so props never crop. */
+  .hero { position: relative; aspect-ratio: 1024 / 504; min-height: 640px; background: var(--wood) url(./desk-hero.jpg) center bottom / cover no-repeat; overflow: hidden; }
+  .hero::after { content: ""; position: absolute; inset: 0; pointer-events: none;
+    background: radial-gradient(60% 55% at 50% 38%, rgba(236,232,224,.55), transparent 70%); }
+
+  nav { position: relative; z-index: 2; display: flex; align-items: center; justify-content: space-between; height: 88px; }
+  .brand { display: flex; align-items: center; gap: 12px; font: 600 15px/1 "Poppins", sans-serif; letter-spacing: .04em; }
+  .brand svg { height: 22px; width: auto; }
+  .links { display: flex; gap: 36px; align-items: center; font-size: 14px; color: var(--muted); }
+  .links a:hover { color: var(--ink); }
+  .cta { color: var(--ink) !important; border: 1px solid rgba(42,37,31,.25); padding: 10px 18px; border-radius: 999px; background: rgba(255,255,255,.35); backdrop-filter: blur(6px); }
+  .cta .dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: #3fae6a; margin-right: 8px; }
+
+  .copy { position: relative; z-index: 2; text-align: center; margin: 5vh auto 0; max-width: 1040px; }
+  .eyebrow { font-size: 12px; letter-spacing: .16em; text-transform: uppercase; color: var(--muted); margin-bottom: 22px; }
+  h1 { font: 400 clamp(38px, 4vw, 60px)/1.06 "Newsreader", serif; letter-spacing: -0.025em; }
+  h1 em { font-style: italic; color: #7b5a3a; }
+  .lede { margin: 22px auto 0; max-width: 600px; font-size: 17px; color: #5d554b; }
+  .actions { margin-top: 30px; display: flex; gap: 12px; justify-content: center; }
+  .btn { padding: 13px 22px; border-radius: 999px; font-weight: 500; font-size: 15px; }
+  .btn.primary { background: var(--ink); color: #f6f2ea; }
+  .btn.ghost { border: 1px solid rgba(42,37,31,.28); background: rgba(255,255,255,.3); }
+
+  /* The mark as a polished steel paperweight on the desk, right of the keyboard. */
+  .weight { position: absolute; z-index: 1; left: 69.5%; top: 70%; width: 11.5%; aspect-ratio: 1; }
+  .weight canvas, .weight .fallback { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .weight canvas { opacity: 0; transition: opacity .8s; }
+  .weight.live canvas { opacity: 1; }
+  .weight.live .fallback { opacity: 0; transition: opacity .8s; }
+  /* Light comes from the top right (see the leaf shadows), so the cast shadow falls down-left. */
+  .weight .shadow { position: absolute; left: 4%; right: 14%; top: 30%; bottom: 10%; background: rgba(70,52,34,.5); filter: blur(9px); transform: translate(-16%, 13%) skewX(-12deg); border-radius: 10%; mix-blend-mode: multiply; }
+
+  /* Proof */
+  .proof { display: grid; grid-template-columns: repeat(3, 1fr); border-bottom: 1px solid var(--line); }
+  .proof > div { padding: 44px 40px 44px 0; }
+  .proof > div + div { padding-left: 40px; border-left: 1px solid var(--line); }
+  .num { font: 400 56px/1 "Newsreader", serif; letter-spacing: -0.02em; }
+  .num small { font-size: 28px; color: var(--soft); }
+  .what { margin-top: 12px; color: #4f483f; font-size: 15px; }
+  .where { margin-top: 6px; color: var(--soft); font-size: 13px; letter-spacing: .04em; }
+
+  /* Work */
+  section.work { padding: 110px 0 70px; }
+  .head { display: flex; justify-content: space-between; align-items: end; margin-bottom: 36px; }
+  h2 { font: 400 44px/1.1 "Newsreader", serif; letter-spacing: -0.02em; }
+  .head a { color: var(--muted); font-size: 14px; }
+  .grid { display: grid; grid-template-columns: 1.4fr 1fr; gap: 20px; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 20px; overflow: hidden; display: flex; flex-direction: column; box-shadow: 0 1px 0 rgba(255,255,255,.8) inset, 0 20px 40px -30px rgba(60,45,30,.35); }
+  .card .art { flex: 1; min-height: 300px; position: relative; overflow: hidden; }
+  .card .meta { padding: 24px 28px 28px; }
+  .tag { font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--soft); }
+  .card h3 { font: 500 22px/1.3 "Inter", sans-serif; margin-top: 10px; letter-spacing: -0.01em; }
+  .card p { color: var(--muted); margin-top: 8px; font-size: 15px; }
+  .stack { display: grid; gap: 20px; }
+  .stack .card .art { min-height: 180px; }
+  .a1 { background: radial-gradient(120% 90% at 80% 0%, #dfe5f3 0%, #eceef3 55%, #f3f2ef 100%); }
+  .a2 { background: radial-gradient(120% 120% at 0% 100%, #f3dcc2 0%, #f5ece2 60%, #f7f3ee 100%); }
+  .a3 { background: radial-gradient(120% 120% at 100% 100%, #d6e8dc 0%, #ebf1ec 60%, #f4f4f0 100%); }
+  .ui { position: absolute; border-radius: 12px; background: rgba(255,255,255,.75); border: 1px solid rgba(42,37,31,.08); box-shadow: 0 12px 30px -18px rgba(60,45,30,.35); }
+  .bar { height: 8px; border-radius: 4px; background: rgba(42,37,31,.1); margin: 10px 14px; }
+  .bar.s { width: 40%; } .bar.m { width: 65%; } .bar.hi { background: #8fa0d6; width: 30%; }
+
+  .clients { display: flex; justify-content: space-between; align-items: center; padding: 40px 0 80px; color: #a39a8d; font: 500 18px/1 "Inter"; letter-spacing: .02em; }
+  .clients span:first-child { font-size: 12px; letter-spacing: .16em; text-transform: uppercase; color: var(--muted); }
+</style>
+</head>
+<body>
+<header class="hero">
+  <div class="wrap">
+    <nav>
+      <a class="brand" href="#">
+        <svg viewBox="0 0 33 31" aria-hidden="true"><rect y="1.09" width="7.68" height="28.36" rx="1.4" fill="currentColor"/><path fill="currentColor" d="M31.24.92c.77 0 1.4.63 1.4 1.4v25.52c0 .77-.63 1.4-1.4 1.4h-6.1c-.27 0-.52-.11-.7-.31L12.18 15.08 24.44 1.22c.18-.19.43-.3.7-.3z"/></svg>
+        KUNAL SATPAL
+      </a>
+      <div class="links">
+        <a href="#work">Work</a><a href="#">About</a><a href="#">Writing</a><a href="#">Résumé</a>
+        <a class="cta" href="#"><span class="dot"></span>Open to conversations</a>
+      </div>
+    </nav>
+
+    <div class="copy">
+      <div class="eyebrow">Staff Product Designer · Bangalore</div>
+      <h1>I make complex products feel <em>simple</em>,<br />and prove it with numbers.</h1>
+      <p class="lede">Ten years designing across healthcare, food delivery and fitness, from AI tools and design systems to growth experiments shipped to millions.</p>
+      <div class="actions">
+        <a class="btn primary" href="#work">See selected work</a>
+        <a class="btn ghost" href="#">Get in touch</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="weight" id="weight">
+    <div class="shadow"></div>
+    <!-- Static steel fallback until the WebGPU shader is live (or forever without WebGPU). -->
+    <svg class="fallback" viewBox="-7.7 -8.9 48 48" aria-hidden="true">
+      <defs>
+        <linearGradient id="st" x1="0" y1="0" x2=".4" y2="1">
+          <stop offset="0" stop-color="#ffffff"/><stop offset=".3" stop-color="#c9c4bb"/>
+          <stop offset=".5" stop-color="#5c574f"/><stop offset=".56" stop-color="#e8e2d8"/>
+          <stop offset=".82" stop-color="#8e8678"/><stop offset="1" stop-color="#efebe4"/>
+        </linearGradient>
+      </defs>
+      <g stroke="#fff" stroke-opacity=".7" stroke-width=".4">
+        <rect y="1.091" width="7.68" height="28.356" rx="1.4" fill="url(#st)"/>
+        <path fill="url(#st)" d="M31.24,0.92 C32.01,0.92 32.64,1.55 32.64,2.32 L32.64,27.84 C32.64,28.61 32.01,29.24 31.24,29.24 L25.14,29.24 C24.87,29.24 24.62,29.13 24.44,28.93 L12.18,15.08 L24.44,1.22 C24.62,1.03 24.87,0.92 25.14,0.92 Z"/>
+      </g>
+    </svg>
+    <canvas id="c"></canvas>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="proof">
+    <div><div class="num">16<small>%</small></div><div class="what">less time per member for care teams</div><div class="where">Hinge Health</div></div>
+    <div><div class="num">2.5<small>×</small></div><div class="what">promo page visits after an end-to-end redesign</div><div class="where">Gojek · GoFood</div></div>
+    <div><div class="num">70<small>%</small></div><div class="what">faster partner onboarding, 10–15 days down to 3–4</div><div class="where">Cult.fit</div></div>
+  </div>
+
+  <section class="work" id="work">
+    <div class="head"><h2>Selected work</h2><a href="#">All projects →</a></div>
+    <div class="grid">
+      <a class="card" href="#">
+        <div class="art a1">
+          <div class="ui" style="left:8%;top:14%;width:52%;height:62%"><div class="bar m"></div><div class="bar s"></div><div class="bar hi"></div><div class="bar m"></div><div class="bar s"></div></div>
+          <div class="ui" style="left:50%;top:30%;width:42%;height:52%"><div class="bar hi" style="width:55%"></div><div class="bar m"></div><div class="bar s"></div></div>
+        </div>
+        <div class="meta"><div class="tag">AI · Clinical tools</div><h3>Making AI recommendations clinicians act on</h3><p>Strategy, safety checks and the interface for next-best-action recommendations.</p></div>
+      </a>
+      <div class="stack">
+        <a class="card" href="#">
+          <div class="art a2"><div class="ui" style="left:10%;top:20%;width:36%;height:60%"><div class="bar s"></div><div class="bar hi" style="background:#e0a065"></div></div><div class="ui" style="left:52%;top:20%;width:36%;height:60%"><div class="bar m"></div><div class="bar s"></div></div></div>
+          <div class="meta"><div class="tag">Growth · Gojek</div><h3>Rebuilding GoFood promotions</h3></div>
+        </a>
+        <a class="card" href="#">
+          <div class="art a3"><div class="ui" style="left:10%;top:22%;width:80%;height:56%"><div class="bar m"></div><div class="bar hi" style="background:#6fb68a"></div><div class="bar s"></div></div></div>
+          <div class="meta"><div class="tag">Systems · Cult.fit</div><h3>A marketplace that onboards in days, not weeks</h3></div>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <div class="clients"><span>Worked with</span><span>Hinge Health</span><span>Gojek</span><span>Cult.fit</span><span>IIT Roorkee</span><span>Pibit</span></div>
+</div>
+
+<script type="module">
+  import { createShader, isWebGPUSupported } from './node_modules/shaders/dist/js/bundle.js'
+  const weight = document.getElementById('weight')
+  if (isWebGPUSupported()) {
+    // Brighter, warmer studio than the dark version so the steel reads against pale wood.
+    createShader(document.getElementById('c'), {
+      components: [{ type: 'Chrome', id: 'mark', props: {
+        shapeSdfUrl: './mark.sdf.bin', scale: 1.1, tint: '#fff7ec',
+        warmColor: '#ffc58a', coolColor: '#a9b6cc',
+        bevelWidth: 0.05, bevelShape: 0.72, curvature: 0.6, waviness: 0.03,
+        environment: 1.35, envRotation: 40, softness: 0.22, spectral: 0.55,
+        dispersion: 0.25, shadows: 0.6, speed: 0.25, edgeSoftness: 0.015,
+      } }],
+    }).then(() => weight.classList.add('live')).catch(e => console.error(e))
+  }
+</script>
+</body>
+</html>

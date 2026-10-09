@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Field note — Kunal Satpal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Inter+Tight:wght@600;700&family=JetBrains+Mono:wght@400;500&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="./node_modules/lenis/dist/lenis.css" />
+<style>
+  /* Blog template: an incoming transmission. Quiet, editorial, read in the dark — deliberately unlike the
+     case-study moon surfaces. Content: site/cases/<key>.json. ?c=<key>&home=<page>. */
+  :root { --c: #9fe8d2; --bg: #07080c; --ink: #ecebe6; --muted: rgba(236,235,230,.7); --faint: rgba(236,235,230,.42); --line: rgba(255,255,255,.1); }
+  .cartoon { --bg: #0e0a28; }
+  * { box-sizing: border-box; margin: 0; }
+  html { background: var(--bg); }
+  body { color: var(--ink); font: 400 21px/1.75 "Newsreader", Georgia, serif; -webkit-font-smoothing: antialiased; overflow-x: hidden; }
+  a { color: inherit; }
+  button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+  :focus-visible { outline: 2px solid var(--c); outline-offset: 3px; border-radius: 6px; }
+
+  .world { transition: transform .9s cubic-bezier(.6,.05,.25,1), filter .9s, opacity .9s; transform-origin: 50% 30vh; }
+  body.arriving .world { opacity: 0; filter: blur(12px); transform: scale(1.3); }
+  body.leaving .world { transform: scale(.2); filter: blur(10px); opacity: 0; }
+
+  /* ---------- Chrome ---------- */
+  .bar { position: fixed; z-index: 50; top: 20px; left: 20px; right: 20px; display: flex; justify-content: space-between; align-items: center; pointer-events: none; font-family: "Inter", sans-serif; }
+  .bar > * { pointer-events: auto; }
+  .back { display: inline-flex; align-items: center; gap: 10px; padding: 10px 16px 10px 12px; border-radius: 16px; font-size: 15px;
+    background: rgba(14,16,24,.6); border: 1px solid rgba(255,255,255,.12); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); transition: border-color .3s; }
+  .back:hover { border-color: var(--c); }
+  .back svg { width: 18px; height: 18px; }
+  /* Signal strength = reading progress. */
+  .signal { display: flex; align-items: flex-end; gap: 3px; height: 18px; padding: 10px 14px; box-sizing: content-box; border-radius: 12px; background: rgba(14,16,24,.5); backdrop-filter: blur(12px); }
+  .signal i { width: 4px; border-radius: 2px; background: rgba(255,255,255,.18); transition: background .3s; }
+  .signal i.on { background: var(--c); box-shadow: 0 0 6px var(--c); }
+  .signal span { margin-left: 8px; font: 500 11px/18px "JetBrains Mono", monospace; letter-spacing: .1em; color: var(--faint); }
+
+  /* ---------- The transmission arrives ---------- */
+  .incoming { position: relative; min-height: 92vh; display: grid; place-items: center; text-align: center; padding: 120px 24px 60px; overflow: hidden; }
+  .stars { position: absolute; inset: 0; background-size: 100% 100%; opacity: .7; }
+  .beacon { position: relative; width: 92px; height: 92px; margin: 0 auto 34px; }
+  .beacon img { position: absolute; inset: 14px; width: 64px; height: 64px; border-radius: 18px; object-fit: cover; background: #fff; box-shadow: 0 0 0 1.5px color-mix(in srgb, var(--c) 70%, transparent), 0 0 30px -6px var(--c); }
+  .beacon i { position: absolute; inset: 0; border-radius: 50%; border: 1.5px solid var(--c); opacity: 0; animation: wave 3s ease-out infinite; }
+  .beacon i:nth-child(2) { animation-delay: 1s; } .beacon i:nth-child(3) { animation-delay: 2s; }
+  @keyframes wave { 0% { transform: scale(.7); opacity: .8; } 100% { transform: scale(2.6); opacity: 0; } }
+  .meta { font: 500 12px/1.6 "JetBrains Mono", monospace; letter-spacing: .14em; color: var(--c); text-transform: uppercase; }
+  .meta .dim { color: var(--faint); }
+  h1 { margin: 22px auto 0; max-width: 900px; font: 400 clamp(44px, 6vw, 88px)/1.02 "Newsreader", serif; letter-spacing: -0.02em; }
+  h1 em { font-style: italic; color: var(--c); }
+  .standfirst { margin: 22px auto 0; max-width: 560px; font-style: italic; font-size: 22px; color: var(--muted); }
+  .typing::after { content: "▍"; color: var(--c); animation: blink 1s steps(1) infinite; } @keyframes blink { 50% { opacity: 0; } }
+
+  /* ---------- The note ---------- */
+  .note { position: relative; max-width: 680px; margin: 0 auto; padding: 40px 24px 120px; }
+  .note > p:first-of-type::first-letter { float: left; font-size: 4.1em; line-height: .86; padding: 6px 12px 0 0; color: var(--c); font-style: italic; }
+  .note h2 { margin-top: 64px; font: 600 15px/1.4 "JetBrains Mono", monospace; letter-spacing: .12em; text-transform: uppercase; color: var(--ink); display: flex; gap: 14px; align-items: baseline; }
+  .note h2::before { content: attr(data-n); color: var(--c); }
+  .note h2::after { content: ""; flex: 1; height: 1px; background: var(--line); transform: translateY(-4px); }
+  .note h3 { margin-top: 38px; font: 500 italic 27px/1.3 "Newsreader", serif; }
+  .note p { margin-top: 20px; color: var(--muted); }
+  .note p b, .note p strong { color: var(--ink); font-weight: 500; background: linear-gradient(transparent 62%, color-mix(in srgb, var(--c) 22%, transparent) 62%); }
+  /* Images are "attachments": quiet, captioned, never bigger than the reading column + a little. */
+  .att { margin: 40px -40px 0; }
+  .att img, .att video { display: block; width: 100%; height: auto; object-fit: contain; border-radius: 10px; background: #f3f3f1; }
+  .att video { max-width: 340px; margin: 0 auto; border-radius: 26px; background: #000; }
+  .att figcaption { margin-top: 10px; font: 500 11px/1.4 "JetBrains Mono", monospace; letter-spacing: .1em; color: var(--faint); text-transform: uppercase; }
+  .cartoon .att img { border: 2.5px solid #15132a; box-shadow: 0 4px 0 #15132a; }
+
+  .eot { max-width: 680px; margin: 0 auto; padding: 0 24px 140px; text-align: center; font-family: "Inter", sans-serif; }
+  .eot .line { font: 500 12px/1 "JetBrains Mono", monospace; letter-spacing: .3em; color: var(--faint); }
+  .eot .line::before, .eot .line::after { content: "— "; } .eot .line::after { content: " —"; }
+  .eot .row { margin-top: 26px; display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+  .eot a, .eot button { padding: 12px 20px; border-radius: 14px; border: 1px solid rgba(255,255,255,.2); font-size: 16px; text-decoration: none; }
+  .eot .primary { background: #fff; color: #050608; border-color: #fff; }
+
+  @media (max-width: 760px) { body { font-size: 19px; } .att { margin: 32px -12px 0; } .signal span { display: none; } }
+  @media (prefers-reduced-motion: reduce) { .world { transition: none; } .beacon i, .typing::after { animation: none; } }
+
+  /* Lists, tables and galleries from the original pages. */
+  .blist { margin: 18px 0 0; padding-left: 22px; color: var(--rock-muted, var(--muted)); }
+  .blist li { margin-top: 10px; padding-left: 4px; }
+  .blist li b { color: var(--rock, var(--ink)); }
+  ol.blist li::marker { color: var(--c); font-weight: 600; }
+  .btable { margin-top: 24px; border-radius: 16px; overflow: hidden; border: 1px solid rgba(255,255,255,.12); }
+  .br { display: grid; grid-template-columns: 180px 1fr; } .br + .br { border-top: 1px solid rgba(255,255,255,.08); }
+  .bk { padding: 16px 18px; font-weight: 600; color: var(--rock, var(--ink)); background: rgba(255,255,255,.04); }
+  .bv { padding: 16px 18px; color: var(--rock-muted, var(--muted)); font-size: .92em; line-height: 1.6; }
+  .bgallery { margin: 36px 0 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 14px; }
+  .bgallery img { width: 100%; border-radius: 14px; background: #fff; }
+  @media (max-width: 600px) { .br { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body class="arriving">
+<div class="bar">
+  <button class="back" id="back"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"/></svg>Back to orbit</button>
+  <div class="signal" id="signal" aria-hidden="true"><i style="height:30%"></i><i style="height:48%"></i><i style="height:66%"></i><i style="height:84%"></i><i style="height:100%"></i><span>SIGNAL</span></div>
+</div>
+
+<div class="world" id="world">
+  <header class="incoming">
+    <div class="stars" id="stars"></div>
+    <div>
+      <div class="beacon"><i></i><i></i><i></i><img id="icon" alt="" /></div>
+      <div class="meta"><span class="typing" id="metaLine"></span></div>
+      <h1 id="title"></h1>
+      <p class="standfirst" id="stand"></p>
+    </div>
+  </header>
+  <article class="note" id="note"></article>
+  <section class="eot"><p class="line">END OF TRANSMISSION</p><div class="row" id="row"></div></section>
+</div>
+
+<script type="module">
+  import Lenis from './node_modules/lenis/dist/lenis.mjs'
+  const $ = id => document.getElementById(id)
+  const q = new URLSearchParams(location.search)
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches
+  const HOME = /^cinematic-(proof|cartoon)$/.test(q.get('home') || '') ? q.get('home') : 'cinematic-proof'
+  if (HOME === 'cinematic-cartoon') document.body.classList.add('cartoon')
+
+  const LOGS = {
+    portfolio:          { n: 1, tag: 'Process', c: '#9fe8d2', icon: './site/img/blog_portfolio.png', title: 'Designing and <em>iterating</em> my portfolio', stand: 'How this website grew up, one version at a time.' },
+    Internship_curefit: { n: 2, tag: 'Career',  c: '#ff8fb0', icon: './site/img/blog_cult.jpg', title: 'My experience at <em>Cure.fit</em>', stand: 'What two internships taught me before my first full-time job.' },
+    Pibit:              { n: 3, tag: 'Career',  c: '#ffb067', icon: './site/img/blog_pibit.png', title: 'Starting my career with <em>Pibit</em>', stand: 'Being the first designer at a tiny startup.' },
+    whatsapp:           { n: 4, tag: 'Sprint',  c: '#7fd6ff', icon: './site/img/blog_whatsapp.png', title: 'A 4-hour sprint: <em>WhatsApp Polls</em>', stand: 'Designing a feature against the clock.' },
+  }
+  const ORDER = ['portfolio', 'Internship_curefit', 'Pibit', 'whatsapp']
+  const key = LOGS[q.get('c')] ? q.get('c') : 'portfolio', log = LOGS[key]
+  document.documentElement.style.setProperty('--c', log.c)
+
+  // Stars
+  let r = 23; const rnd = () => (r = (r * 16807) % 2147483647) / 2147483647; let c = ''
+  for (let i = 0; i < 140; i++) c += `<circle cx="${(rnd() * 1600).toFixed(1)}" cy="${(rnd() * 900).toFixed(1)}" r="${(0.4 + rnd() * 1.1).toFixed(2)}" fill="#fff" fill-opacity="${(0.2 + rnd() * 0.6).toFixed(2)}"/>`
+  $('stars').style.backgroundImage = `url("data:image/svg+xml,${encodeURIComponent(`<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1600 900' preserveAspectRatio='xMidYMid slice'>${c}</svg>`)}")`
+
+  const data = await fetch(`./site/cases/${key}.json`).then(r => r.json())
+  const words = data.blocks.filter(b => b.t === 'p').map(b => b.html.replace(/<[^>]+>/g, '')).join(' ').split(/\s+/).length
+  const mins = Math.max(2, Math.round(words / 220))
+  document.title = `${log.title.replace(/<[^>]+>/g, '')} — Kunal Satpal`
+  $('icon').src = log.icon; $('title').innerHTML = log.title; $('stand').textContent = log.stand
+  const metaText = `Incoming · Log ${String(log.n).padStart(2, '0')} · ${log.tag} · ${mins} min read`
+  if (reduce) $('metaLine').textContent = metaText
+  else { let k = 0; const type = () => { $('metaLine').textContent = metaText.slice(0, ++k); if (k < metaText.length) setTimeout(type, 28) }; setTimeout(type, 500) }
+
+  // Body: skip a leading cover image (it's in the hero's place), number sections.
+  const note = $('note'); let n = 0, att = 0
+  data.blocks.forEach((b, i) => {
+    if (i === 0 && b.t === 'img') return
+    if (b.t === 'h') { n++; note.insertAdjacentHTML('beforeend', `<h2 data-n="${String(n).padStart(2, '0')}">${b.text}</h2>`) }
+    else if (b.t === 'h3') note.insertAdjacentHTML('beforeend', `<h3>${b.text}</h3>`)
+    else if (b.t === 'list') note.insertAdjacentHTML('beforeend', `<${b.ordered ? 'ol' : 'ul'} class="blist">${b.items.map(x => `<li>${x}</li>`).join('')}</${b.ordered ? 'ol' : 'ul'}>`)
+    else if (b.t === 'table') note.insertAdjacentHTML('beforeend', `<div class="btable">${b.rows.map(r => `<div class="br"><div class="bk">${r[0] || ''}</div><div class="bv">${r.slice(1).join(' ')}</div></div>`).join('')}</div>`)
+    else if (b.t === 'gallery') note.insertAdjacentHTML('beforeend', `<div class="bgallery">${b.srcs.map(x => `<img src="${x}" alt="" loading="lazy" />`).join('')}</div>`)
+    else if (b.t === 'p') note.insertAdjacentHTML('beforeend', `<p>${b.html}</p>`)
+    else if (b.t === 'img') { att++; note.insertAdjacentHTML('beforeend', `<figure class="att"><img src="${b.src}" alt="" loading="lazy" /><figcaption>Attachment ${String(att).padStart(2, '0')}</figcaption></figure>`) }
+    else if (b.t === 'video') { att++; note.insertAdjacentHTML('beforeend', `<figure class="att"><video src="${b.src}" muted loop playsinline autoplay controls></video><figcaption>Attachment ${String(att).padStart(2, '0')}</figcaption></figure>`) }
+  })
+  const next = ORDER[(ORDER.indexOf(key) + 1) % ORDER.length]
+  $('row').innerHTML = `<button class="primary" id="back2">Back to orbit</button><a id="nextLink" href="./blog.html?c=${next}&home=${HOME}">Next log: ${LOGS[next].title.replace(/<[^>]+>/g, '')} →</a>`
+
+  let lenis = null
+  if (!reduce) { lenis = new Lenis({ lerp: 0.09, smoothWheel: true }); const raf = t => { lenis.raf(t); requestAnimationFrame(raf) }; requestAnimationFrame(raf) }
+  requestAnimationFrame(() => requestAnimationFrame(() => document.body.classList.remove('arriving')))
+  const bars = [...document.querySelectorAll('.signal i')]
+  addEventListener('scroll', () => { const p = scrollY / Math.max(1, document.documentElement.scrollHeight - innerHeight); bars.forEach((b, i) => b.classList.toggle('on', p >= i / bars.length + .02)) }, { passive: true })
+
+  const leave = url => { if (reduce) { location.href = url; return } lenis?.stop(); document.body.classList.add('leaving'); setTimeout(() => location.href = url, 820) }
+  const orbit = () => leave(`./${HOME}.html?from=writing`)
+  $('back').addEventListener('click', orbit); $('back2').addEventListener('click', orbit)
+  $('nextLink').addEventListener('click', e => { e.preventDefault(); leave(e.currentTarget.href) })
+  addEventListener('keydown', e => { if (e.key === 'Escape') orbit() })
+  addEventListener('pageshow', e => { if (e.persisted) document.body.classList.remove('leaving') })
+  if (q.has('y')) { lenis?.destroy(); const w = $('world'); w.style.transition = 'none'; const yy = q.get("y") === "end" ? document.documentElement.scrollHeight - innerHeight : +q.get("y"); setTimeout(() => w.style.transform = `translateY(${-(q.get("y") === "end" ? document.documentElement.scrollHeight - innerHeight : yy)}px)`, 600) }  // preview helper
+</script>
+</body>
+</html>

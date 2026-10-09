@@ -1,0 +1,223 @@
+{
+ "key": "Fitclub",
+ "title": "Designing for engagement | Fitclub V2",
+ "blocks": [
+  {
+   "t": "img",
+   "src": "./site/cases/m/c4f18367d3.png",
+   "size": "bleed"
+  },
+  {
+   "t": "h",
+   "text": "Problem Statement"
+  },
+  {
+   "t": "p",
+   "html": "Solving for increasing user engagement and revenue generated per user by expanding Fitclub to Cult/Mind. Measuring success in terms of classes attended per user, per month."
+  },
+  {
+   "t": "p",
+   "html": "<b> Success criteria in short term and long term </b>"
+  },
+  {
+   "t": "list",
+   "ordered": false,
+   "items": [
+    "Short term -&gt; Activity should substantially improve y% classes attended per month. This should go to x%",
+    "Long term -&gt; Incremental retention revenue should be greater than the burn"
+   ]
+  },
+  {
+   "t": "p",
+   "html": "<b> Guard rails </b>"
+  },
+  {
+   "t": "list",
+   "ordered": false,
+   "items": [
+    "Quantitatively, product rating shouldn\u2019t be impacted.",
+    "Qualitatively, core benefit should be positioned as fitness. Rewards shouldn\u2019t take the center stage"
+   ]
+  },
+  {
+   "t": "h",
+   "text": "Defining the scope"
+  },
+  {
+   "t": "list",
+   "ordered": true,
+   "items": [
+    "Who will get the reward?",
+    "When will they get the reward?",
+    "How will they get the reward?"
+   ]
+  },
+  {
+   "t": "p",
+   "html": "This overall scope was defined after a number of discussions and debates over the product strategy, future goals, etc. Here are a few terms explained which affected the overall product:-"
+  },
+  {
+   "t": "img",
+   "src": "./site/cases/m/90ca8d563a.png",
+   "size": "large"
+  },
+  {
+   "t": "h3",
+   "text": "Understanding segments"
+  },
+  {
+   "t": "table",
+   "rows": [
+    [
+     "Eat.fit Members",
+     "Users already using fitclub for Eat.fit orders. <br>\u2022 Need upfront discount before buying <br>\u2022 At moment purchases <br>\u2022 Large ticket size in terms of payable amount"
+    ],
+    [
+     "Cult/Mind Members",
+     "\u2022 Book class in advance several days before. <br>\u2022 Forget about the class sometimes <br>\u2022 Can book a class easily with two taps. (Very low ticket size) <br>\u2022 Getting out of bed and going to the cult center is the biggest task <br>\u2022 Beacuse of which a lot of cancellations happen with nearly zero penalty"
+    ]
+   ]
+  },
+  {
+   "t": "h3",
+   "text": "Defining product"
+  },
+  {
+   "t": "list",
+   "ordered": true,
+   "items": [
+    "<b> Who will get the reward?- </b> Every FitClub member is eligible to get the reward - this includes all Cult/Mind members, as well as users who are not members. User motivations very much different from Eat.fit users.",
+    "<b> When will they get the reward?- </b> Eligible users will get the reward upon completing every Cult/Mind class. The reward will, however, be limited to 1 per day. (Due to business constraints)",
+    "<b> How will they get the reward?- </b> The users will receive the reward on the app (not on the web in v1) - the reward will be variable and will be revealed. Even if the user books the class via the web and attends it, she will get the reward message - but to avail, she has to use it on the app."
+   ]
+  },
+  {
+   "t": "h",
+   "text": "Painting the journey"
+  },
+  {
+   "t": "h",
+   "text": "1. How will users discover about fitclub"
+  },
+  {
+   "t": "p",
+   "html": "Users encounter multiple entry points to the application form, ensuring they learn about FitClub rewards to build anticipation."
+  },
+  {
+   "t": "p",
+   "html": "All entry points direct users to the FitClub page"
+  },
+  {
+   "t": "img",
+   "src": "./site/cases/m/789aa401c9.png",
+   "size": "bleed"
+  },
+  {
+   "t": "h",
+   "text": "2. How will users crave and claim rewards?"
+  },
+  {
+   "t": "p",
+   "html": "Learning in flow is more effective than a single detail page or onboarding. Nudges across the app educate users and build anticipation, as rewards unlock after class. Users can reveal rewards on the home or FitClub page"
+  },
+  {
+   "t": "img",
+   "src": "./site/cases/m/e79fa376dc.png",
+   "size": "bleed"
+  },
+  {
+   "t": "img",
+   "src": "./site/cases/m/76292e56a3.png",
+   "size": "large"
+  },
+  {
+   "t": "img",
+   "src": "./site/cases/m/13f35bb84b.png",
+   "size": "bleed"
+  },
+  {
+   "t": "p",
+   "html": "Experimenting with multiple reveal interactions were fun. Initially, to further increase the anticipation, we decide to take some action to claim the reward, similar to what we do in scratch cards. Later we realized we are overdoing this, and we removed it from the interaction."
+  },
+  {
+   "t": "img",
+   "src": "./site/cases/m/3bb5f1d9d0.png",
+   "size": "bleed"
+  },
+  {
+   "t": "gallery",
+   "srcs": [
+    "./site/cases/m/52f42b1abe.gif",
+    "./site/cases/m/7d3104fb88.gif",
+    "./site/cases/m/3dcf920a41.gif",
+    "./site/cases/m/b9cca8101e.gif"
+   ]
+  },
+  {
+   "t": "img",
+   "src": "./site/cases/m/9670dbfd0d.png",
+   "size": "bleed"
+  },
+  {
+   "t": "p",
+   "html": "We moved forward with the reveal interaction, which requires no extra effort from the user&#x27;s side. Moreover, it can&#x27;t be in continuation of feedbacks as it might become a big blocker and lead to drops. We further finalized the gift concept and visuals before completing things"
+  },
+  {
+   "t": "img",
+   "src": "./site/cases/m/e79cbcb6d1.png",
+   "size": "bleed"
+  },
+  {
+   "t": "p",
+   "html": "Once the user has claimed the reward, he can share the achievement with friends. We know <b><i>95% of gamers are socializers</i></b> so leveraging that power is a must."
+  },
+  {
+   "t": "h3",
+   "text": "3. How will users renew the membership?"
+  },
+  {
+   "t": "p",
+   "html": "Like any other membership, success and adaptability is calculated by the percentage of users renewing the membership. Savings being a great motivator, is used here to keep the user informed, motivating them to keep progressing."
+  },
+  {
+   "t": "img",
+   "src": "./site/cases/m/c3d0d8ea65.png",
+   "size": "bleed"
+  },
+  {
+   "t": "img",
+   "src": "./site/cases/m/75b4a64aae.png",
+   "size": "text"
+  },
+  {
+   "t": "h",
+   "text": "The Launch"
+  },
+  {
+   "t": "p",
+   "html": "After months of hard work, discussions, debates and several iterations. Fitclub V2 was finally ready to fly. On September 2nd 2019, Fitclub V2 i.e. fitclub for cult and mind, was launched with the media campaign #itpaystobefit. Suddenly whole social media was covered with #itpaystobefit; people enjoyed the experience; it may be the incentives."
+  },
+  {
+   "t": "img",
+   "src": "./site/cases/m/81ca3bdb52.png",
+   "size": "bleed"
+  },
+  {
+   "t": "img",
+   "src": "./site/cases/m/d012e14b6c.png",
+   "size": "large"
+  },
+  {
+   "t": "h",
+   "text": "Things I learned"
+  },
+  {
+   "t": "h3",
+   "text": "How to leverage user motivations"
+  },
+  {
+   "t": "p",
+   "html": "There are a number of game mechanics and gamification elements, but not all work in every case. Users are motivated both intrinsically and extrinsically, but it&#x27;s our job to find out which of them can be leveraged and which game mechanics are suited in the scenario. This internship has completely changed my mindset about gamification and incentivization."
+  }
+ ]
+}

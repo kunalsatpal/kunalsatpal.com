@@ -1,0 +1,156 @@
+{
+ "key": "cart_abandonment",
+ "title": "Kunal Satpal | Case Study - Cart Abandonment",
+ "blocks": [
+  {
+   "t": "img",
+   "src": "./site/cases/m/037e5d68d0.png",
+   "size": "bleed"
+  },
+  {
+   "t": "p",
+   "html": "After around 8 months of working at cultfit, I moved to a new team: Team Wellness. And the first and exciting project that came to us was cross-selling wellness products to fitness users. Of the massive project, a small part was cart abandonment, an experiment that turned out too good to be true. But firstly"
+  },
+  {
+   "t": "h",
+   "text": "What is cart abandonment?"
+  },
+  {
+   "t": "p",
+   "html": "<b> <i> \u201cAbandonment is an e-commerce term used to describe a visitor on a web page who leaves that page before completing the desired action.\u201d </i> </b>"
+  },
+  {
+   "t": "p",
+   "html": "Shopping cart abandonment refers to visitors who add items to their online shopping cart but exit without purchasing. This somehow feels counterintuitive; if a user has made all the effort to find, select a thing, and add it to the cart, why won\u2019t he purchase it?"
+  },
+  {
+   "t": "img",
+   "src": "./site/cases/m/25ebbb8c35.png",
+   "size": "bleed"
+  },
+  {
+   "t": "h",
+   "text": "An extensive and renowned problem in e-commerce"
+  },
+  {
+   "t": "p",
+   "html": "The average cart abandonment rate globally lies somewhere around 72% according to statista.com, which means that out of 100 users who add something to the cart, only 28 will make payment. This looks like a huge percentage, and probably that\u2019s why e-commerce sites focus so much on a clear visible cart, cart abandonment mailers, push notification, etc"
+  },
+  {
+   "t": "img",
+   "src": "./site/cases/m/d5eef12ea2.png",
+   "size": "large"
+  },
+  {
+   "t": "h",
+   "text": "Why are we talking about it?"
+  },
+  {
+   "t": "p",
+   "html": "Cult.fit provides a range of services and products from gym memberships to healthy food delivery and a lot more. Of all the verticals, a good business comes from e-commerce i.e. fitstore. <b> <i> Users can buy apparel, equipment, and supplements from here, and with every e-commerce comes cart abandonment. </i> </b>"
+  },
+  {
+   "t": "img",
+   "src": "./site/cases/m/b19cc430a3.png",
+   "size": "large"
+  },
+  {
+   "t": "h",
+   "text": "Hypothesis"
+  },
+  {
+   "t": "img",
+   "src": "./site/cases/m/7258367385.png",
+   "size": "large"
+  },
+  {
+   "t": "h",
+   "text": "Our target audience"
+  },
+  {
+   "t": "p",
+   "html": "On Fitstore, ~20% of users purchase within 24 hours of adding to the cart (d0 purchases), with nearly zero purchases on d1 and none beyond that."
+  },
+  {
+   "t": "p",
+   "html": "TTo boost orders, we should re-engage the 80% who don&#x27;t buy within 24 hours, as they are unlikely to convert on their own."
+  },
+  {
+   "t": "h",
+   "text": "Hypothesis testing"
+  },
+  {
+   "t": "p",
+   "html": "To quickly check the hypothesis, we build a widget using the existing atoms in the library and placed it on pages with good overlap of high DAU and our target audience."
+  },
+  {
+   "t": "img",
+   "src": "./site/cases/m/6ec8a29ce0.png",
+   "size": "bleed"
+  },
+  {
+   "t": "h",
+   "text": "How did it perform?"
+  },
+  {
+   "t": "p",
+   "html": "We conducted a 2-week A/B test comparing marketing banners to a targeted cart abandonment widget, analyzing view-to-purchase conversions. The widget achieved a strong 0.8% conversion rate, driving purchases from users who typically wouldn\u2019t buy on days 1 and 2, boosting overall revenue."
+  },
+  {
+   "t": "p",
+   "html": "<b> Additionally, the widget&#x27;s conversion rate was 40X higher than the replaced banners, thanks to its high targeting precision for users likely to convert </b>"
+  },
+  {
+   "t": "img",
+   "src": "./site/cases/m/b8277761b6.png",
+   "size": "bleed"
+  },
+  {
+   "t": "h",
+   "text": "Feedback and suggestions from internal users"
+  },
+  {
+   "t": "img",
+   "src": "./site/cases/m/5e880f4e1e.png",
+   "size": "bleed"
+  },
+  {
+   "t": "p",
+   "html": "Along the whole time of experiment we collected some qualitative data from internal users as well which became a foundation of our next step to the project."
+  },
+  {
+   "t": "img",
+   "src": "./site/cases/m/55f3a18066.png",
+   "size": "bleed"
+  },
+  {
+   "t": "img",
+   "src": "./site/cases/m/918b39f698.png",
+   "size": "bleed"
+  },
+  {
+   "t": "img",
+   "src": "./site/cases/m/2c08b095bf.png",
+   "size": "bleed"
+  },
+  {
+   "t": "img",
+   "src": "./site/cases/m/2fece80134.png",
+   "size": "bleed"
+  },
+  {
+   "t": "img",
+   "src": "./site/cases/m/ddfd39285b.png",
+   "size": "bleed"
+  },
+  {
+   "t": "img",
+   "src": "./site/cases/m/2e57196a97.png",
+   "size": "bleed"
+  },
+  {
+   "t": "h",
+   "text": "That&#x27;s all folks"
+  }
+ ]
+}

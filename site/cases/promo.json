@@ -1,0 +1,172 @@
+{
+ "key": "promo",
+ "title": "Kunal Satpal | Case Study - Promo Zone",
+ "blocks": [
+  {
+   "t": "img",
+   "src": "./site/cases/m/fe0ed5eb7d.png",
+   "size": "bleed"
+  },
+  {
+   "t": "h",
+   "text": "The start of my initiative"
+  },
+  {
+   "t": "p",
+   "html": "When I joined GoFood&#x27;s growth team at the end of 2022, I was tasked with enhancing promo perception. However, as I began my work, <b>I made some surprising discoveries that led us in an entirely new direction.</b>"
+  },
+  {
+   "t": "img",
+   "src": "./site/cases/m/8a84baf2be.png",
+   "size": "text"
+  },
+  {
+   "t": "h",
+   "text": "Insights that sparked the change"
+  },
+  {
+   "t": "p",
+   "html": "Through our research and data analysis, I uncovered several insights that revealed the root causes behind user drop-offs and low conversions within the promo funnels."
+  },
+  {
+   "t": "img",
+   "src": "./site/cases/m/a439890881.png",
+   "size": "large"
+  },
+  {
+   "t": "h3",
+   "text": "1. Indonesia is a dominant budget sensitive market"
+  },
+  {
+   "t": "p",
+   "html": "Nearly <b>50% of GoFood orders involved a discount</b>, revealing a substantial segment. Within this group, we identified <b>&#x27;Value Eaters&#x27; as our primary users</b>."
+  },
+  {
+   "t": "img",
+   "src": "./site/cases/m/e4be2e07d9.png",
+   "size": "large"
+  },
+  {
+   "t": "img",
+   "src": "./site/cases/m/32a692e04f.png",
+   "size": "bleed"
+  },
+  {
+   "t": "h3",
+   "text": "2. Funnel analysis"
+  },
+  {
+   "t": "img",
+   "src": "./site/cases/m/ab07f3c163.png",
+   "size": "bleed"
+  },
+  {
+   "t": "img",
+   "src": "./site/cases/m/637bd31945.png",
+   "size": "bleed"
+  },
+  {
+   "t": "h",
+   "text": "Connecting the dots"
+  },
+  {
+   "t": "img",
+   "src": "./site/cases/m/031ccfb28d.png",
+   "size": "bleed"
+  },
+  {
+   "t": "h",
+   "text": "An artefact to gain stakeholder buy-in"
+  },
+  {
+   "t": "p",
+   "html": "To align and secure buy-in, I created a strategic artifact to visualize the vision. Starting with my PM and design managers, I gained support from the Head of Product, SLT, and key teams like marketing, ads, and platform, unifying stakeholders and driving full endorsement."
+  },
+  {
+   "t": "video",
+   "src": "./site/cases/m/27f489d9ee.mp4",
+   "size": "text"
+  },
+  {
+   "t": "img",
+   "src": "./site/cases/m/2556330ad5.png",
+   "size": "bleed"
+  },
+  {
+   "t": "h",
+   "text": "How will we reach those goals?"
+  },
+  {
+   "t": "p",
+   "html": "Transitioning from concept to execution, I focused on translating our strategic vision into detailed design specifications. By creating hypotheses for each element of the page, I ensured alignment with our goals and user needs."
+  },
+  {
+   "t": "img",
+   "src": "./site/cases/m/6b4c9bc807.png",
+   "size": "large"
+  },
+  {
+   "t": "img",
+   "src": "./site/cases/m/3e631ada55.png",
+   "size": "large"
+  },
+  {
+   "t": "img",
+   "src": "./site/cases/m/fe097928ad.png",
+   "size": "large"
+  },
+  {
+   "t": "img",
+   "src": "./site/cases/m/015bab93a4.png",
+   "size": "large"
+  },
+  {
+   "t": "h",
+   "text": "From insights to implementation"
+  },
+  {
+   "t": "p",
+   "html": "As we progressed through the project, we adopted an iterative and data-driven approach to ensure each design solution aligned with our goals. Here&#x27;s a glimpse of all the different milestones we experimented with."
+  },
+  {
+   "t": "img",
+   "src": "./site/cases/m/c218e908be.png",
+   "size": "large"
+  },
+  {
+   "t": "h",
+   "text": "Six months of testing"
+  },
+  {
+   "t": "p",
+   "html": "Over the course of six months, we engaged in extensive usability testing and A/B experiments to gather critical insights into user behavior and preferences and further improve the designs. A glimpse into some of the metrics :"
+  },
+  {
+   "t": "img",
+   "src": "./site/cases/m/0184c04852.png",
+   "size": "bleed"
+  },
+  {
+   "t": "h",
+   "text": "Overall result? Better than we expected"
+  },
+  {
+   "t": "img",
+   "src": "./site/cases/m/85fcee7281.png",
+   "size": "bleed"
+  },
+  {
+   "t": "h",
+   "text": "Next Steps"
+  },
+  {
+   "t": "p",
+   "html": "Though the final output was positive, it was critical to understand what was driving those results and formulate the next steps. Some concepts performed exceptionally well, while others led to a decline. The next steps involved utilizing all the learnings to further optimize different shuffles for various cohortsh"
+  },
+  {
+   "t": "img",
+   "src": "./site/cases/m/5be17a8765.png",
+   "size": "bleed"
+  }
+ ]
+}

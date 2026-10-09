@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Kunal Satpal mark, rebuilt as two closed solids (no seam) with padding for chrome bevels. -->
+<svg xmlns="http://www.w3.org/2000/svg" width="480" height="480" viewBox="-7.7 -8.9 48 48">
+  <rect x="0" y="1.091" width="7.68" height="28.356" rx="1.4" fill="#000"/>
+  <path fill="#000" d="M31.24,0.92 C32.01,0.92 32.64,1.55 32.64,2.32 L32.64,27.84 C32.64,28.61 32.01,29.24 31.24,29.24 L25.14,29.24 C24.87,29.24 24.62,29.13 24.44,28.93 L12.18,15.08 L24.44,1.22 C24.62,1.03 24.87,0.92 25.14,0.92 Z"/>
+</svg>

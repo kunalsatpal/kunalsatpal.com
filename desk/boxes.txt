@@ -1,0 +1,10 @@
+plant 0 246 76 94
+controller1 0 348 78 96
+controller2 32 418 100 94
+notebook 230 416 162 148
+keyboard 392 416 290 136
+glasses 808 284 114 92
+pen 946 260 78 72
+clip 934 304 36 32
+coffee 930 328 94 84
+book 838 366 154 150

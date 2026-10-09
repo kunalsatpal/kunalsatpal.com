@@ -1,0 +1,478 @@
+{
+ "key": "portfolio",
+ "title": "Working on my portfolio website",
+ "blocks": [
+  {
+   "t": "img",
+   "src": "./site/cases/m/df72d10452.gif",
+   "size": "bleed"
+  },
+  {
+   "t": "p",
+   "html": "After joining Cure.fit as an intern in 2018, I realized the importance of a portfolio that reflects not just my work, but also my approach and personality. With recruiters inundated with portfolio links, I aimed to design a captivating and concise portfolio to make the most of their limited time."
+  },
+  {
+   "t": "img",
+   "src": "./site/cases/m/29ab381f3c.png",
+   "size": "large"
+  },
+  {
+   "t": "img",
+   "src": "./site/cases/m/598682c4a9.png",
+   "size": "bleed"
+  },
+  {
+   "t": "h",
+   "text": "Why website?"
+  },
+  {
+   "t": "p",
+   "html": "There are multiple ways in which one can share a portfolio, and it can be a portfolio pdf, Behance, or Dribbble link, website etc. Where most of the online portfolios like Dribbble help designers share what they are up to, mainly focussing on visuals and UI. These platforms are perfect for reach and online presence, but most of the time, companies are not looking for such content."
+  },
+  {
+   "t": "p",
+   "html": "In my case, I decided to have a website as my portfolio for the following reasons:"
+  },
+  {
+   "t": "list",
+   "ordered": true,
+   "items": [
+    "<b>Centralized Content: -</b> Having all my content in one place makes it easier for recruiters to navigate and view my work without the need to open multiple links.",
+    "<b>Adding Personality -</b> A website allows me to present my work in a way that tells a cohesive story and reflects my personality, making a stronger impression on potential employers..",
+    "<b>Overcoming PDF Limitations -</b> PDF portfolios can be cumbersome to download, which may deter users from viewing them. A website eliminates these issues, providing a seamless browsing experience.",
+    "<b>SEO (Benefits)</b> By optimizing my website for search engines, I can attract organic traffic and increase the visibility of my portfolio to a wider audience."
+   ]
+  },
+  {
+   "t": "h",
+   "text": "Research and Exploration"
+  },
+  {
+   "t": "p",
+   "html": "I was just starting my career back then and I was good that I did my research to understand the market before jumping to explorations. Articles online really helped me know for whom to design and what to design. I studied several articles on medium, smashing design, nngroup, and other sources about designing portfolios. Checking other portfolios on the web was also a crucial part of the exploration, how they are trying to solve problems and trying to find out the reasons behind some decisions."
+  },
+  {
+   "t": "p",
+   "html": "Being on my internship, I also talked to a few designers over there to understand what they look for in a portfolio."
+  },
+  {
+   "t": "h",
+   "text": "Starting with the landing page"
+  },
+  {
+   "t": "p",
+   "html": "Making sure that users can easily navigate through your content is an essential aspect for every product. Once I was evident with the users&#x27; intent and what are the things to be focused, it wasn\u2019t tough to work on navigation."
+  },
+  {
+   "t": "p",
+   "html": "The idea was to make it simple and sweet, content being the hero and serving the purpose rightfully. I decided to follow a minimal approach for my portfolio and focus on creating the right story with a high focus on the case studies."
+  },
+  {
+   "t": "img",
+   "src": "./site/cases/m/266638cdfc.png",
+   "size": "large"
+  },
+  {
+   "t": "h",
+   "text": "Branding and Visuals"
+  },
+  {
+   "t": "p",
+   "html": "It was challenging to get sure of the visuals, it should not only give a unique personality to it but also empower the content. It took me some time and quite some iterations, but in the end, the result was satisfactory."
+  },
+  {
+   "t": "h",
+   "text": "Working on the personal page"
+  },
+  {
+   "t": "p",
+   "html": "Every page has its story and for this page the story was about my life. I wanted to make sure anyone who lands on this page gets to know my professional as well as the personal self, Who is Kunal Satpal? What he believes in? What does he enjoy?, and what matters to him the most? Everything had to be answered."
+  },
+  {
+   "t": "img",
+   "src": "./site/cases/m/80085df0d7.png",
+   "size": "large"
+  },
+  {
+   "t": "h",
+   "text": "Development Phase"
+  },
+  {
+   "t": "p",
+   "html": "I was no developer back then, it took me quite some time to perfect every part of it, but in the end, it was amazing, and I also learned a lot about development in the process. <b> <i> Thanks a lot to Praduman Goyal and Dhruv Bhanushali for helping me out with this. </i> </b>"
+  },
+  {
+   "t": "h3",
+   "text": "Installing google analytics"
+  },
+  {
+   "t": "p",
+   "html": "Three lines of code to every page and this powerful tool allowed me to analyze user behavior, track drop rates, bounce rates, exits, and session time etc. With Google Analytics, I can gain insights into different cohorts and time frames, helping me understand and optimize my website&#x27;s performance."
+  },
+  {
+   "t": "h",
+   "text": "Launch - 26th September 2018"
+  },
+  {
+   "t": "p",
+   "html": "The launch is where the real journey started; I got several messages on social media from people who liked the website and also who found bugs. I also got a handful of feedback on my website, from the readability, layout to the content."
+  },
+  {
+   "t": "img",
+   "src": "./site/cases/m/f032a90521.png",
+   "size": "bleed"
+  },
+  {
+   "t": "h",
+   "text": "Post launch"
+  },
+  {
+   "t": "p",
+   "html": "Launching was just the first step, the following section is the journey of how and why I kept on experimenting with my portfolio and what all I learned in this time."
+  },
+  {
+   "t": "p",
+   "html": "<b> What to do once it is is launched? </b>"
+  },
+  {
+   "t": "list",
+   "ordered": false,
+   "items": [
+    "By putting out your portfolio on the web and showcasing people. You\u2019ll get lots of love and feedback at the same time.",
+    "Keep it alive, present it to as many people and designers possible, know their views/feedback for the same.",
+    "Don\u2019t hesitate with the feedback and note them all."
+   ]
+  },
+  {
+   "t": "img",
+   "src": "./site/cases/m/fdb4052803.png",
+   "size": "text"
+  },
+  {
+   "t": "h",
+   "text": "December 2018: The first experiment"
+  },
+  {
+   "t": "p",
+   "html": "One significant feedback I got from my colleague Sai Nihas- \u201cThere is much description on the home page, what purpose does it serve\u201d"
+  },
+  {
+   "t": "p",
+   "html": "Considering our target users are busy individuals who are often overwhelmed with numerous websites. Having excessive text and content on the home page could lead to cognitive overload and a high risk of quick drop outs. Given their low attention span, our users needed something easily consumable to capture their interest within a few seconds."
+  },
+  {
+   "t": "img",
+   "src": "./site/cases/m/c918c0c801.png",
+   "size": "large"
+  },
+  {
+   "t": "img",
+   "src": "./site/cases/m/ab92dd6d3a.png",
+   "size": "bleed"
+  },
+  {
+   "t": "h",
+   "text": "After Math"
+  },
+  {
+   "t": "p",
+   "html": "With the help of google analytics I found that the <b>average session duration increased tremendously</b> and <b>drops from home page also reduced</b>. It was so good that I checked them thrice before jumping to conclusions."
+  },
+  {
+   "t": "img",
+   "src": "./site/cases/m/3f5c792968.png",
+   "size": "large"
+  },
+  {
+   "t": "h3",
+   "text": "Installing Hotjar in the meantime \ud83d\udd25"
+  },
+  {
+   "t": "p",
+   "html": "This website is still evolving, and with hotjar integration, the heat maps, misclicks, scroll percentage, etc. I was able to know more about the user behaviour."
+  },
+  {
+   "t": "img",
+   "src": "./site/cases/m/df3d1c0bb2.png",
+   "size": "bleed"
+  },
+  {
+   "t": "h",
+   "text": "February 2019: Projects Under NDA"
+  },
+  {
+   "t": "p",
+   "html": "In february 19 when I was looking for internships, a sudden roadblock occured, my last two projects both were under NDA and I can not share them publicly i.e. I can\u2019t put them on my website."
+  },
+  {
+   "t": "p",
+   "html": "This is when I decided to create a pass key system that will let users view the case study on the website itself if they have the <b>pass key</b>."
+  },
+  {
+   "t": "h",
+   "text": "May 2019: Insights from Hotjar \ud83d\udd25"
+  },
+  {
+   "t": "p",
+   "html": "Hotjar provided the data for the deep scroll, the miss clicks and screen recordings."
+  },
+  {
+   "t": "p",
+   "html": "With the increasing number of articles, case studies, blogs it was really tough to keep the scroll limited. Even adding one case study to the website means adding a full page, this wasn\u2019t scalable."
+  },
+  {
+   "t": "h3",
+   "text": "Introducing blog cards"
+  },
+  {
+   "t": "p",
+   "html": "small With a small stack of cards, more content can be fitted in the same screen size, description and subheading had to be removed to avoid cognitive overload. It also helped in <b>differentiating between case studies and blogs</b> moreover emphasizing on the bigger cards of case studies."
+  },
+  {
+   "t": "img",
+   "src": "./site/cases/m/b3cc0ca4e6.gif",
+   "size": "text"
+  },
+  {
+   "t": "h",
+   "text": "December 2019: Load speed and consistency"
+  },
+  {
+   "t": "p",
+   "html": "With more than a year passed, a number of things changed in my website several articles were added and now things had to be curated and images to be reduced so that website speed is not compromized. At the same time due to the lack of guidelines for imagery there was inconsistency in various cover images used across the website."
+  },
+  {
+   "t": "p",
+   "html": "Final covers look like this."
+  },
+  {
+   "t": "img",
+   "src": "./site/cases/m/50bce861c7.png",
+   "size": "large"
+  },
+  {
+   "t": "img",
+   "src": "./site/cases/m/d2d55fb57b.png",
+   "size": "bleed"
+  },
+  {
+   "t": "h",
+   "text": "March 2020: More feedback"
+  },
+  {
+   "t": "h3",
+   "text": "1. Monochrome blue theme"
+  },
+  {
+   "t": "p",
+   "html": "Designing imagery for a blue based website is not that difficult but when everyone started associating this with my identity it hit me hard. A number of people ask me if I\u2019m a big fan of blue?"
+  },
+  {
+   "t": "img",
+   "src": "./site/cases/m/486002a262.png",
+   "size": "large"
+  },
+  {
+   "t": "h3",
+   "text": "2. Passkey! what do you mean?"
+  },
+  {
+   "t": "p",
+   "html": "People got really confused with the home page asking for a passkey, without providing any context. The next page seems very unexpected."
+  },
+  {
+   "t": "img",
+   "src": "./site/cases/m/3325acebb5.png",
+   "size": "large"
+  },
+  {
+   "t": "h3",
+   "text": "3. What\u2019s there in the card?"
+  },
+  {
+   "t": "p",
+   "html": "The card still feels not big enough to some users for proper visibility of the content."
+  },
+  {
+   "t": "img",
+   "src": "./site/cases/m/cd540fc28c.png",
+   "size": "large"
+  },
+  {
+   "t": "h",
+   "text": "The solution"
+  },
+  {
+   "t": "h3",
+   "text": "1. Color neutral branding"
+  },
+  {
+   "t": "p",
+   "html": "Removed color from my brand and identity to avoid biasis and also using black to show professionalism and expertise in my work."
+  },
+  {
+   "t": "img",
+   "src": "./site/cases/m/2457d775b2.png",
+   "size": "large"
+  },
+  {
+   "t": "img",
+   "src": "./site/cases/m/7673d9bda1.png",
+   "size": "large"
+  },
+  {
+   "t": "h3",
+   "text": "2. Upfornt Input field"
+  },
+  {
+   "t": "p",
+   "html": "With the imput field upfront and the subheading it is much more clear now what is the meaning of passkey and what exactly is a protected case study."
+  },
+  {
+   "t": "img",
+   "src": "./site/cases/m/e6da2fc87a.png",
+   "size": "large"
+  },
+  {
+   "t": "h3",
+   "text": "3. Images not bound to cards"
+  },
+  {
+   "t": "p",
+   "html": "Using clear and visible images, interaction gifs to give an enhanced visual experience to the user at the same time engaging them with the content. Also opening space for a lot more creative ideas"
+  },
+  {
+   "t": "img",
+   "src": "./site/cases/m/1a084adf54.png",
+   "size": "large"
+  },
+  {
+   "t": "h",
+   "text": "Analysing solutions"
+  },
+  {
+   "t": "p",
+   "html": "So far I&#x27;ve got a good reposnse from people on the changes, It&#x27;ll still takes a few weeks to get the proper data and analyse if these changes worked or not."
+  },
+  {
+   "t": "p",
+   "html": "<b>Update 2021:</b> Launched in 2020 I saw a great increase in the CTR&#x27;s and engagement on my website. Moreover it opened to a new place for me add in more engagig content further helping me drive users forward. This portfolio also helped me get into interviews while looking out in 2022 and finally join Gojek."
+  },
+  {
+   "t": "img",
+   "src": "./site/cases/m/9c36a1a35b.png",
+   "size": "bleed"
+  },
+  {
+   "t": "p",
+   "html": "It had been quite some time since I last reviewed my portfolio. Amidst my busy schedule, I had not had the opportunity to revisit its core elements. However, when I finally took the time to assess it, I recognized some significant gaps, with the primary one being the lack of personality. While the monochrome branding had its advantages, it fell short in terms of character and individuality."
+  },
+  {
+   "t": "img",
+   "src": "./site/cases/m/b632d26511.png",
+   "size": "text"
+  },
+  {
+   "t": "p",
+   "html": "I looked at a bunch of other portfolios and started experimenting with particles, characters, illustrations, and some ideas like merging engineering with design. Another concept transformed the initial wireframe into a full website as users scrolled. Sounds great right? But I wanted more\u2014I wanted my portfolio to reflect my personality."
+  },
+  {
+   "t": "img",
+   "src": "./site/cases/m/16668b646b.png",
+   "size": "text"
+  },
+  {
+   "t": "p",
+   "html": "One day, as I was reorganizing my desk to make it more productive, it suddenly struck me. I realized that my desk contained everything I needed and also represented the kind of person I am. It was filled with games, books, notepads, pens, and coffee mug, all of which perfectly captured my interests and what brings me joy"
+  },
+  {
+   "t": "img",
+   "src": "./site/cases/m/cd61f15cb3.png",
+   "size": "text"
+  },
+  {
+   "t": "h3",
+   "text": "The New Home"
+  },
+  {
+   "t": "p",
+   "html": "During my exploration, I experimented with several variations of this idea. One concept involved showcasing a top view of a monitor that users could zoom in on while scrolling, creating an immersive experience. It was an exciting and unconventional approach that reminded me of the primary principle I established back in 2018: to keep my website simple."
+  },
+  {
+   "t": "img",
+   "src": "./site/cases/m/ed8ad84a90.png",
+   "size": "text"
+  },
+  {
+   "t": "h3",
+   "text": "But we don&#x27;t stop here"
+  },
+  {
+   "t": "p",
+   "html": "I wanted to go one level beyond and talk about what does all this meant to me, as if the idea sparked something. I knew my about page was a bit out dated. I had not looked at it since 2019. I knew what I needed to do now. UPDATE MY ABOUT PAGE"
+  },
+  {
+   "t": "h3",
+   "text": "About Page"
+  },
+  {
+   "t": "img",
+   "src": "./site/cases/m/e0bf7a7964.png",
+   "size": "text"
+  },
+  {
+   "t": "p",
+   "html": "It became evident that I needed to start afresh and rebuild my about page from the ground level. I began by outlining the key aspects that were most important to me for the about page. I primarily focused on adding a lot about my hobbies and things outside work while making sure I touch base on them and go a bit in detail. The page story:"
+  },
+  {
+   "t": "list",
+   "ordered": true,
+   "items": [
+    "Life is more than work",
+    "Lift, read, play",
+    "Repeat"
+   ]
+  },
+  {
+   "t": "img",
+   "src": "./site/cases/m/a0829602d2.png",
+   "size": "text"
+  },
+  {
+   "t": "img",
+   "src": "./site/cases/m/dd820ce1d6.png",
+   "size": "text"
+  },
+  {
+   "t": "img",
+   "src": "./site/cases/m/d212501616.png",
+   "size": "text"
+  },
+  {
+   "t": "img",
+   "src": "./site/cases/m/ba133cb0ba.gif",
+   "size": "text"
+  },
+  {
+   "t": "img",
+   "src": "./site/cases/m/09460bd589.png",
+   "size": "text"
+  },
+  {
+   "t": "h",
+   "text": "What&#x27;s next?"
+  },
+  {
+   "t": "p",
+   "html": "Working on my portfolio website is a great learning experience for me, I learned a variety of skills from branding, design to development."
+  },
+  {
+   "t": "p",
+   "html": "This website is still evolving. It excites me every time I look at data and try to figure out things that can be improved. There are a number of places where I know the experience can be improved mainly on analysing the effect of latest changes and where to take this forward."
+  },
+  {
+   "t": "p",
+   "html": "Till then stay tuned :)"
+  }
+ ]
+}

@@ -1,0 +1,14 @@
+sheet1 keyboard_l 110 112 560 215
+sheet1 notebook 805 42 452 330
+sheet1 coffee_l 112 432 262 258
+sheet2 plant_l 105 85 250 235
+sheet2 ctrl_a 455 92 318 278
+sheet2 ctrl_b 890 70 318 278
+sheet2 ctrl_c 104 444 286 204
+sheet2 glasses 432 404 268 198
+sheet2 pen 726 362 165 250
+sheet2 clip 845 578 62 70
+sheet2 books 980 374 310 334
+sheet3 keyboard_d 44 268 590 228
+sheet3 coffee_d 704 252 266 262
+sheet3 plant_d 1035 237 296 293

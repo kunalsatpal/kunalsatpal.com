@@ -1,0 +1,158 @@
+{
+ "key": "whatsapp",
+ "title": "4 hr Sprint | Whatsapp Polls",
+ "blocks": [
+  {
+   "t": "img",
+   "src": "./site/cases/m/e2601e5a53.png",
+   "size": "bleed"
+  },
+  {
+   "t": "h3",
+   "text": "Razorpay Design Assignment 2018"
+  },
+  {
+   "t": "p",
+   "html": "This case study details my Razorpay on-campus assignment, where I designed a new feature: polling in WhatsApp groups. The goal was to enable users to ask questions and gather responses from group members. The assignment was completed within one day, including 4 hours for design and 2 hours for presentation preparation."
+  },
+  {
+   "t": "img",
+   "src": "./site/cases/m/c14069a3df.png",
+   "size": "bleed"
+  },
+  {
+   "t": "img",
+   "src": "./site/cases/m/620c517750.png",
+   "size": "large"
+  },
+  {
+   "t": "h",
+   "text": "Insights from Web"
+  },
+  {
+   "t": "list",
+   "ordered": true,
+   "items": [
+    "The primary user base is aged 18\u201325, followed by 26\u201335.",
+    "WhatsApp has provided a free alternative to SMS (Short Message Services), which is often three still a metered (pay per use) service.",
+    "WhatsApp often more cost-effective than SMS, but it facilitates extensive group conversations, something that is difficult through SMS, if not impossible.",
+    "It is used widely for both personal and professional use cases. Office groups, family groups, bussiness accounts etc."
+   ]
+  },
+  {
+   "t": "h",
+   "text": "Understanding users better"
+  },
+  {
+   "t": "p",
+   "html": "To better understand user behavior, I focused on the primary age groups (18\u201325 and 26\u201335 years) and conducted interviews to explore key questions around usage, need of polls and other platforms."
+  },
+  {
+   "t": "p",
+   "html": "<b>Participants:</b> I interviewed 8 students (18-23 age), 4 relatives (26\u201335 years), and my father (46 years, extensive WhatsApp user in the service sector)."
+  },
+  {
+   "t": "p",
+   "html": "<b> Interview Questions: </b>"
+  },
+  {
+   "t": "list",
+   "ordered": true,
+   "items": [
+    "Which app did they use the most for messaging daily?",
+    "For what purpose you use WhatsApp?",
+    "What are the top active groups in your WhatsApp?",
+    "Have you ever used the poll feature in messenger or facebook?",
+    "What question did you ask or answer?"
+   ]
+  },
+  {
+   "t": "img",
+   "src": "./site/cases/m/13ee88c1c4.png",
+   "size": "bleed"
+  },
+  {
+   "t": "h3",
+   "text": "Insights Gained"
+  },
+  {
+   "t": "h",
+   "text": "Narrowing focus"
+  },
+  {
+   "t": "img",
+   "src": "./site/cases/m/368c3e3cc7.png",
+   "size": "bleed"
+  },
+  {
+   "t": "h",
+   "text": "User Stories"
+  },
+  {
+   "t": "img",
+   "src": "./site/cases/m/97ed7b801d.png",
+   "size": "text"
+  },
+  {
+   "t": "img",
+   "src": "./site/cases/m/6a59c8b0e7.png",
+   "size": "bleed"
+  },
+  {
+   "t": "img",
+   "src": "./site/cases/m/fbe4b651bf.png",
+   "size": "bleed"
+  },
+  {
+   "t": "img",
+   "src": "./site/cases/m/09f7654be4.png",
+   "size": "bleed"
+  },
+  {
+   "t": "img",
+   "src": "./site/cases/m/51d41f3244.png",
+   "size": "bleed"
+  },
+  {
+   "t": "img",
+   "src": "./site/cases/m/12d3cba6cf.png",
+   "size": "bleed"
+  },
+  {
+   "t": "img",
+   "src": "./site/cases/m/37459532c3.png",
+   "size": "bleed"
+  },
+  {
+   "t": "h3",
+   "text": "Other decisions"
+  },
+  {
+   "t": "list",
+   "ordered": false,
+   "items": [
+    "The poll is created and sent as a message on the group (similar to any other attachment uploaded by the user)",
+    "After the user choose an option, the opted option will be sent as a reply to the poll, letting others know their opinion (Such multiple messages can be grouped to avoid spamming)",
+    "The user can view the top two options, time left, the total number of options, and vote from the next screen.",
+    "The result will be declared after every person in the group has voted or the time has expired."
+   ]
+  },
+  {
+   "t": "img",
+   "src": "./site/cases/m/b17acd74db.png",
+   "size": "bleed"
+  },
+  {
+   "t": "h",
+   "text": "Assignment Outcome"
+  },
+  {
+   "t": "p",
+   "html": "My assignment was recognized as one of the top submissions, leading to further interview opportunities. This experience was highly valuable, particularly in managing a project within a constrained timeline. While several assumptions were made, I acknowledge that the final solution requires a deeper understanding of users and is not possible to do in a 4 hour window."
+  },
+  {
+   "t": "h",
+   "text": "Thank you"
+  }
+ ]
+}

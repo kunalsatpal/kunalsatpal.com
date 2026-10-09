@@ -1,0 +1,449 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Case study — Kunal Satpal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,500;0,600;1,400&family=Inter+Tight:wght@600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="./node_modules/lenis/dist/lenis.css" />
+<style>
+  /* Case study template: you've landed on a moon. The page is its surface; "Back to orbit" zooms out to home.
+     One template for every case — content comes from site/cases/<key>.json. ?c=<key>&home=<page>. */
+  :root { --c: #9fe8d2; --ink: #f4f5f8; --muted: rgba(244,245,248,.68); --faint: rgba(244,245,248,.42); --line: rgba(255,255,255,.1);
+    --regolith: #15161b; --regolith-2: #1b1d23; }
+  * { box-sizing: border-box; margin: 0; }
+  html { background: var(--regolith); }
+  body { color: var(--ink); font: 400 18px/1.7 "Inter", system-ui, sans-serif; -webkit-font-smoothing: antialiased; overflow-x: hidden; }
+  a { color: inherit; }
+  button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+  :focus-visible { outline: 2px solid var(--c); outline-offset: 3px; border-radius: 6px; }
+  .cartoon { --regolith: #191338; --regolith-2: #20184a; }
+
+  /* Zoom-out to orbit (and the matching zoom-in on arrival). */
+  .world { transform-origin: 50% 30vh; transition: transform .9s cubic-bezier(.6,.05,.25,1), filter .9s, opacity .9s; }
+  body.arriving .world { transform: scale(1.6); filter: blur(14px) brightness(1.4); opacity: 0; }
+  body.leaving .world { transform: scale(.18); filter: blur(10px); opacity: 0; }
+  body.leaving { background: #020308; }
+
+  /* ---------- Top bar ---------- */
+  .bar { position: fixed; z-index: 50; top: 20px; left: 20px; right: 20px; display: flex; justify-content: space-between; align-items: center; pointer-events: none; }
+  .bar > * { pointer-events: auto; }
+  .back { display: inline-flex; align-items: center; gap: 10px; padding: 10px 16px 10px 12px; border-radius: 16px; font-size: 15px;
+    background: rgba(14,16,24,.6); border: 1px solid rgba(255,255,255,.12); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); transition: border-color .3s; }
+  .back:hover { border-color: var(--c); }
+  .back .orb { width: 22px; height: 22px; border-radius: 50%; background: radial-gradient(circle at 34% 30%, color-mix(in srgb, var(--c) 40%, white), var(--c) 50%, color-mix(in srgb, var(--c) 40%, #05060c)); box-shadow: 0 0 12px -2px var(--c); }
+  .coords { font: 500 12px/1 "JetBrains Mono", monospace; letter-spacing: .1em; color: var(--faint); padding: 12px 14px; border-radius: 12px; background: rgba(14,16,24,.5); backdrop-filter: blur(12px); }
+  .progress { position: fixed; z-index: 51; top: 0; left: 0; height: 2px; width: 0; background: var(--c); box-shadow: 0 0 10px var(--c); }
+
+  /* ---------- Arrival: the sky above the moon ---------- */
+  .sky { position: relative; height: 100vh; min-height: 640px; overflow: hidden;
+    background: radial-gradient(120% 90% at 50% 115%, #0f1428 0%, #070910 55%, #020308 100%); }
+  .cartoon .sky { background: radial-gradient(110% 80% at 50% 110%, #22185a 0%, #140d3a 55%, #0b0724 100%); }
+  .stars { position: absolute; inset: 0; background-size: 100% 100%; opacity: .9; }
+  /* The parent planet hanging in the sky, in the company's colour. */
+  .parent { position: absolute; right: 8%; top: 12%; width: min(30vw, 320px); aspect-ratio: 1; border-radius: 50%;
+    background: radial-gradient(circle at 32% 28%, color-mix(in srgb, var(--c) 45%, white) 0 6%, var(--c) 34%, color-mix(in srgb, var(--c) 35%, #05060c) 72%, #04050a);
+    box-shadow: 0 0 120px -30px var(--c), inset -30px -30px 60px rgba(0,0,0,.6); will-change: transform; }
+  .cartoon .parent { border: 5px solid #15132a; box-shadow: 0 0 90px -30px var(--c); background: radial-gradient(circle at 32% 28%, rgba(255,255,255,.55) 0 10%, transparent 11%), var(--c); }
+  .parent::after { content: ""; position: absolute; left: -12%; right: -12%; top: 44%; height: 12%; border-radius: 50%; border: 2px solid color-mix(in srgb, var(--c) 60%, white); opacity: .45; transform: rotate(-14deg); }
+  /* The moon's horizon: a huge curved surface rising from the bottom, with craters. */
+  .horizon { position: absolute; left: -30%; right: -30%; top: 64%; height: 160vw; border-radius: 50%; will-change: transform;
+    background: radial-gradient(60% 6% at 50% 0%, rgba(255,255,255,.14), transparent 70%), var(--regolith-2);
+    box-shadow: 0 -2px 0 rgba(255,255,255,.12), 0 -40px 120px -40px color-mix(in srgb, var(--c) 30%, transparent); }
+  .horizon i { position: absolute; border-radius: 50%; background: radial-gradient(circle at 50% 40%, rgba(0,0,0,.35), rgba(0,0,0,.15) 60%, transparent 72%); box-shadow: inset 0 2px 0 rgba(255,255,255,.06); }
+  .cartoon .horizon { box-shadow: 0 -4px 0 #15132a, 0 -40px 120px -40px color-mix(in srgb, var(--c) 30%, transparent); }
+  .hero { position: absolute; left: 0; right: 0; top: 0; bottom: 38%; display: grid; place-items: center; text-align: center; padding: 100px 6vw 0; }
+  .hero .kicker { display: inline-block; color: var(--c); font-size: 14px; letter-spacing: .02em; padding: 5px 14px; border-radius: 999px; border: 1px solid color-mix(in srgb, var(--c) 45%, transparent); }
+  .hero h1 { margin-top: 18px; font: 700 clamp(40px, 5.4vw, 84px)/1.04 "Inter Tight", sans-serif; letter-spacing: -0.035em; max-width: 1000px; text-shadow: 0 4px 40px rgba(0,0,0,.5); }
+  .hero .sum { margin: 18px auto 0; max-width: 640px; color: var(--muted); font-size: 19px; line-height: 1.55; }
+  .chips { margin-top: 22px; display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+  .chips span { font-size: 14px; padding: 6px 12px; border-radius: 999px; background: rgba(255,255,255,.05); border: 1px solid var(--line); }
+  .chips b { color: var(--c); font-weight: 600; }
+  /* The cover image rests on the surface like a lander. */
+  .lander { position: absolute; left: 50%; bottom: 3%; width: min(1000px, 86vw); transform: translateX(-50%); z-index: 3; }
+  .lander img { display: block; width: auto; max-width: 100%; max-height: 36vh; margin: 0 auto; object-fit: contain; border-radius: 20px; box-shadow: 0 0 0 8px rgba(255,255,255,.05), 0 0 0 1px rgba(255,255,255,.14), 0 40px 80px -30px rgba(0,0,0,.9); }
+  .cartoon .lander img { box-shadow: 0 0 0 4px #15132a, 0 10px 0 4px #15132a; }
+  .cue { position: absolute; left: 50%; bottom: 18px; transform: translateX(-50%); z-index: 4; font: 500 12px/1 "JetBrains Mono", monospace; letter-spacing: .12em; color: var(--faint); }
+
+  /* ---------- The surface: the case study itself ---------- */
+  .surface { position: relative; background: var(--regolith-2); padding: 80px 0 140px;
+    background-image: radial-gradient(circle at 12% 8%, rgba(0,0,0,.18) 0 40px, transparent 41px), radial-gradient(circle at 88% 22%, rgba(0,0,0,.14) 0 70px, transparent 71px),
+      radial-gradient(circle at 20% 64%, rgba(0,0,0,.12) 0 90px, transparent 91px), radial-gradient(circle at 80% 86%, rgba(0,0,0,.14) 0 54px, transparent 55px); background-size: 100% 1600px; }
+  .grain { position: absolute; inset: 0; opacity: .1; mix-blend-mode: overlay; pointer-events: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
+  .layout { position: relative; max-width: 760px; margin: 0 auto; padding: 0 24px; }
+  /* Section index as survey markers. */
+  .toc { position: fixed; z-index: 20; left: 28px; top: 50%; transform: translateY(-50%); width: 190px; opacity: 0; transition: opacity .4s; list-style: none; padding: 0; font: 500 12px/1.4 "JetBrains Mono", monospace; letter-spacing: .04em; }
+  .toc li + li { margin-top: 4px; }
+  .toc a { display: flex; gap: 10px; padding: 7px 0; color: var(--faint); text-decoration: none; transition: color .25s; }
+  .toc a::before { content: ""; flex: none; width: 8px; height: 8px; margin-top: 4px; border-radius: 50%; border: 1.5px solid currentColor; transition: background .25s; }
+  .toc a.on { color: var(--ink); } .toc a.on::before { background: var(--c); border-color: var(--c); box-shadow: 0 0 8px var(--c); }
+  .body { min-width: 0; }
+  .toc.show { opacity: 1; }
+  @media (max-width: 1320px) { .toc { display: none; } }
+  .body h2 { margin-top: 90px; font: 700 clamp(30px, 3vw, 44px)/1.12 "Inter Tight", sans-serif; letter-spacing: -0.025em; scroll-margin-top: 100px; }
+  .body h2:first-child { margin-top: 0; }
+  .body h2 .no { display: block; margin-bottom: 12px; font: 500 12px/1 "JetBrains Mono", monospace; letter-spacing: .14em; color: var(--c); }
+  .body h3 { margin-top: 44px; font: 600 22px/1.3 "Inter Tight", sans-serif; letter-spacing: -0.01em; }
+  .body p { margin-top: 16px; color: var(--muted); }
+  .body p b, .body p strong { color: var(--ink); font-weight: 600; }
+  /* Images: resting on the surface in a crater-like tray, wide ones break out of the text column. */
+  .shot .tray { position: relative; border-radius: 22px; padding: 10px; background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.015));
+    border: 1px solid var(--line); box-shadow: 0 30px 60px -36px rgba(0,0,0,.9), inset 0 1px 0 rgba(255,255,255,.06); }
+  .cartoon .shot .tray { border: 3px solid #15132a; box-shadow: 0 8px 0 #15132a; background: #251c5a; }
+  .shot img, .shot video { display: block; width: 100%; height: auto; aspect-ratio: auto; object-fit: contain; border-radius: 14px; background: #f5f5f3; }
+  .shot video { max-width: 360px; margin: 0 auto; border-radius: 28px; background: #000; }
+  .shot.rise { opacity: 0; transform: translateY(30px); transition: opacity .8s cubic-bezier(.2,.8,.2,1), transform .8s cubic-bezier(.2,.8,.2,1); }
+  .shot.rise.in { opacity: 1; transform: none; }
+
+  /* Lift-off: the end of the case study. */
+  .liftoff { position: relative; margin: 120px auto 0; max-width: 760px; text-align: center; padding: 0 24px; }
+  .liftoff h2 { font: 700 clamp(30px, 3.2vw, 46px)/1.1 "Inter Tight", sans-serif; letter-spacing: -0.025em; }
+  .liftoff p { margin-top: 10px; color: var(--muted); }
+  .liftoff .row { margin-top: 26px; display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+  .liftoff .row a, .liftoff .row button { padding: 12px 20px; border-radius: 14px; border: 1px solid rgba(255,255,255,.2); font-size: 16px; text-decoration: none; }
+  .liftoff .row .primary { background: #fff; color: #050608; border-color: #fff; }
+  .cartoon .liftoff .row .primary { border: 3px solid #15132a; box-shadow: 0 5px 0 #15132a; }
+
+
+  /* ---------- The surface is pale lunar grey, like the real moon — the case images were made for light pages ---------- */
+  :root { --dust: #e7e6e2; --dust-2: #dcdad5; --rock: #1d1e22; --rock-muted: #55575e; --rock-faint: #8a8c92; }
+  .cartoon { --dust: #e6e3ef; --dust-2: #d8d3e8; --rock: #1b1640; --rock-muted: #4c4672; --rock-faint: #8a84ab; }
+  .horizon { background: radial-gradient(60% 5% at 50% 0%, rgba(255,255,255,.7), transparent 70%), var(--dust) !important;
+    box-shadow: 0 -2px 0 rgba(255,255,255,.6), 0 -50px 140px -40px color-mix(in srgb, var(--c) 40%, transparent) !important; }
+  .horizon i { background: radial-gradient(circle at 50% 38%, rgba(60,58,52,.32), rgba(60,58,52,.12) 60%, transparent 72%) !important; box-shadow: inset 0 -2px 0 rgba(255,255,255,.6) !important; }
+  .cartoon .horizon { box-shadow: 0 -4px 0 #15132a, 0 -50px 140px -40px color-mix(in srgb, var(--c) 40%, transparent) !important; }
+  .lander img { box-shadow: 0 30px 60px -20px rgba(0,0,0,.55) !important; }
+  .surface { background-color: var(--dust) !important; color: var(--rock);
+    background-image: radial-gradient(circle at 10% 6%, rgba(90,86,78,.13) 0 46px, rgba(255,255,255,.5) 47px, transparent 50px),
+      radial-gradient(circle at 92% 20%, rgba(90,86,78,.1) 0 80px, rgba(255,255,255,.45) 81px, transparent 85px),
+      radial-gradient(circle at 6% 58%, rgba(90,86,78,.09) 0 100px, rgba(255,255,255,.4) 101px, transparent 105px),
+      radial-gradient(circle at 94% 82%, rgba(90,86,78,.11) 0 60px, rgba(255,255,255,.45) 61px, transparent 65px) !important;
+    background-size: 100% 1800px !important; }
+  .surface .grain { opacity: .22; mix-blend-mode: multiply; }
+  .toc a { color: var(--rock-faint); } .toc a.on { color: var(--rock); }
+  .body h2 { color: var(--rock); } .body h2 .no { color: color-mix(in srgb, var(--c) 70%, #000); }
+  .body h3 { color: var(--rock); }
+  .body p { color: var(--rock-muted); } .body p b, .body p strong { color: var(--rock); }
+  /* Images sit straight on the surface, like samples laid out on the ground: no dark tray, a soft contact shadow. */
+  .shot .tray { padding: 0; background: none !important; border: 0 !important; box-shadow: none !important; }
+  .shot img { border-radius: 18px; background: #fff; padding: clamp(10px, 1.6vw, 22px); box-shadow: 0 1px 0 rgba(255,255,255,.8) inset, 0 24px 50px -28px rgba(40,36,30,.55), 0 2px 6px rgba(40,36,30,.08); }
+  .cartoon .shot img { border: 3px solid #15132a; box-shadow: 0 7px 0 #15132a; }
+  .liftoff h2 { color: var(--rock); } .liftoff p { color: var(--rock-muted); }
+  .liftoff .row a, .liftoff .row button { border-color: rgba(0,0,0,.18); color: var(--rock); }
+  .liftoff .row .primary { background: var(--rock); color: #fff; border-color: var(--rock); }
+  .progress { box-shadow: none; }
+
+
+  /* Image sizes follow the original pages: text-width, large (72vw, max 1100) and full-bleed (edge to edge). */
+  .shot { margin-top: 36px; }
+  .shot.large { width: min(1100px, 72vw); margin-left: calc(50% - min(550px, 36vw)); }
+  .shot.bleed { width: 100vw; margin-left: calc(50% - 50vw); margin-top: 56px; margin-bottom: 20px; }
+  .shot img { padding: 0 !important; border-radius: 14px !important; box-shadow: 0 1px 2px rgba(40,36,30,.06), 0 10px 24px -18px rgba(40,36,30,.25) !important; }
+  .shot.bleed img { border-radius: 0 !important; box-shadow: none !important; background: transparent; }
+  .cartoon .shot img { border: 2.5px solid #15132a !important; box-shadow: 0 4px 0 #15132a !important; }
+  .cartoon .shot.bleed img { border: 0 !important; border-top: 3px solid #15132a !important; border-bottom: 3px solid #15132a !important; box-shadow: none !important; }
+  @media (max-width: 760px) { .shot.large { width: calc(100vw - 24px); margin-left: calc(50% - 50vw + 12px); } }
+
+
+  /* ---------- Next moon: a window onto the next landing ---------- */
+  .liftoff { max-width: 1100px !important; }
+  .lo-k { font: 500 12px/1 "JetBrains Mono", monospace; letter-spacing: .2em; text-transform: uppercase; color: var(--rock-faint) !important; }
+  .nextmoon { margin-top: 22px; display: grid; grid-template-columns: 1.3fr 1fr; border-radius: 28px; overflow: hidden; text-decoration: none; text-align: left; color: #f4f5f8;
+    background: #07090f; box-shadow: 0 30px 70px -40px rgba(20,18,14,.7); transition: transform .5s cubic-bezier(.2,.8,.2,1), box-shadow .5s; }
+  .nextmoon:hover { transform: translateY(-6px); box-shadow: 0 40px 90px -40px rgba(20,18,14,.8), 0 0 0 2px var(--nc); }
+  .cartoon .nextmoon { border: 4px solid #15132a; box-shadow: 0 10px 0 #15132a; background: #120c33; }
+  .nm-sky { position: relative; min-height: 340px; overflow: hidden; background: radial-gradient(120% 90% at 50% 120%, color-mix(in srgb, var(--nc) 22%, #0c1022), #05060c 70%); }
+  .nm-stars { position: absolute; inset: 0; background-size: 100% 100%; opacity: .8; }
+  .nm-planet { position: absolute; right: 10%; top: 12%; width: 120px; aspect-ratio: 1; border-radius: 50%;
+    background: radial-gradient(circle at 32% 28%, color-mix(in srgb, var(--nc) 45%, white) 0 6%, var(--nc) 36%, color-mix(in srgb, var(--nc) 35%, #05060c) 74%);
+    box-shadow: 0 0 70px -16px var(--nc); transition: transform .8s cubic-bezier(.2,.8,.2,1); }
+  .nm-horizon { position: absolute; left: -20%; right: -20%; top: 70%; height: 300%; border-radius: 50%; background: var(--dust); box-shadow: 0 -2px 0 rgba(255,255,255,.5), 0 -30px 80px -30px var(--nc); }
+  .nm-cover { position: absolute; left: 50%; bottom: 8%; width: 74%; height: auto; max-height: 62%; object-fit: contain; transform: translateX(-50%); border-radius: 12px; box-shadow: 0 20px 40px -20px rgba(0,0,0,.8); transition: transform .8s cubic-bezier(.2,.8,.2,1); }
+  .nextmoon:hover .nm-planet { transform: translate(-12px, 10px) scale(1.08); }
+  .nextmoon:hover .nm-cover { transform: translateX(-50%) translateY(-8px); }
+  .nm-copy { display: flex; flex-direction: column; justify-content: center; padding: 40px; gap: 12px; }
+  .nm-k { font: 500 12px/1 "JetBrains Mono", monospace; letter-spacing: .12em; text-transform: uppercase; color: var(--nc); }
+  .nm-copy b { font: 700 clamp(28px, 2.8vw, 40px)/1.08 "Inter Tight", sans-serif; letter-spacing: -0.025em; }
+  .nm-s { color: rgba(244,245,248,.66); font-size: 16px; line-height: 1.5; }
+  .nm-go { margin-top: 10px; align-self: flex-start; padding: 12px 18px; border-radius: 14px; background: #fff; color: #07090f; font-weight: 500; font-size: 16px; }
+  .nm-go i { display: inline-block; font-style: normal; transition: transform .3s; } .nextmoon:hover .nm-go i { transform: translateX(4px); }
+  .lo-back { margin-top: 22px; font-size: 15px; color: var(--rock-muted); text-decoration: underline; text-underline-offset: 4px; }
+  @media (max-width: 760px) { .nextmoon { grid-template-columns: 1fr; } .nm-sky { min-height: 240px; } .nm-copy { padding: 26px; } }
+
+
+  /* ---------- Calmer arrival: editorial two-column, small distant planet, a thin horizon as the divider ---------- */
+  .sky { height: auto !important; min-height: 0 !important; padding: 130px 0 0; }
+  .parent { width: 220px !important; right: 9% !important; top: 120px !important; opacity: .95; }
+  .hero2 { padding-top: 30px !important; padding-bottom: 110px !important; }
+  .hero2 h1 { font-size: clamp(40px, 4.6vw, 70px) !important; }
+  .parent::after { display: none; }
+  .hero2 { position: relative; z-index: 3; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 60px; align-items: center; max-width: 1240px; margin: 0 auto; padding: 0 40px 90px; }
+  .h2-copy { text-align: left; }
+  .hero2 h1 { margin-top: 16px; font: 700 clamp(34px, 3.6vw, 54px)/1.08 "Inter Tight", sans-serif; letter-spacing: -0.03em; text-shadow: none; }
+  .hero2 .sum { margin: 14px 0 0; max-width: 46ch; font-size: 18px; text-align: left; }
+  .hero2 .chips { justify-content: flex-start; gap: 22px; margin-top: 26px; }
+  .hero2 .chips span { padding: 0; border: 0; background: none; display: grid; gap: 2px; font-size: 13.5px; color: var(--muted); }
+  .hero2 .chips b { font: 700 26px/1 "Inter Tight", sans-serif; letter-spacing: -0.02em; }
+  .lander { position: static !important; transform: none !important; width: auto !important; }
+  .lander img { width: 100% !important; height: auto !important; max-height: none !important; object-fit: contain; border-radius: 18px !important; box-shadow: 0 30px 60px -30px rgba(0,0,0,.8) !important; }
+  .horizon { position: relative !important; left: auto !important; right: auto !important; top: auto !important; height: 60px !important; width: 140%; margin-left: -20%; border-radius: 50% 50% 0 0 / 100% 100% 0 0 !important; }
+  .horizon i { display: none; }
+  @media (max-width: 900px) { .hero2 { grid-template-columns: 1fr; padding: 0 20px 60px; } .parent { display: none; } }
+
+
+  .lander .phone { width: auto !important; height: min(62vh, 560px) !important; max-height: none !important; border-radius: 0 !important; box-shadow: none !important;
+    filter: drop-shadow(0 40px 50px rgba(0,0,0,.6)) drop-shadow(0 0 60px color-mix(in srgb, var(--c) 25%, transparent)); animation: float 6s ease-in-out infinite; }
+  @keyframes float { 50% { transform: translateY(-10px) rotate(1deg); } }
+  .parent { right: 3% !important; top: 70px !important; width: 160px !important; z-index: 1; }
+  @media (max-width: 900px) { .lander .phone { height: 380px !important; } }
+  @media (prefers-reduced-motion: reduce) { .lander .phone { animation: none; } }
+
+
+  /* ---------- Alignment fixes ---------- */
+  .shot { max-width: none !important; }
+  .shot.text { width: 100%; margin-left: 0; }
+  .shot.large { width: min(1100px, 92vw); margin-left: calc(50% - min(550px, 46vw)); }
+  .shot.bleed { width: 100vw; margin-left: calc(50% - 50vw); }
+  /* Tall (portrait) images: keep them phone-sized and centred rather than column-wide. */
+  .shot img.tall { width: auto; max-width: 100%; max-height: 82vh; margin: 0 auto; }
+  /* Decorative surface craters read as stray circles — removed. */
+  .surface { background-image: none !important; }
+  /* Hero: planet sits clear of the phone; copy and phone share one centred container. */
+  .hero2 { max-width: 1180px; padding-left: 40px; padding-right: 40px; }
+  .parent { right: auto !important; left: calc(50% + 40px) !important; top: 60px !important; width: 96px !important; }
+  .lander { justify-self: end; }
+  .body h2, .body h3, .body p { max-width: 100%; }
+  @media (max-width: 900px) { .shot.large { width: 100%; margin-left: 0; } .lander { justify-self: center; } }
+
+  @media (max-width: 900px) {
+    .layout { grid-template-columns: 1fr; padding: 0 20px; } .toc { display: none; }
+    .parent { width: 40vw; right: -6%; } .coords { display: none; }
+  }
+  @media (prefers-reduced-motion: reduce) { .world, .shot.rise { transition: none; } .shot.rise { opacity: 1; transform: none; } }
+
+  /* Lists, tables and galleries from the original pages. */
+  .blist { margin: 18px 0 0; padding-left: 22px; color: var(--rock-muted, var(--muted)); }
+  .blist li { margin-top: 10px; padding-left: 4px; }
+  .blist li b { color: var(--rock, var(--ink)); }
+  ol.blist li::marker { color: var(--c); font-weight: 600; }
+  .btable { margin-top: 24px; border-radius: 16px; overflow: hidden; border: 1px solid rgba(0,0,0,.1); }
+  .br { display: grid; grid-template-columns: 180px 1fr; } .br + .br { border-top: 1px solid rgba(0,0,0,.08); }
+  .bk { padding: 16px 18px; font-weight: 600; color: var(--rock, var(--ink)); background: rgba(0,0,0,.035); }
+  .bv { padding: 16px 18px; color: var(--rock-muted, var(--muted)); font-size: .92em; line-height: 1.6; }
+  .bgallery { margin: 36px 0 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 14px; }
+  .bgallery img { width: 100%; border-radius: 14px; background: #fff; }
+  @media (max-width: 600px) { .br { grid-template-columns: 1fr; } }
+
+  .toc { display: none !important; }
+  .parent { width: 120px !important; overflow: visible;
+    background:
+      radial-gradient(circle at 30% 26%, rgba(255,255,255,.5) 0 5%, transparent 22%),
+      radial-gradient(circle at 74% 76%, rgba(2,3,8,.95) 0 26%, rgba(2,3,8,.55) 48%, transparent 66%),
+      repeating-linear-gradient(-18deg, color-mix(in srgb, var(--c) 82%, #000) 0 9%, var(--c) 9% 16%, color-mix(in srgb, var(--c) 60%, #fff) 16% 19%, color-mix(in srgb, var(--c) 70%, #000) 19% 27%) !important;
+    box-shadow: 0 0 60px -14px var(--c), inset -12px -14px 26px rgba(0,0,0,.55) !important; }
+  .parent::after { display: block !important; content: ""; position: absolute; left: -30%; right: -30%; top: 42%; height: 16%; border-radius: 50%;
+    border: 2px solid color-mix(in srgb, var(--c) 55%, white); opacity: .7; transform: rotate(-16deg); box-shadow: 0 0 0 4px color-mix(in srgb, var(--c) 18%, transparent);
+    -webkit-mask-image: linear-gradient(180deg, transparent 47%, #000 47%); mask-image: linear-gradient(180deg, transparent 47%, #000 47%); }
+  .cartoon .parent { border: 4px solid #15132a; }
+
+  /* Two forward moons side by side: phone on the moon, copy below. */
+  .nextmoons { margin-top: 22px; display: grid; grid-template-columns: 1fr 1fr; gap: 22px; }
+  .nextmoons .nextmoon { margin-top: 0; grid-template-columns: 1fr; }
+  .nextmoons .nm-sky { min-height: 260px; }
+  .nextmoons .nm-cover.phone { left: 50%; bottom: -10%; width: auto; height: 92%; max-height: none; border-radius: 0; box-shadow: none; filter: drop-shadow(0 20px 24px rgba(0,0,0,.6)); }
+  .nextmoons .nm-planet { width: 80px; right: 8%; top: 10%; }
+  .nextmoons .nm-horizon { top: 76%; }
+  .nextmoons .nm-copy { padding: 26px 28px 28px; }
+  .nextmoons .nm-copy b { font-size: clamp(22px, 2vw, 28px); }
+  @media (max-width: 760px) { .nextmoons { grid-template-columns: 1fr; } }
+
+  /* Forward cards v2: calm glow, small banded planet, phone rising from the bottom edge. */
+  .nextmoons .nm-sky { min-height: 300px; background: radial-gradient(70% 90% at 50% 100%, color-mix(in srgb, var(--nc) 32%, #0b0d14), #07080d 70%) !important; }
+  .nextmoons .nm-horizon { display: none; }
+  .nextmoons .nm-stars { opacity: .5; }
+  .nextmoons .nm-planet { width: 44px !important; right: 9% !important; top: 12% !important; box-shadow: 0 0 24px -6px var(--nc) !important;
+    background: radial-gradient(circle at 30% 26%, rgba(255,255,255,.45) 0 6%, transparent 24%),
+      radial-gradient(circle at 74% 76%, rgba(2,3,8,.9) 0 24%, transparent 62%),
+      repeating-linear-gradient(-18deg, color-mix(in srgb, var(--nc) 80%, #000) 0 10%, var(--nc) 10% 18%, color-mix(in srgb, var(--nc) 70%, #000) 18% 28%) !important; }
+  .nextmoons .nm-cover.phone { bottom: auto !important; top: 16%; height: 120% !important; transform: translateX(-50%) rotate(-6deg) !important;
+    filter: drop-shadow(0 30px 30px rgba(0,0,0,.6)); transition: transform .7s cubic-bezier(.2,.8,.2,1); }
+  .nextmoons .nextmoon:hover .nm-cover.phone { transform: translateX(-50%) rotate(-2deg) translateY(-14px) !important; }
+  .nextmoons .nm-sky::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 30%; background: linear-gradient(transparent, #07080d); pointer-events: none; }
+  .nextmoons .nm-copy { background: #07080d; }
+  .nextmoons .nextmoon { background: #07080d; }
+  .parent { display: none !important; }  /* dropped: the header reads cleaner without it */
+  .lander .heroimg { width: min(640px, 46vw) !important; height: auto !important; border-radius: 14px !important; box-shadow: 0 0 0 1px rgba(255,255,255,.12), 0 40px 80px -30px rgba(0,0,0,.9) !important; animation: float 7s ease-in-out infinite; }
+  .nextmoons .nm-cover.wideshot { left: 50%; top: 16%; bottom: auto; width: 86%; height: auto; max-height: none; transform: translateX(-50%) rotate(-3deg); border-radius: 10px; box-shadow: 0 24px 40px -18px rgba(0,0,0,.8); }
+
+  /* ---------- Native blocks (rebuilt case studies) ---------- */
+  .bstats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 14px; margin-top: 30px; }
+  .bstats div { padding: 20px 20px 18px; border-radius: 18px; background: #fff; box-shadow: 0 1px 2px rgba(40,36,30,.06); }
+  .bstats b { display: block; font: 700 clamp(30px, 3.2vw, 44px)/1 "Inter Tight", sans-serif; letter-spacing: -0.03em; color: color-mix(in srgb, var(--c) 60%, #0b2a1d); }
+  .bstats span { display: block; margin-top: 8px; font-size: 14.5px; line-height: 1.4; color: var(--rock-muted); }
+  .bquotes { columns: 2 280px; column-gap: 14px; margin-top: 30px; }
+  .bquotes figure { break-inside: avoid; margin: 0 0 14px; padding: 20px 22px; border-radius: 18px; background: #fff; box-shadow: 0 1px 2px rgba(40,36,30,.06); }
+  .bquotes blockquote { margin: 0; font: 500 17px/1.5 "Inter", sans-serif; color: var(--rock); }
+  .bquotes blockquote::before { content: "“"; display: block; font: 700 40px/0.6 "Inter Tight", sans-serif; color: var(--c); margin-bottom: 8px; }
+  .bquotes figcaption { margin-top: 12px; font: 500 12px/1 "JetBrains Mono", monospace; letter-spacing: .08em; text-transform: uppercase; color: var(--rock-faint); }
+  .bpull { margin: 46px 0 10px !important; font: 700 clamp(26px, 2.8vw, 38px)/1.2 "Inter Tight", sans-serif !important; letter-spacing: -0.02em; color: var(--rock) !important; }
+  .bpull em { font-style: normal; background: linear-gradient(transparent 58%, color-mix(in srgb, var(--c) 40%, transparent) 58%); }
+  .bnotes { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-top: 30px; }
+  .bnotes div { padding: 18px 18px 22px; border-radius: 4px 4px 18px 4px; font: 500 15.5px/1.45 "Inter", sans-serif; color: #2a2414; background: #fff4b8; transform: rotate(var(--r)); box-shadow: 0 10px 20px -14px rgba(60,50,20,.6); }
+  .bnotes div:nth-child(3n+2) { background: #d6f2e3; } .bnotes div:nth-child(3n) { background: #dfe6ff; }
+  .btrack { list-style: none; padding: 0; margin: 34px 0 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 0; counter-reset: m; position: relative; }
+  .btrack::before { content: ""; position: absolute; left: 16px; right: 16px; top: 15px; height: 2px; background: linear-gradient(90deg, var(--c), color-mix(in srgb, var(--c) 30%, transparent)); }
+  .btrack li { position: relative; padding: 46px 18px 0 0; counter-increment: m; }
+  .btrack li::before { content: counter(m); position: absolute; left: 0; top: 0; width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center;
+    font: 700 14px/1 "Inter Tight", sans-serif; color: #fff; background: color-mix(in srgb, var(--c) 70%, #0b2a1d); box-shadow: 0 0 0 5px var(--dust); }
+  .btrack b { display: block; font: 600 18px/1.25 "Inter Tight", sans-serif; color: var(--rock); }
+  .btrack span { display: block; margin-top: 6px; font-size: 15px; line-height: 1.5; color: var(--rock-muted); }
+  .bcompare { display: grid !important; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 34px; }
+  .bcompare figure { margin: 0; } .bcompare span { display: block; margin-bottom: 10px; font: 500 12px/1 "JetBrains Mono", monospace; letter-spacing: .12em; text-transform: uppercase; color: var(--rock-faint); }
+  .bcompare img { width: 100%; border-radius: 12px; box-shadow: 0 1px 2px rgba(40,36,30,.08), 0 14px 30px -20px rgba(40,36,30,.4); }
+  @media (max-width: 760px) { .btrack, .bcompare { grid-template-columns: 1fr; } .btrack::before { display: none; } .btrack li { padding-top: 44px; margin-bottom: 18px; } }
+</style>
+</head>
+<body class="arriving">
+<div class="progress" id="progress"></div>
+<div class="bar">
+  <button class="back" id="back"><span class="orb"></span>Back to orbit</button>
+  <span class="coords" id="coords"></span>
+</div>
+
+<div class="world" id="world">
+  <header class="sky" id="sky">
+    <div class="stars" id="stars"></div>
+    <div class="parent" id="parent"></div>
+    <div class="hero2">
+      <div class="h2-copy"><span class="kicker" id="kicker"></span><h1 id="title"></h1><p class="sum" id="sum"></p><div class="chips" id="chips"></div></div>
+      <div class="lander" id="lander"></div>
+    </div>
+    <div class="horizon" id="horizon"></div>
+  </header>
+
+  <main class="surface">
+    <div class="grain"></div>
+    <div class="layout">
+      <ol class="toc" id="toc"></ol>
+      <article class="body" id="body"></article>
+    </div>
+    <section class="liftoff">
+      <p class="lo-k">Surface explored</p>
+      <div class="nextmoons" id="nextMoons"></div>
+      <button class="lo-back" id="back2">or go back to orbit</button>
+    </section>
+  </main>
+</div>
+
+<script type="module">
+  import Lenis from './node_modules/lenis/dist/lenis.mjs'
+  const $ = id => document.getElementById(id)
+  const q = new URLSearchParams(location.search)
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches
+  const HOME = /^cinematic-(proof|cartoon)$/.test(q.get('home') || '') ? q.get('home') : 'cinematic-proof'
+  if (HOME === 'cinematic-cartoon') document.body.classList.add('cartoon')
+
+  // Which planet each case belongs to (for colour and where "Back to orbit" lands you).
+  const META = {
+    promo:              { title: 'Solving for promo discovery', planet: 'gojek',   c: '#3fe05a', kicker: 'Gojek · GoFood growth', summary: 'Streamlining the promo journey, leading to 4% incremental conversions and 5× ad revenue.', chips: [['4%', 'session conversions'], ['5×', 'ad revenue'], ['6', 'months of testing']] },
+    Fitclub:            { title: 'Designing for engagement: Fitclub V2', planet: 'cult',    c: '#ff5a85', kicker: 'Cult.fit', summary: 'Fitclub V2, a loyalty program built to lift retention and cross-sell products.', chips: [['V2', 'loyalty program'], ['Gamified', 'rewards']] },
+    cart_abandonment:   { title: 'Solving for cart abandonment', planet: 'cult',    c: '#ff5a85', kicker: 'Cult.fit', summary: 'Designing to bring people back on day two and after, once they have left a cart behind.', chips: [['Day 2+', 'recovery'], ['Nudges', 'and reminders']] },
+    Pibit:              { title: 'Starting my design journey with Pibit', planet: 'galaxy',  c: '#ffa45a', kicker: 'Pibit · Writing', summary: 'Starting my design journey as a founding product designer.', chips: [] },
+    portfolio:          { title: 'Designing and iterating my portfolio', planet: 'writing', c: '#9fe8d2', kicker: 'Writing · Process', summary: 'Designing and iterating my portfolio website.', chips: [] },
+    Internship_curefit: { title: 'My experience at Cure.fit', planet: 'writing', c: '#ff8fb0', kicker: 'Writing · Career', summary: 'What two internships at Cure.fit taught me.', chips: [] },
+    whatsapp:           { title: 'A 4-hour sprint: WhatsApp Polls', planet: 'writing', c: '#7fd6ff', kicker: 'Writing · Sprint', summary: 'A 4-hour design sprint: WhatsApp Polls.', chips: [] },
+  }
+  const ORDER = ['promo', 'Fitclub', 'cart_abandonment']  // case studies only; blogs have their own template
+  const key = META[q.get('c')] ? q.get('c') : 'promo', meta = META[key]
+  document.documentElement.style.setProperty('--c', meta.c)
+
+  // ---------- Sky ----------
+  function starTile(seed, n) {
+    let r = seed; const rnd = () => (r = (r * 16807) % 2147483647) / 2147483647
+    let c = ''
+    for (let i = 0; i < n; i++) c += `<circle cx="${(rnd() * 1600).toFixed(1)}" cy="${(rnd() * 900).toFixed(1)}" r="${(0.4 + rnd() * 1.2).toFixed(2)}" fill="#fff" fill-opacity="${(0.25 + rnd() * 0.6).toFixed(2)}"/>`
+    return `url("data:image/svg+xml,${encodeURIComponent(`<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1600 900' preserveAspectRatio='xMidYMid slice'>${c}</svg>`)}")`
+  }
+  $('stars').style.backgroundImage = starTile(17, 160)
+  // Craters along the horizon.
+  const hz = $('horizon')
+  ;[[44, 1.2, 70], [52, 2.4, 38], [37, 3.6, 46], [61, 1.6, 54], [48, 5, 90], [56, 4.2, 30], [41, 6.6, 60], [66, 3, 26]].forEach(([x, y, s]) => {
+    const i = document.createElement('i'); i.style.left = x + '%'; i.style.top = y + '%'; i.style.width = s + 'px'; i.style.height = (s * .38) + 'px'; hz.appendChild(i) })
+
+  // ---------- Content ----------
+  const data = await fetch(`./site/cases/${key}.json`).then(r => r.json())
+  const blocks = data.blocks.slice()
+  const coverIdx = blocks.findIndex(b => b.t === 'img')
+  const cover = coverIdx === 0 || coverIdx === 1 ? blocks.splice(coverIdx, 1)[0] : null
+  const firstH = blocks.find(b => b.t === 'h')
+  document.title = `${meta.title} — Kunal Satpal`
+  $('kicker').textContent = meta.kicker
+  $('title').textContent = meta.title
+  $('sum').textContent = meta.summary
+  $('chips').innerHTML = meta.chips.map(([b, t]) => `<span><b>${b}</b>${t}</span>`).join('')
+  // The final design, as a phone floating in the sky on the right (cut from the original cover).
+  $('lander').innerHTML = meta.hero ? `<img class="heroimg" src="${meta.hero}" alt="Final design" />` : `<img class="phone" src="./site/cases/media/phone_${key}.png" alt="Final design" onerror="this.remove()" />`
+  $('coords').textContent = `SURFACE · ${key.toUpperCase().replace(/_/g, ' ')}`
+
+  const body = $('body'), toc = $('toc'); let n = 0
+  blocks.forEach(b => {
+    if (b.t === 'h') { n++; const id = 's' + n
+      body.insertAdjacentHTML('beforeend', `<h2 id="${id}"><span class="no">${String(n).padStart(2, '0')}</span>${b.text}</h2>`)
+      toc.insertAdjacentHTML('beforeend', `<li><a href="#${id}">${b.text}</a></li>`) }
+    else if (b.t === 'h3') body.insertAdjacentHTML('beforeend', `<h3>${b.text}</h3>`)
+    else if (b.t === 'stats') body.insertAdjacentHTML('beforeend', `<div class="bstats">${b.items.map(([n, l]) => `<div><b>${n}</b><span>${l}</span></div>`).join('')}</div>`)
+    else if (b.t === 'quotes') body.insertAdjacentHTML('beforeend', `<div class="bquotes">${b.items.map(([q, who]) => `<figure><blockquote>${q}</blockquote><figcaption>${who}</figcaption></figure>`).join('')}</div>`)
+    else if (b.t === 'pull') body.insertAdjacentHTML('beforeend', `<p class="bpull">${b.html}</p>`)
+    else if (b.t === 'notes') body.insertAdjacentHTML('beforeend', `<div class="bnotes">${b.items.map((x, i) => `<div style="--r:${[-2, 1.5, -1, 2, -1.5, 1][i % 6]}deg">${x}</div>`).join('')}</div>`)
+    else if (b.t === 'track') body.insertAdjacentHTML('beforeend', `<ol class="btrack">${b.items.map(([t, d]) => `<li><b>${t}</b><span>${d}</span></li>`).join('')}</ol>`)
+    else if (b.t === 'compare') body.insertAdjacentHTML('beforeend', `<div class="bcompare shot large"><figure><span>${b.labels[0]}</span><img src="${b.a}" alt="" loading="lazy" /></figure><figure><span>${b.labels[1]}</span><img src="${b.b}" alt="" loading="lazy" /></figure></div>`)
+    else if (b.t === 'list') body.insertAdjacentHTML('beforeend', `<${b.ordered ? 'ol' : 'ul'} class="blist">${b.items.map(x => `<li>${x}</li>`).join('')}</${b.ordered ? 'ol' : 'ul'}>`)
+    else if (b.t === 'table') body.insertAdjacentHTML('beforeend', `<div class="btable">${b.rows.map(r => `<div class="br"><div class="bk">${r[0] || ''}</div><div class="bv">${r.slice(1).join(' ')}</div></div>`).join('')}</div>`)
+    else if (b.t === 'gallery') body.insertAdjacentHTML('beforeend', `<div class="bgallery">${b.srcs.map(x => `<img src="${x}" alt="" loading="lazy" />`).join('')}</div>`)
+    else if (b.t === 'p') body.insertAdjacentHTML('beforeend', `<p>${b.html}</p>`)
+    else if (b.t === 'img') body.insertAdjacentHTML('beforeend', `<figure class="shot rise ${b.size || 'large'}"><div class="tray"><img src="${b.src}" alt="" loading="lazy" /></div></figure>`)
+    else if (b.t === 'video') body.insertAdjacentHTML('beforeend', `<figure class="shot rise"><div class="tray"><video src="${b.src}" muted loop playsinline autoplay controls></video></div></figure>`)
+  })
+
+  // Two forward moons: windows onto the other case studies.
+  const nexts = ORDER.filter(k => k !== key).slice(0, 2)
+  $('nextMoons').innerHTML = nexts.map((k, i) => `<a class="nextmoon" href="./case.html?c=${k}&home=${HOME}" style="--nc:${META[k].c}">
+      <span class="nm-sky"><span class="nm-stars" style="background-image:${starTile(41 + i * 13, 50)}"></span><span class="nm-planet"></span><span class="nm-horizon"></span><img class="nm-cover" data-k="${k}" alt="" /></span>
+      <span class="nm-copy"><span class="nm-k">${i ? 'Another moon' : 'Next moon'} · ${META[k].kicker}</span><b>${META[k].title}</b><span class="nm-s">${META[k].summary}</span><span class="nm-go">Land here <i>→</i></span></span></a>`).join('')
+  document.querySelectorAll('.nm-cover').forEach(im => { const h = META[im.dataset.k].hero; if (h) { im.src = h; im.classList.add('wideshot') } else { im.src = `./site/cases/media/phone_${im.dataset.k}.png`; im.classList.add('phone') } })
+  document.querySelectorAll('.nextmoon').forEach(a => a.addEventListener('click', e => { if (reduce) return; e.preventDefault(); document.body.classList.add('leaving'); setTimeout(() => location.href = a.href, 820) }))
+
+  // ---------- Motion ----------
+  let lenis = null
+  if (!reduce) { lenis = new Lenis({ lerp: 0.08, smoothWheel: true, anchors: { offset: -90 } }); const raf = t => { lenis.raf(t); requestAnimationFrame(raf) }; requestAnimationFrame(raf) }
+  requestAnimationFrame(() => requestAnimationFrame(() => document.body.classList.remove('arriving')))
+  body.querySelectorAll('.shot img').forEach(im => { const tag = () => { if (im.naturalHeight > im.naturalWidth * 1.15) im.classList.add('tall') }; im.complete ? tag() : im.addEventListener('load', tag) })
+  const io = new IntersectionObserver(es => es.forEach(e => e.isIntersecting && (e.target.classList.add('in'), io.unobserve(e.target))), { rootMargin: '0px 0px -10% 0px' })
+  document.querySelectorAll('.shot.rise').forEach(el => io.observe(el))
+  const heads = [...body.querySelectorAll('h2')], links = [...toc.querySelectorAll('a')]
+  addEventListener('scroll', () => {
+    const y = scrollY, H = innerHeight
+    // Descent: the parent planet sinks, the horizon flattens as you drop to the surface.
+    $('parent').style.transform = `translateY(${y * 0.25}px)`
+    $('progress').style.width = (y / (document.documentElement.scrollHeight - H) * 100) + '%'
+    let cur = -1; heads.forEach((h, i) => { if (h.getBoundingClientRect().top < H * .35) cur = i })
+    links.forEach((a, i) => a.classList.toggle('on', i === cur))
+    toc.classList.toggle('show', y > H * .8)
+  }, { passive: true })
+
+  // ---------- Back to orbit: zoom out, then land on home at this case's planet ----------
+  function toOrbit(e) {
+    e?.preventDefault()
+    const url = `./${HOME}.html?from=${meta.planet}`
+    if (reduce) { location.href = url; return }
+    lenis?.stop(); document.body.classList.add('leaving'); setTimeout(() => location.href = url, 820)
+  }
+  $('back').addEventListener('click', toOrbit); $('back2').addEventListener('click', toOrbit)
+  addEventListener('keydown', e => { if (e.key === 'Escape') toOrbit() })
+  addEventListener('pageshow', e => { if (e.persisted) document.body.classList.remove('leaving') })
+  if (q.has('y')) { lenis?.destroy(); document.querySelectorAll('.shot.rise').forEach(el => el.classList.add('in')); const w = $('world'); w.style.transition = 'none'; const yy = q.get("y") === "end" ? document.documentElement.scrollHeight - innerHeight : +q.get("y"); setTimeout(() => w.style.transform = `translateY(${-(q.get("y") === "end" ? document.documentElement.scrollHeight - innerHeight : yy)}px)`, 600) }  // preview helper (headless can't scroll)
+</script>
+</body>
+</html>

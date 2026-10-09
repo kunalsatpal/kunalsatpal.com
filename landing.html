@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Kunal Satpal — Product Designer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=Poppins:wght@600&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg: #09090a; --ink: #f2f1ee; --muted: #8d8c88; --line: #1f1f21; --card: #111113;
+    --accent: #c9d4ff;
+  }
+  * { box-sizing: border-box; margin: 0; }
+  html { background: var(--bg); }
+  body { color: var(--ink); font: 400 16px/1.55 "Inter", system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+  a { color: inherit; text-decoration: none; }
+  .wrap { max-width: 1280px; margin: 0 auto; padding: 0 56px; }
+
+  /* Nav */
+  nav { display: flex; align-items: center; justify-content: space-between; height: 88px; }
+  .brand { display: flex; align-items: center; gap: 12px; font: 600 15px/1 "Poppins", sans-serif; letter-spacing: .04em; }
+  .brand svg { height: 22px; width: auto; }
+  .links { display: flex; gap: 36px; align-items: center; font-size: 14px; color: var(--muted); }
+  .links a:hover { color: var(--ink); }
+  .cta { color: var(--ink) !important; border: 1px solid #2c2c2f; padding: 10px 18px; border-radius: 999px; }
+  .cta .dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: #5be38a; margin-right: 8px; box-shadow: 0 0 10px #5be38a; }
+
+  /* Hero */
+  .hero { position: relative; display: grid; grid-template-columns: 1.15fr 1fr; align-items: center; min-height: min(calc(100vh - 88px), 780px); gap: 24px; }
+  .eyebrow { font-size: 13px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); margin-bottom: 28px; }
+  h1 { font: 400 clamp(48px, 5.6vw, 84px)/1.02 "Newsreader", serif; letter-spacing: -0.025em; }
+  h1 em { font-style: italic; background: linear-gradient(100deg, #ffffff 10%, #aeb6c8 40%, #fefefe 55%, #7d8494 85%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .lede { margin-top: 32px; max-width: 520px; font-size: 18px; color: #b5b4af; }
+  .actions { margin-top: 44px; display: flex; gap: 14px; }
+  .btn { padding: 14px 24px; border-radius: 999px; font-weight: 500; font-size: 15px; }
+  .btn.primary { background: var(--ink); color: #000; }
+  .btn.ghost { border: 1px solid #2c2c2f; }
+
+  .stage { position: relative; aspect-ratio: 1; width: 100%; max-width: 560px; justify-self: end; }
+  .stage::before { content: ""; position: absolute; inset: 8%; border-radius: 50%; background: radial-gradient(closest-side, rgba(150,170,255,.16), transparent 70%); filter: blur(30px); }
+  .stage canvas, .stage .fallback { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .stage canvas { opacity: 0; transition: opacity .8s; }
+  .stage.live canvas { opacity: 1; }
+  .stage.live .fallback { opacity: 0; transition: opacity .8s; }
+  .floor { position: absolute; left: 12%; right: 12%; bottom: 6%; height: 18px; border-radius: 50%; background: radial-gradient(closest-side, rgba(0,0,0,.9), transparent); filter: blur(6px); }
+
+  /* Proof */
+  .proof { border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); display: grid; grid-template-columns: repeat(3, 1fr); }
+  .proof > div { padding: 40px 40px 40px 0; }
+  .proof > div + div { padding-left: 40px; border-left: 1px solid var(--line); }
+  .num { font: 400 56px/1 "Newsreader", serif; letter-spacing: -0.02em; }
+  .num small { font-size: 28px; color: var(--muted); }
+  .what { margin-top: 12px; color: #b5b4af; font-size: 15px; }
+  .where { margin-top: 6px; color: var(--muted); font-size: 13px; letter-spacing: .04em; }
+
+  /* Work */
+  section.work { padding: 120px 0 80px; }
+  .head { display: flex; justify-content: space-between; align-items: end; margin-bottom: 40px; }
+  h2 { font: 400 44px/1.1 "Newsreader", serif; letter-spacing: -0.02em; }
+  .head a { color: var(--muted); font-size: 14px; }
+  .grid { display: grid; grid-template-columns: 1.4fr 1fr; gap: 20px; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 20px; overflow: hidden; display: flex; flex-direction: column; }
+  .card .art { flex: 1; min-height: 300px; position: relative; overflow: hidden; }
+  .card .meta { padding: 24px 28px 28px; }
+  .tag { font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+  .card h3 { font: 500 22px/1.3 "Inter", sans-serif; margin-top: 10px; letter-spacing: -0.01em; }
+  .card p { color: var(--muted); margin-top: 8px; font-size: 15px; }
+  .stack { display: grid; gap: 20px; }
+  .stack .card .art { min-height: 180px; }
+
+  /* Abstract product art */
+  .a1 { background: radial-gradient(120% 90% at 80% 0%, #2a3350 0%, #121420 55%, #0c0d12 100%); }
+  .a2 { background: radial-gradient(120% 120% at 0% 100%, #3a2a18 0%, #17120d 60%, #0f0d0b 100%); }
+  .a3 { background: radial-gradient(120% 120% at 100% 100%, #16352b 0%, #0e1714 60%, #0b0e0d 100%); }
+  .ui { position: absolute; border-radius: 12px; background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.08); backdrop-filter: blur(8px); }
+  .bar { height: 8px; border-radius: 4px; background: rgba(255,255,255,.12); margin: 10px 14px; }
+  .bar.s { width: 40%; } .bar.m { width: 65%; } .bar.hi { background: rgba(201,212,255,.55); width: 30%; }
+
+  .clients { display: flex; justify-content: space-between; align-items: center; padding: 48px 0 80px; color: #5d5c59; font: 500 18px/1 "Inter"; letter-spacing: .02em; }
+  .clients span:first-child { font-size: 13px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <nav>
+    <a class="brand" href="#">
+      <svg viewBox="0 0 33 31" aria-hidden="true"><rect y="1.09" width="7.68" height="28.36" rx="1.4" fill="currentColor"/><path fill="currentColor" d="M31.24.92c.77 0 1.4.63 1.4 1.4v25.52c0 .77-.63 1.4-1.4 1.4h-6.1c-.27 0-.52-.11-.7-.31L12.18 15.08 24.44 1.22c.18-.19.43-.3.7-.3z"/></svg>
+      KUNAL SATPAL
+    </a>
+    <div class="links">
+      <a href="#work">Work</a><a href="#">About</a><a href="#">Writing</a><a href="#">Résumé</a>
+      <a class="cta" href="#"><span class="dot"></span>Open to conversations</a>
+    </div>
+  </nav>
+
+  <header class="hero">
+    <div>
+      <div class="eyebrow">Staff Product Designer · Bangalore</div>
+      <h1>I make complex products feel <em>simple</em>, and prove it with numbers.</h1>
+      <p class="lede">Ten years designing across healthcare, food delivery and fitness, from AI tools and design systems to growth experiments shipped to millions.</p>
+      <div class="actions">
+        <a class="btn primary" href="#work">See selected work</a>
+        <a class="btn ghost" href="#">Get in touch</a>
+      </div>
+    </div>
+    <div class="stage" id="stage">
+      <!-- Static chrome fallback: shown until the WebGPU shader is live (or forever without WebGPU). -->
+      <svg class="fallback" viewBox="-7.7 -8.9 48 48" aria-hidden="true">
+        <defs>
+          <linearGradient id="chr" x1="0" y1="0" x2="0.35" y2="1">
+            <stop offset="0" stop-color="#fdfdfd"/><stop offset=".28" stop-color="#b9bfcc"/>
+            <stop offset=".46" stop-color="#3c4048"/><stop offset=".5" stop-color="#ffb070"/>
+            <stop offset=".54" stop-color="#d9dde6"/><stop offset=".78" stop-color="#6f86b8"/>
+            <stop offset="1" stop-color="#e9ecf2"/>
+          </linearGradient>
+          <linearGradient id="rim" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#fff" stop-opacity=".95"/><stop offset=".5" stop-color="#fff" stop-opacity=".1"/><stop offset="1" stop-color="#fff" stop-opacity=".7"/>
+          </linearGradient>
+        </defs>
+        <g stroke="url(#rim)" stroke-width=".45">
+          <rect y="1.091" width="7.68" height="28.356" rx="1.4" fill="url(#chr)"/>
+          <path fill="url(#chr)" d="M31.24,0.92 C32.01,0.92 32.64,1.55 32.64,2.32 L32.64,27.84 C32.64,28.61 32.01,29.24 31.24,29.24 L25.14,29.24 C24.87,29.24 24.62,29.13 24.44,28.93 L12.18,15.08 L24.44,1.22 C24.62,1.03 24.87,0.92 25.14,0.92 Z"/>
+        </g>
+      </svg>
+      <canvas id="c"></canvas>
+      <div class="floor"></div>
+    </div>
+  </header>
+
+  <div class="proof">
+    <div><div class="num">16<small>%</small></div><div class="what">less time per member for care teams</div><div class="where">Hinge Health</div></div>
+    <div><div class="num">2.5<small>×</small></div><div class="what">promo page visits after an end-to-end redesign</div><div class="where">Gojek · GoFood</div></div>
+    <div><div class="num">70<small>%</small></div><div class="what">faster partner onboarding, 10–15 days down to 3–4</div><div class="where">Cult.fit</div></div>
+  </div>
+
+  <section class="work" id="work">
+    <div class="head"><h2>Selected work</h2><a href="#">All projects →</a></div>
+    <div class="grid">
+      <a class="card" href="#">
+        <div class="art a1">
+          <div class="ui" style="left:8%;top:14%;width:52%;height:62%"><div class="bar m"></div><div class="bar s"></div><div class="bar hi"></div><div class="bar m"></div><div class="bar s"></div></div>
+          <div class="ui" style="left:50%;top:30%;width:42%;height:52%;background:rgba(201,212,255,.07)"><div class="bar hi" style="width:55%"></div><div class="bar m"></div><div class="bar s"></div></div>
+        </div>
+        <div class="meta"><div class="tag">AI · Clinical tools</div><h3>Making AI recommendations clinicians act on</h3><p>Strategy, safety checks and the interface for next-best-action recommendations.</p></div>
+      </a>
+      <div class="stack">
+        <a class="card" href="#">
+          <div class="art a2"><div class="ui" style="left:10%;top:20%;width:36%;height:60%"><div class="bar s"></div><div class="bar hi" style="background:rgba(255,190,120,.6)"></div></div><div class="ui" style="left:52%;top:20%;width:36%;height:60%"><div class="bar m"></div><div class="bar s"></div></div></div>
+          <div class="meta"><div class="tag">Growth · Gojek</div><h3>Rebuilding GoFood promotions</h3></div>
+        </a>
+        <a class="card" href="#">
+          <div class="art a3"><div class="ui" style="left:10%;top:22%;width:80%;height:56%"><div class="bar m"></div><div class="bar hi" style="background:rgba(120,230,170,.55)"></div><div class="bar s"></div></div></div>
+          <div class="meta"><div class="tag">Systems · Cult.fit</div><h3>A marketplace that onboards in days, not weeks</h3></div>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <div class="clients"><span>Worked with</span><span>Hinge Health</span><span>Gojek</span><span>Cult.fit</span><span>IIT Roorkee</span><span>Pibit</span></div>
+</div>
+
+<script type="module">
+  import { createShader, isWebGPUSupported } from './node_modules/shaders/dist/js/bundle.js'
+  const stage = document.getElementById('stage')
+  if (isWebGPUSupported()) {
+    createShader(document.getElementById('c'), {
+      components: [{ type: 'Chrome', id: 'mark', props: {
+        shapeSdfUrl: './mark.sdf.bin', scale: 1.15,
+        bevelWidth: 0.045, bevelShape: 0.72, curvature: 0.65, waviness: 0.04,
+        environment: 1.15, envRotation: 25, softness: 0.16, spectral: 0.8,
+        dispersion: 0.4, shadows: 0.82, speed: 0.3, edgeSoftness: 0.015,
+      } }],
+    }).then(() => stage.classList.add('live')).catch(e => console.error(e))
+  }
+</script>
+</body>
+</html>

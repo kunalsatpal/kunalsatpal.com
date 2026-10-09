@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Chrome logo — kunalsatpal.com</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600&display=swap" rel="stylesheet" />
+<style>
+  :root { --bg: #0b0b0c; --panel: #151517; --line: #26262a; --text: #e8e8ea; --muted: #8a8a90; }
+  * { box-sizing: border-box; }
+  body { margin: 0; font: 13px/1.4 -apple-system, BlinkMacSystemFont, "Inter", sans-serif; color: var(--text); background: var(--panel); display: grid; grid-template-columns: 1fr 320px; height: 100vh; overflow: hidden; }
+  #stage { position: relative; background: var(--bg); display: grid; place-items: center; transition: background .2s; }
+  #lockup { display: flex; align-items: center; gap: 0; }
+  #stage canvas { width: min(70vh, 70vw - 320px); aspect-ratio: 1; display: block; transition: width .3s; }
+  #word { display: none; font: 600 clamp(28px, 5vw, 72px)/1 "Poppins", sans-serif; letter-spacing: .02em; text-transform: uppercase; white-space: nowrap; margin-left: -2%;
+    background: linear-gradient(180deg, #ffffff 0%, #c9ccd3 38%, #6d717a 52%, #e6e8ec 70%, #9a9ea8 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  body.light #word { background: linear-gradient(180deg, #4a4d55 0%, #1d1f24 45%, #000 55%, #3a3d44 100%); -webkit-background-clip: text; background-clip: text; }
+  body.lockup #stage canvas { width: min(34vh, 22vw); }
+  body.lockup #word { display: block; }
+  #stage .ref { position: absolute; left: 24px; bottom: 24px; display: flex; gap: 12px; align-items: center; color: var(--muted); font-size: 12px; }
+  #stage .ref img { height: 28px; background: #fff; padding: 4px 8px; border-radius: 4px; }
+  #err { position: absolute; inset: 0; display: none; place-items: center; text-align: center; padding: 40px; color: #ff8a8a; }
+  aside { border-left: 1px solid var(--line); overflow-y: auto; padding: 16px; }
+  h2 { font-size: 11px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin: 18px 0 8px; font-weight: 600; }
+  h2:first-child { margin-top: 0; }
+  .seg { display: flex; gap: 4px; flex-wrap: wrap; }
+  .seg button { flex: 1; background: #1f1f22; color: var(--text); border: 1px solid var(--line); border-radius: 6px; padding: 6px 8px; cursor: pointer; font: inherit; }
+  .seg button.on { background: var(--text); color: #000; }
+  label.row { display: grid; grid-template-columns: 96px 1fr 44px; gap: 8px; align-items: center; margin: 6px 0; }
+  label.row span { color: var(--muted); }
+  label.row output { text-align: right; font-variant-numeric: tabular-nums; }
+  input[type=range] { width: 100%; }
+  input[type=color] { width: 100%; height: 22px; border: 0; background: none; padding: 0; }
+  pre { background: #0e0e10; border: 1px solid var(--line); border-radius: 6px; padding: 10px; font-size: 11px; white-space: pre-wrap; word-break: break-all; }
+</style>
+</head>
+<body>
+<main id="stage">
+  <div id="lockup"><canvas id="c"></canvas><div id="word">Kunal Satpal</div></div>
+  <div id="err"></div>
+  <div class="ref">Original: <img src="./logo.svg" alt="kunalsatpal.com logo" /></div>
+</main>
+
+<aside>
+  <h2>Logo</h2>
+  <div class="seg" id="logoSeg">
+    <button data-v="mark" class="on">Mark</button>
+    <button data-v="lockup">Lockup</button>
+    <button data-v="logo">Raw SVG (thin)</button>
+  </div>
+
+  <h2>Shader</h2>
+  <div class="seg" id="typeSeg">
+    <button data-v="Chrome" class="on">Chrome</button>
+    <button data-v="LiquidMetal">Liquid metal</button>
+    <button data-v="BrushedMetal">Brushed metal</button>
+    <button data-v="Obsidian">Obsidian</button>
+    <button data-v="Holographic">Holo foil</button>
+    <button data-v="ThinFilm">Thin film</button>
+    <button data-v="Plastic">Plastic</button>
+    <button data-v="Frost">Frost</button>
+    <button data-v="Neon">Neon</button>
+    <button data-v="Voxels">Voxels</button>
+    <button data-v="Particles">Particles</button>
+    <button data-v="LightEdge">Light edge</button>
+  </div>
+  <p id="typeNote" style="color:var(--muted);margin:6px 0 0;display:none">Shown with library defaults. The sliders below only apply to Chrome.</p>
+
+  <h2>Background</h2>
+  <div class="seg" id="bgSeg">
+    <button data-v="#0b0b0c" class="on">Black</button>
+    <button data-v="#ffffff">White (site)</button>
+    <button data-v="#e9e6e1">Warm grey</button>
+  </div>
+
+  <h2>Metal</h2>
+  <div class="seg" id="presetSeg">
+    <button data-v="silver" class="on">Silver</button>
+    <button data-v="gold">Gold</button>
+    <button data-v="copper">Copper</button>
+    <button data-v="graphite">Graphite</button>
+  </div>
+  <div class="seg" style="margin-top:6px"><button id="reset">Reset to tuned</button><button id="docs">Docs defaults</button></div>
+
+  <div id="controls"></div>
+
+  <h2>Current props</h2>
+  <pre id="out"></pre>
+</aside>
+
+<script type="module">
+  // Self-contained ESM bundle shipped in the `shaders` npm package (no bundler needed).
+  import { createShader, isWebGPUSupported } from './node_modules/shaders/dist/js/bundle.js'
+
+  // mark.sdf.bin: mark rebuilt as two seamless solids. logo.sdf.bin: original SVG, for comparison.
+  const SDF = { mark: './mark.sdf.bin', lockup: './mark.sdf.bin', logo: './logo.sdf.bin' }
+
+  // Defaults from https://shaders.com/docs/components/chrome
+  const DEFAULTS = {
+    tint: '#ffffff', warmColor: '#ffa94d', coolColor: '#82a7e6',
+    scale: 1, rotation: 0,
+    bevelWidth: 0.028, bevelShape: 0.55, curvature: 0.5, waviness: 0.15,
+    environment: 1, envRotation: 0, softness: 0.3, spectral: 0.9,
+    dispersion: 0.3, shadows: 0.7, speed: 0.5, edgeSoftness: 0.05,
+  }
+
+  const PRESETS = {
+    silver:   { tint: '#ffffff', warmColor: '#ffa94d', coolColor: '#82a7e6', spectral: 0.9, shadows: 0.7 },
+    gold:     { tint: '#f3d79a', warmColor: '#ffb347', coolColor: '#c9a46a', spectral: 0.6, shadows: 0.6 },
+    copper:   { tint: '#e3a58c', warmColor: '#ff8a5c', coolColor: '#a07b8f', spectral: 0.6, shadows: 0.65 },
+    graphite: { tint: '#9a9ca3', warmColor: '#d0d4dc', coolColor: '#5b6475', spectral: 0.2, shadows: 0.9 },
+  }
+
+  const RANGES = [
+    ['scale', 0.2, 2, 0.01], ['rotation', -180, 180, 1],
+    ['bevelWidth', 0, 0.15, 0.001], ['bevelShape', 0, 1, 0.01],
+    ['curvature', 0, 1.5, 0.01], ['waviness', 0, 1, 0.01],
+    ['environment', 0, 2, 0.01], ['envRotation', -180, 180, 1],
+    ['softness', 0, 1, 0.01], ['spectral', 0, 1.5, 0.01],
+    ['dispersion', 0, 1, 0.01], ['shadows', 0, 1, 0.01],
+    ['speed', 0, 2, 0.01], ['edgeSoftness', 0, 0.2, 0.001],
+  ]
+  const COLORS = ['tint', 'warmColor', 'coolColor']
+
+  // Tuned for a chunky two-piece mark: wider machined bevel, crisper silhouette,
+  // almost no pressed-metal wobble (reads cheap on a logo), deeper contrast, slower orbit.
+  const TUNED = {
+    ...DEFAULTS,
+    scale: 0.9, bevelWidth: 0.045, bevelShape: 0.72, curvature: 0.65, waviness: 0.04,
+    environment: 1.15, envRotation: 25, softness: 0.16, spectral: 0.8,
+    dispersion: 0.4, shadows: 0.82, speed: 0.3, edgeSoftness: 0.015,
+  }
+
+  const state = { type: 'Chrome', logo: 'mark', props: { ...TUNED } }
+  const canvas = document.getElementById('c')
+  const errEl = document.getElementById('err')
+  let shader = null
+
+  // Other shaders run on their own defaults; only the shape is passed through.
+  const fullProps = () => state.type === 'Chrome'
+    ? { ...state.props, shapeSdfUrl: SDF[state.logo] }
+    : { shapeSdfUrl: SDF[state.logo] }
+
+  async function build() {
+    shader?.destroy()
+    shader = await createShader(canvas, {
+      components: [{ type: state.type, id: 'chrome', props: fullProps() }],
+    })
+    render()
+  }
+
+  function render() {
+    document.getElementById('out').textContent =
+      JSON.stringify({ type: state.type, props: fullProps() }, null, 2)
+    for (const [k] of RANGES) {
+      const el = document.getElementById(k)
+      if (el) { el.value = state.props[k]; el.nextElementSibling.value = state.props[k] }
+    }
+    for (const k of COLORS) { const el = document.getElementById(k); if (el) el.value = state.props[k] }
+  }
+
+  function set(patch) {
+    Object.assign(state.props, patch)
+    if (state.type === 'Chrome') shader?.update('chrome', patch)
+    render()
+  }
+
+  // Build controls
+  const ctr = document.getElementById('controls')
+  ctr.insertAdjacentHTML('beforeend', '<h2>Colours</h2>')
+  for (const k of COLORS) {
+    ctr.insertAdjacentHTML('beforeend',
+      `<label class="row"><span>${k}</span><input type="color" id="${k}"><output></output></label>`)
+    document.getElementById(k).addEventListener('input', e => set({ [k]: e.target.value }))
+  }
+  ctr.insertAdjacentHTML('beforeend', '<h2>Shape &amp; light</h2>')
+  for (const [k, min, max, step] of RANGES) {
+    ctr.insertAdjacentHTML('beforeend',
+      `<label class="row"><span>${k}</span><input type="range" id="${k}" min="${min}" max="${max}" step="${step}"><output></output></label>`)
+    document.getElementById(k).addEventListener('input', e => set({ [k]: parseFloat(e.target.value) }))
+  }
+
+  function seg(id, onPick) {
+    const root = document.getElementById(id)
+    root.addEventListener('click', e => {
+      const b = e.target.closest('button'); if (!b) return
+      root.querySelectorAll('button').forEach(x => x.classList.toggle('on', x === b))
+      onPick(b.dataset.v)
+    })
+  }
+  // shapeSdfUrl is compile-time, so switching logos rebuilds the shader.
+  seg('logoSeg', v => {
+    const rebuild = SDF[v] !== SDF[state.logo]
+    state.logo = v
+    document.body.classList.toggle('lockup', v === 'lockup')
+    rebuild ? build() : render()
+  })
+  document.getElementById('reset').onclick = () => set({ ...TUNED })
+  document.getElementById('docs').onclick = () => set({ ...DEFAULTS })
+  seg('bgSeg', v => { document.getElementById('stage').style.background = v; document.body.classList.toggle('light', v !== '#0b0b0c') })
+  seg('presetSeg', v => set(PRESETS[v]))
+  seg('typeSeg', v => {
+    state.type = v
+    const chrome = v === 'Chrome'
+    for (const id of ['controls', 'presetSeg']) document.getElementById(id).style.opacity = chrome ? 1 : 0.35
+    document.getElementById('typeNote').style.display = chrome ? 'none' : 'block'
+    errEl.style.display = 'none'
+    build().catch(e => fail(String(e?.stack || e)))
+  })
+
+  render()
+  const fail = msg => { errEl.style.display = 'grid'; errEl.textContent = msg; console.error(msg) }
+  if (!isWebGPUSupported()) {
+    fail('WebGPU not available — open this in Chrome, Edge or Arc (Safari 26+ also works).')
+  } else {
+    build().then(() => console.log('shader ready')).catch(e => fail(String(e?.stack || e)))
+  }
+</script>
+</body>
+</html>
