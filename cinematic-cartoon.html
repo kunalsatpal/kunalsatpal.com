@@ -1399,14 +1399,21 @@
   const params = new URLSearchParams(location.search), pinned = params.get('at')   // ?at=0..1 for previews
   const progress = () => pinned !== null ? +pinned : Math.min(1, Math.max(0, scrollY / (journey.offsetHeight - innerHeight)))
   const cards = [...document.querySelectorAll('.proof')]
+  const sceneNodes = SCENES.map(s => ({
+    scene: s.el,
+    floats: [...s.el.querySelectorAll('[data-z]')].map(el => ({ el, depth: +el.dataset.z * 0.12 })),
+  }))
   const hatsScene = SCENES.find(s => s.key === 'about'), writingScene = SCENES.find(s => s.key === 'writing'), lifeScene = SCENES.find(s => s.key === 'life')
-  let mxp = 0, myp = 0, cx = 0, cy = 0, lastIdx = -1
+  let mxp = 0, myp = 0, cx = 0, cy = 0, lastIdx = -1, lastSceneU = NaN
   addEventListener('pointermove', e => { mxp = e.clientX / innerWidth - .5; myp = e.clientY / innerHeight - .5 })
 
   let introStart = null
   let heldCard = null
   document.querySelectorAll('.proof').forEach(c => { c.addEventListener('pointerenter', () => heldCard = c); c.addEventListener('pointerleave', () => { if (heldCard === c) heldCard = null }) })
   const streaksEl = document.querySelector('.streaks')
+  const writeStyle = (el, property, value) => {
+    if (el.style[property] !== value) el.style[property] = value
+  }
   function frame(t) {
     if (introStart === null) introStart = t
     cx += (mxp - cx) * 0.05; cy += (myp - cy) * 0.05
@@ -1423,19 +1430,27 @@
     warps.forEach((w, i) => { const f = (travel + i / warps.length) % 1
       w.style.transform = `translate3d(${cx * -60}px, ${cy * -40}px, 0) scale(${0.6 + f * f * 3.4})`; w.style.opacity = Math.sin(Math.PI * f) * 0.9 })
 
-    SCENES.forEach((s, i) => {
-      let z = u - s.u                                    // route units: <0 ahead, >0 passed
-      if (i === 0 && z < 0) z = 0; if (i === SCENES.length - 1 && z > 0) z = 0
-      const approach = z < 0 ? range(-z, 0.12, 0.8) : 0, pass = z > 0 ? range(z, 0.12, 0.8) : 0
-      const opacity = (1 - approach) * (1 - pass), el = s.el
-      el.style.opacity = opacity
-      el.style.transform = `scale(${1 - approach * 0.55 + pass * 0.9})`
-      el.style.filter = opacity > 0.98 ? 'none' : `blur(${(approach * 10 + pass * 14).toFixed(1)}px)`
-      el.classList.toggle('active', opacity > 0.6)
-      el.style.visibility = opacity < 0.01 ? 'hidden' : 'visible'
-      el.querySelectorAll('[data-z]').forEach(c => { const k = +c.dataset.z * 0.12, a = z < 0 ? range(-z + k, 0.12, 0.8) : 0
-        c.style.translate = `0 ${a * 40}px`; c.style.opacity = 1 - a })
-    })
+    if (u !== lastSceneU) {
+      sceneNodes.forEach(({ scene, floats }, i) => {
+        let z = u - SCENES[i].u                          // route units: <0 ahead, >0 passed
+        if (i === 0 && z < 0) z = 0; if (i === SCENES.length - 1 && z > 0) z = 0
+        const approach = z < 0 ? range(-z, 0.12, 0.8) : 0, pass = z > 0 ? range(z, 0.12, 0.8) : 0
+        const opacity = (1 - approach) * (1 - pass)
+        writeStyle(scene, 'opacity', String(opacity))
+        writeStyle(scene, 'transform', `scale(${1 - approach * 0.55 + pass * 0.9})`)
+        writeStyle(scene, 'filter', opacity > 0.98 ? 'none' : `blur(${(approach * 10 + pass * 14).toFixed(1)}px)`)
+        const active = opacity > 0.6
+        if (scene.classList.contains('active') !== active) scene.classList.toggle('active', active)
+        const visible = opacity >= 0.01
+        if ((scene.style.visibility !== 'hidden') !== visible) scene.style.visibility = visible ? 'visible' : 'hidden'
+        floats.forEach(({ el, depth }) => {
+          const a = z < 0 ? range(-z + depth, 0.12, 0.8) : 0
+          writeStyle(el, 'translate', `0 ${a * 40}px`)
+          writeStyle(el, 'opacity', String(1 - a))
+        })
+      })
+      lastSceneU = u
+    }
 
     // HUD
     const idx = readout(u)
