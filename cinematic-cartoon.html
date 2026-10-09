@@ -1374,6 +1374,8 @@
   map.querySelectorAll('.stop').forEach(g => g.addEventListener('click', () => warpTo(+g.dataset.i)))
 
   const PS = SCENES.filter(x => x.kind === 'planet')
+  const readoutEl = $('readout')
+  let lastReadoutMarkup = ''
   function nearest(u) { let i = 0; for (let k = 0; k < SCENES.length; k++) if (Math.abs(SCENES[k].u - u) < Math.abs(SCENES[i].u - u)) i = k; return i }
   function readout(u) {
     // Nearest scene for the label; the year counts smoothly between planets.
@@ -1383,7 +1385,8 @@
     else for (let k = 0; k < PS.length - 1; k++) if (u >= PS[k].u && u < PS[k + 1].u) { const f = (u - PS[k].u) / (PS[k + 1].u - PS[k].u); year = PS[k].planet.start + f * (PS[k + 1].planet.start - PS[k].planet.start) }
     const pi = s.kind === 'planet' ? MAJOR.indexOf(s.planet) + 1 : 0
     // Years only mean something on the planets; elsewhere just name the stop.
-    $('readout').innerHTML = pi ? `<span class="y">${Math.floor(year)}</span> · <b>${s.label}</b> <i>· ${pi} of ${MAJOR.length}</i>` : s.kind === 'galaxy' ? `<span class="y">2016 – 2020</span> · <b>${s.label}</b>` : `<b>${s.label}</b>`
+    const markup = pi ? `<span class="y">${Math.floor(year)}</span> · <b>${s.label}</b> <i>· ${pi} of ${MAJOR.length}</i>` : s.kind === 'galaxy' ? `<span class="y">2016 – 2020</span> · <b>${s.label}</b>` : `<b>${s.label}</b>`
+    if (markup !== lastReadoutMarkup) { lastReadoutMarkup = markup; readoutEl.innerHTML = markup }
     return i
   }
 
