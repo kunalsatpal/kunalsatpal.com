@@ -41,6 +41,7 @@
   .stars { position: absolute; inset: 0; background-size: 100% 100%; opacity: .7; }
   .beacon { position: relative; width: 92px; height: 92px; margin: 0 auto 34px; }
   .beacon img { position: absolute; inset: 14px; width: 64px; height: 64px; border-radius: 18px; object-fit: cover; background: #fff; box-shadow: 0 0 0 1.5px color-mix(in srgb, var(--c) 70%, transparent), 0 0 30px -6px var(--c); }
+  .beacon img.pibit { background: #4c63ef; }
   .beacon i { position: absolute; inset: 0; border-radius: 50%; border: 1.5px solid var(--c); opacity: 0; animation: wave 3s ease-out infinite; }
   .beacon i:nth-child(2) { animation-delay: 1s; } .beacon i:nth-child(3) { animation-delay: 2s; }
   @keyframes wave { 0% { transform: scale(.7); opacity: .8; } 100% { transform: scale(2.6); opacity: 0; } }
@@ -121,7 +122,7 @@
   const LOGS = {
     portfolio:          { n: 1, tag: 'Process', c: '#9fe8d2', icon: './site/img/blog_portfolio.png', title: 'Designing and <em>iterating</em> my portfolio', stand: 'How this website grew up, one version at a time.' },
     Internship_curefit: { n: 2, tag: 'Career',  c: '#ff8fb0', icon: './site/img/blog_cult.jpg', title: 'My experience at <em>Cure.fit</em>', stand: 'What two internships taught me before my first full-time job.' },
-    Pibit:              { n: 3, tag: 'Career',  c: '#ffb067', icon: './site/img/blog_pibit.png', title: 'Starting my career with <em>Pibit</em>', stand: 'Being the first designer at a tiny startup.' },
+    Pibit:              { n: 3, tag: 'Career',  c: '#ffb067', icon: 'https://kunalsatpal.com/images/whatsapp/pibit-logo.png', title: 'Starting my career with <em>Pibit</em>', stand: 'Being the first designer at a tiny startup.' },
     whatsapp:           { n: 4, tag: 'Sprint',  c: '#7fd6ff', icon: './site/img/blog_whatsapp.png', title: 'A 4-hour sprint: <em>WhatsApp Polls</em>', stand: 'Designing a feature against the clock.' },
   }
   const ORDER = ['portfolio', 'Internship_curefit', 'Pibit', 'whatsapp']
@@ -137,7 +138,7 @@
   const words = data.blocks.filter(b => b.t === 'p').map(b => b.html.replace(/<[^>]+>/g, '')).join(' ').split(/\s+/).length
   const mins = Math.max(2, Math.round(words / 220))
   document.title = `${log.title.replace(/<[^>]+>/g, '')} — Kunal Satpal`
-  $('icon').src = log.icon; $('title').innerHTML = log.title; $('stand').textContent = log.stand
+  $('icon').src = log.icon; $('icon').classList.toggle('pibit', key === 'Pibit'); $('title').innerHTML = log.title; $('stand').textContent = log.stand
   const metaText = `Incoming · Log ${String(log.n).padStart(2, '0')} · ${log.tag} · ${mins} min read`
   if (reduce) $('metaLine').textContent = metaText
   else { let k = 0; const type = () => { $('metaLine').textContent = metaText.slice(0, ++k); if (k < metaText.length) setTimeout(type, 28) }; setTimeout(type, 500) }

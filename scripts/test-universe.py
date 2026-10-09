@@ -46,8 +46,13 @@ if args.baseline:
 
 b.navigate(base + '?perf')
 print(b.js("import('/scripts/test-universe-shaders.mjs').then(m=>m.testShaderLifecycle())"), flush=True)
-for width, height, mobile in [(390, 844, True), (1440, 900, False)]:
+for width, height, mobile in [(390, 844, True), (768, 1024, False), (1440, 900, False)]:
     b.call('Emulation.setDeviceMetricsOverride', {'width':width, 'height':height, 'deviceScaleFactor':3 if mobile else 1, 'mobile':mobile})
+    if mobile:
+        check(b.js("(()=>{const s=getComputedStyle(document.querySelector('nav'));return parseFloat(s.paddingTop)>=12&&parseFloat(s.paddingRight)>=14&&parseFloat(s.paddingBottom)>=12&&parseFloat(s.paddingLeft)>=14})()"), '390px: mobile navigation has roomier padding')
+        check(b.js("parseFloat(getComputedStyle(document.querySelector('nav')).rowGap)>=10"), '390px: mobile navigation has more vertical space above the toggle')
+    if width == 768:
+        check(b.js("(()=>{const s=getComputedStyle(document.querySelector('nav'));return s.padding==='12px 16px'})()"), '768px: tablet navigation has balanced padding')
     b.call('Emulation.setTouchEmulationEnabled', {'enabled':mobile})
     b.js("localStorage.removeItem('universeTheme')")
     b.navigate(base + '?perf')
@@ -112,10 +117,12 @@ for width, height, mobile in [(390, 844, True), (1440, 900, False)]:
     time.sleep(.3)
     check(b.js("(()=>{const c=document.getElementById('hatcanvas');return c.height===Math.round(c.offsetHeight*Math.min(2,devicePixelRatio))})()"), f'{width}: constellation canvas follows height-only resize')
     # Exercise the page lifecycle used for pagehide/pageshow and BFCache restoration.
+    b.js("(()=>{const c=document.getElementById('camera');c.classList.add('diving');c.style.transform='scale(6)';c.style.transformOrigin='20px 20px';c.style.filter='blur(14px)'})()")
     b.js("dispatchEvent(new PageTransitionEvent('pagehide',{persisted:true}))")
     check(b.js('universePerformance().suspended'), f'{width}: pagehide pauses rendering')
     b.js("dispatchEvent(new PageTransitionEvent('pageshow',{persisted:true}))")
     wait_for('!universePerformance().suspended')
+    check(b.js("(()=>{const c=document.getElementById('camera');return !c.classList.contains('diving')&&getComputedStyle(c).transform==='none'&&getComputedStyle(c).filter==='none'&&getComputedStyle(c).transformOrigin===`${innerWidth/2}px ${innerHeight/2}px`})()"), f'{width}: page restore resets the camera zoom')
     errors = [e for e in b.events if e.get('method') == 'Runtime.exceptionThrown']
     check(not errors, f'{width}: no uncaught browser errors')
     print(f'Passed viewport {width}x{height}', flush=True)
@@ -192,21 +199,27 @@ b.navigate(base + '?scene=galaxy&perf')
 wait_for("[...document.querySelectorAll('.mbadge img')].every(image => image.complete)")
 badges = b.js("""[...document.querySelectorAll('.mbadge')].map(badge => {
   const image = badge.querySelector('img'), b = badge.getBoundingClientRect(), i = image.getBoundingClientRect()
-  return i.left >= b.left && i.top >= b.top && i.right <= b.right && i.bottom <= b.bottom && getComputedStyle(image).objectFit === 'contain'
+  return { mark: badge.className, src: image.currentSrc, loaded: image.complete && image.naturalWidth > 0,
+    contained: i.left >= b.left && i.top >= b.top && i.right <= b.right && i.bottom <= b.bottom && getComputedStyle(image).objectFit === 'contain',
+    background: getComputedStyle(badge).backgroundColor, transform: getComputedStyle(image).transform }
 })""")
-check(len(badges) == 7 and all(badges), 'Every company logo fits inside its badge safe area')
+pibit_badge = next((badge for badge in badges if 'mark-pibit' in badge['mark']), None)
+check(len(badges) == 7 and all(badge['contained'] for badge in badges if 'mark-pibit' not in badge['mark']), 'Every earlier-stop logo fits inside its badge safe area')
+check(pibit_badge and pibit_badge['src'] == 'https://kunalsatpal.com/images/whatsapp/pibit-logo.png' and pibit_badge['loaded'] and pibit_badge['background'] == 'rgb(76, 99, 239)' and pibit_badge['transform'] == 'matrix(1.35, 0, 0, 1.35, 0, 0)', 'Earlier stops uses the blue Pibit logo at the field-note scale')
 
 b.navigate(base + '?scene=writing&perf')
 wait_for("document.querySelectorAll('.log').length === 4")
+check(b.js("document.querySelectorAll('.log-no').length === 0"), 'Field notes do not show log numbers')
 notes = b.js("""[...document.querySelectorAll('.log')].map(note => ({
   fresh: !!note.querySelector('.log-new'),
   icon: note.querySelector('.patch img').getAttribute('src'),
   fit: getComputedStyle(note.querySelector('.patch img')).objectFit,
   background: getComputedStyle(note.querySelector('.patch')).backgroundColor,
-  filter: getComputedStyle(note.querySelector('.patch img')).filter
+  filter: getComputedStyle(note.querySelector('.patch img')).filter,
+  transform: getComputedStyle(note.querySelector('.patch img')).transform
 }))""")
 check(notes[0]['fresh'] and notes[0]['icon'] == './mark.svg' and notes[0]['fit'] == 'contain', 'First field note carries the Kunal Satpal mark and New tag')
-check(notes[2]['icon'] == './site/img/marks/pibit.png' and notes[2]['fit'] == 'contain' and notes[2]['background'] == 'rgb(76, 99, 239)' and notes[2]['filter'] == 'brightness(0) invert(1)', 'Pibit field note uses the white mark on a blue badge')
+check(notes[2]['icon'] == 'https://kunalsatpal.com/images/whatsapp/pibit-logo.png' and notes[2]['fit'] == 'cover' and notes[2]['background'] == 'rgb(76, 99, 239)' and notes[2]['filter'] == 'brightness(0) invert(1)' and notes[2]['transform'] == 'matrix(1.35, 0, 0, 1.35, 0, 0)', 'Pibit field note uses the requested logo on a padded blue badge')
 
 # Legacy incoming URLs may still carry the old home parameter; every return action is canonicalized to Universe.
 b.call('Page.navigate', {'url':'http://127.0.0.1:8765/case.html?c=promo&home=cinematic-proof'})
@@ -217,6 +230,8 @@ check(True, 'Case-study Back to orbit returns to the matching Universe scene')
 
 b.call('Page.navigate', {'url':'http://127.0.0.1:8765/blog.html?c=Pibit&home=cinematic-proof'})
 wait_for("document.readyState === 'complete' && document.getElementById('title').textContent.length > 0")
+wait_for("document.getElementById('icon').complete && document.getElementById('icon').naturalWidth > 0")
+check(b.js("(()=>{const i=document.getElementById('icon');return i.currentSrc==='https://kunalsatpal.com/images/whatsapp/pibit-logo.png'&&i.classList.contains('pibit')&&getComputedStyle(i).backgroundColor==='rgb(76, 99, 239)'})()"), 'Pibit blog hero uses the requested white logo on blue')
 b.js("document.getElementById('back').click()")
 wait_for("location.pathname.endsWith('/universe.html') && !!document.querySelector('[data-scene=\"writing\"]') && document.querySelector('[data-scene=\"writing\"]').style.visibility !== 'hidden'")
 check(True, 'Field-note Back to orbit returns to the Universe writing scene')

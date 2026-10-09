@@ -38,6 +38,7 @@
   .grow { flex: 1; }
   .skip { font-size: 15px !important; padding: 6px 12px; border-radius: 12px; border: 1px dashed rgba(255,255,255,.25); }
   .contact { padding: 9px 16px; border-radius: 14px; background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.14); }
+  @media (min-width: 601px) and (max-width: 900px) { nav { padding: 12px 16px; } }
 
   /* ---------- The journey ---------- */
   .journey { position: relative; }
@@ -207,11 +208,10 @@
   .patch.brand { padding: 10px; box-sizing: border-box; }
   .patch.brand img { object-fit: contain; }
   .patch.pibit { background: #4c63ef; }
-  .patch.pibit img { box-sizing: border-box; padding: 9px; object-fit: contain; filter: brightness(0) invert(1); }
+  .patch.pibit img { object-fit: cover; transform: scale(1.35); filter: brightness(0) invert(1); }
   .log:hover .patch { transform: rotate(-12deg) scale(1.06); }
   .log-meta { display: flex; align-items: center; gap: 8px; }
   .log-new { position: absolute; top: -12px; right: 16px; padding: 6px 9px; border-radius: 999px; background: #ff5a85; color: #fff; box-shadow: 0 7px 18px -8px rgba(255,90,133,.9); font: 700 10px/1 "JetBrains Mono", monospace; letter-spacing: .08em; text-transform: uppercase; }
-  .log-no { font: 500 12px/1 "JetBrains Mono", monospace; letter-spacing: .1em; color: var(--faint); }
   .log h3 { font: 600 21px/1.25 "Inter Tight", sans-serif; letter-spacing: -0.015em; flex: 1; }
   .log-foot { display: flex; justify-content: space-between; align-items: center; font: 500 12px/1 "JetBrains Mono", monospace; letter-spacing: .08em; text-transform: uppercase; color: var(--c); }
   .log .read { color: var(--muted); text-transform: none; letter-spacing: 0; font: 500 15px/1 "Inter", sans-serif; transition: color .3s; }
@@ -501,6 +501,8 @@
   .mbadge { position: absolute; right: -6%; bottom: -4%; width: 42%; min-width: 26px; aspect-ratio: 1; overflow: hidden; border-radius: 50%; background: #fff; z-index: 2;
     box-shadow: 0 4px 12px rgba(0,0,0,.45), 0 0 0 2px color-mix(in srgb, var(--c) 60%, transparent); }
   .mbadge img { position: absolute; inset: 17%; display: block; width: 66%; height: 66%; object-fit: contain; }
+  .mbadge.mark-pibit { background: #4c63ef; }
+  .mbadge.mark-pibit img { inset: 0; width: 100%; height: 100%; object-fit: cover; transform: scale(1.35); }
   .mbadge.wide { width: 74%; aspect-ratio: 2.4; border-radius: 999px; right: -24%; }
   .mbadge.wide img { inset: 7%; width: 86%; height: 86%; }
   .mbadge.mark-img img, .mbadge.mark-cult img { transform: translateX(-5%); }
@@ -571,9 +573,9 @@
       display: grid;
       grid-template-areas: "mark sep work about spacer" "toggle toggle resume contact contact";
       grid-template-columns: auto auto auto auto 1fr;
-      gap: 4px 8px;
+      gap: 10px 8px;
       width: calc(100vw - 24px);
-      padding: 8px 10px;
+      padding: 12px 14px;
       border-radius: 18px;
       font-size: 14px;
     }
@@ -697,7 +699,7 @@ html.theme-toon .rolechip { border: 2px solid #15132a; background: #1f1757; }
   .styletoggle svg { width: 17px; height: 17px; display: block; }
   .styletoggle .st-toon svg { color: rgba(255,255,255,.55); }
   .styletoggle[aria-pressed="true"] .st-toon svg { color: #ffd36b; }
-  @media (max-width: 560px) { nav { gap: 12px !important; padding-left: 14px !important; } nav a[href*="resume"] { display: none; } .sep { display: none; } }
+  @media (max-width: 560px) { nav { gap: 12px !important; } nav a[href*="resume"] { display: none; } .sep { display: none; } }
 
   /* Pause only animation that cannot contribute visible pixels. */
   .scene.render-paused *, .scene.render-paused *::before, .scene.render-paused *::after,
@@ -1275,7 +1277,7 @@ html.theme-toon .rolechip { border: 2px solid #15132a; background: #1f1757; }
   const POSTS = [
     { t: 'Designing and iterating my portfolio', tag: 'Process', href: './blog.html?c=portfolio&home=universe', c: '#9fe8d2', icon: './mark.svg', logo: true, fresh: true },
     { t: 'My experience at Cure.fit', tag: 'Career', href: './blog.html?c=Internship_curefit&home=universe', c: '#ff8fb0', icon: './site/img/blog_cult.jpg' },
-    { t: 'Starting my career with Pibit', tag: 'Career', href: './blog.html?c=Pibit&home=universe', c: '#ffb067', icon: './site/img/marks/pibit.png', pibit: true },
+    { t: 'Starting my career with Pibit', tag: 'Career', href: './blog.html?c=Pibit&home=universe', c: '#ffb067', icon: 'https://kunalsatpal.com/images/whatsapp/pibit-logo.png', pibit: true },
     { t: 'A 4-hour sprint: WhatsApp Polls', tag: 'Sprint', href: './blog.html?c=whatsapp&home=universe', c: '#7fd6ff', icon: './site/img/blog_whatsapp.png' },
   ]
   // Mission patches: a badge in the post's colour with a small motif.
@@ -1286,10 +1288,10 @@ html.theme-toon .rolechip { border: 2px solid #15132a; background: #1f1757; }
     bolt: c => `<path d="M26 10 L 16 26 L 23 26 L 21 38 L 32 21 L 25 21 Z" fill="${c}"/>`,
   }
   const logs = $('logs')
-  POSTS.forEach((p, i) => {
+  POSTS.forEach(p => {
     const a = document.createElement('a'); a.className = 'log' + (p.fresh ? ' fresh' : ''); a.href = p.href; a.style.setProperty('--c', p.c)
     a.innerHTML = `<div class="log-top"><span class="patch${p.logo ? ' brand' : ''}${p.pibit ? ' pibit' : ''}"><img src="${p.icon}" alt="" /></span>
-      <span class="log-meta"><span class="log-no">LOG ${String(i + 1).padStart(2, '0')}</span></span></div>${p.fresh ? '<span class="log-new">New</span>' : ''}<h3>${p.t}</h3><div class="log-foot"><span>${p.tag}</span><span class="read">Read ↗</span></div>`
+      </div>${p.fresh ? '<span class="log-new">New</span>' : ''}<h3>${p.t}</h3><div class="log-foot"><span>${p.tag}</span><span class="read">Read ↗</span></div>`
     logs.appendChild(a)
   })
 
@@ -1350,10 +1352,11 @@ html.theme-toon .rolechip { border: 2px solid #15132a; background: #1f1757; }
   STOPS.forEach((st, i) => {
     const pl = st.planet && PLANETS.find(p => p.key === st.planet), m = pl && pl.moons[st.moon]
     const href = m && m.href, el = document.createElement(href ? 'a' : 'div')
+    const markImg = st.mark === 'pibit' ? 'https://kunalsatpal.com/images/whatsapp/pibit-logo.png' : `./site/img/marks/${st.mark}.png`
     if (href) el.href = href
     el.className = 'mini' + (href ? ' open' : ''); el.style.left = st.x + '%'; el.style.top = st.y + '%'
     el.style.setProperty('--c', st.c); el.style.setProperty('--s', st.size); el.style.animationDelay = `${-i * 1.3}s`
-    el.innerHTML = `<i><span class="msurf"></span><span class="mshade"></span><span class="mbadge mark-${st.mark}${st.mark === 'pipeline' ? ' wide' : ''}"><img src="./site/img/marks/${st.mark}.png" alt="" /></span></i><b>${st.name}</b>${st.years ? `<small>${st.years}</small>` : ''}<span class="tip" role="tooltip">${st.note}</span>`
+    el.innerHTML = `<i><span class="msurf"></span><span class="mshade"></span><span class="mbadge mark-${st.mark}${st.mark === 'pipeline' ? ' wide' : ''}"><img src="${markImg}" alt="" /></span></i><b>${st.name}</b>${st.years ? `<small>${st.years}</small>` : ''}<span class="tip" role="tooltip">${st.note}</span>`
     if (href) el.setAttribute('aria-label', `${st.name}: read the story`)
     // Same look as the big planets: a banded texture wrapped on a sphere, shaded from the upper left.
     el.querySelector('.msurf').style.backgroundImage = `url(${textureURL(`mini-${st.mark}.jpg`)})`
@@ -1785,7 +1788,7 @@ html.theme-toon .rolechip { border: 2px solid #15132a; background: #1f1757; }
     document.body.style.transition = 'opacity .8s'; setTimeout(() => document.body.style.opacity = 0, 300)
     setTimeout(() => location.href = a.href, 780)
   })
-  addEventListener('pageshow', e => { if (e.persisted) { navigatingAway = false; sceneSnap?.resume(); document.body.style.opacity = ''; camera.style.transform = ''; camera.style.filter = ''; lenis?.start() } })
+  addEventListener('pageshow', e => { if (e.persisted) { navigatingAway = false; sceneSnap?.resume(); document.body.style.opacity = ''; camera.classList.remove('diving'); camera.style.transform = ''; camera.style.transformOrigin = ''; camera.style.filter = ''; lenis?.start() } })
   const fromKey = params.get('from')
   if (fromKey) {
     const i = SCENES.findIndex(s => s.key === fromKey)

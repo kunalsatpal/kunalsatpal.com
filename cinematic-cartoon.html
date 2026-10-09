@@ -200,7 +200,6 @@
   .patch { width: 56px; height: 56px; border-radius: 16px; overflow: hidden; background: #fff; box-shadow: 0 0 0 1.5px color-mix(in srgb, var(--c) 70%, transparent), 0 0 24px -4px color-mix(in srgb, var(--c) 55%, transparent); transition: transform .4s; }
   .patch img { width: 100%; height: 100%; object-fit: cover; display: block; }
   .log:hover .patch { transform: rotate(-12deg) scale(1.06); }
-  .log-no { font: 500 12px/1 "JetBrains Mono", monospace; letter-spacing: .1em; color: var(--faint); }
   .log h3 { font: 600 21px/1.25 "Inter Tight", sans-serif; letter-spacing: -0.015em; flex: 1; }
   .log-foot { display: flex; justify-content: space-between; align-items: center; font: 500 12px/1 "JetBrains Mono", monospace; letter-spacing: .08em; text-transform: uppercase; color: var(--c); }
   .log .read { color: var(--muted); text-transform: none; letter-spacing: 0; font: 500 15px/1 "Inter", sans-serif; transition: color .3s; }
@@ -1290,10 +1289,10 @@
     bolt: c => `<path d="M26 10 L 16 26 L 23 26 L 21 38 L 32 21 L 25 21 Z" fill="${c}"/>`,
   }
   const logs = $('logs')
-  POSTS.forEach((p, i) => {
+  POSTS.forEach(p => {
     const a = document.createElement('a'); a.className = 'log'; a.href = p.href; a.style.setProperty('--c', p.c)
     a.innerHTML = `<div class="log-top"><span class="patch"><img src="${p.icon}" alt="" /></span>
-      <span class="log-no">LOG ${String(i + 1).padStart(2, '0')}</span></div><h3>${p.t}</h3><div class="log-foot"><span>${p.tag}</span><span class="read">Read ↗</span></div>`
+      </div><h3>${p.t}</h3><div class="log-foot"><span>${p.tag}</span><span class="read">Read ↗</span></div>`
     logs.appendChild(a)
   })
   function drawComets() {}
