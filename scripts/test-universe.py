@@ -144,5 +144,48 @@ b.call('Page.navigateToHistoryEntry', {'entryId':entry['id']})
 time.sleep(1)
 wait_for("!!window.universePerformance && !universePerformance().suspended && universePerformance().visibleScenes.includes('gojek')")
 check(b.js("document.body.style.opacity !== '0' && document.getElementById('camera').style.filter === ''"), 'Actual case-study navigation and browser Back restore the flight')
+
+# Project previews keep the complete image prominent and strip redundant badge copy.
+preview = b.js("""(() => {
+  const tip = document.querySelector('[data-scene=gojek] .moon.open .tip.big')
+  const image = tip.querySelector('img')
+  const ir = image.getBoundingClientRect()
+  return { imageWidth: image.offsetWidth, tipWidth: tip.clientWidth, renderedRatio: ir.width / ir.height,
+    naturalRatio: image.naturalWidth / image.naturalHeight,
+    result: tip.querySelector('.tip-result')?.textContent,
+    redundantTags: tip.querySelectorAll('.tip-k,.tip-go').length }
+})()""")
+check(preview['imageWidth'] == preview['tipWidth'], 'Hover preview image spans the full card content width')
+check(abs(preview['renderedRatio'] - preview['naturalRatio']) < .02, 'Hover preview shows the complete image without cropping')
+check(preview['result'] == '+4% conversions · 5× ad revenue', 'Hover preview includes the final result numbers without a label')
+check(preview['redundantTags'] == 0, 'Hover preview omits redundant company and action tags')
+
+b.call('Page.navigate', {'url':'http://127.0.0.1:8765/case.html?c=promo'})
+wait_for("document.querySelectorAll('.nextmoon').length === 2")
+cards = b.js("""[...document.querySelectorAll('.nextmoon')].map(card => {
+  const image = card.querySelector('.nm-cover')
+  return { imageWidth: image.offsetWidth, cardWidth: card.clientWidth, src: image.getAttribute('src'),
+    redundantTags: card.querySelectorAll('.nm-k,.nm-go,.nm-planet').length }
+})""")
+check(all(abs(card['imageWidth'] - card['cardWidth']) < 1 for card in cards), 'Case-study footer images span the full card width')
+check(all(card['redundantTags'] == 0 for card in cards), 'Case-study footer cards omit decorative tags')
+
+b.call('Emulation.setDeviceMetricsOverride', {'width':390, 'height':844, 'deviceScaleFactor':3, 'mobile':True})
+clamped = []
+for scene in ('gojek', 'cult'):
+    b.navigate(base + f'?scene={scene}&perf')
+    wait_for("[...document.querySelectorAll('.moon.open .tip-img img')].every(image => image.complete)")
+    clamped += b.js("""(async () => {
+      const results = []
+      for (const moon of document.querySelectorAll('.moon.open')) {
+        moon.dispatchEvent(new PointerEvent('pointerenter'))
+        await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)))
+        const r = moon.querySelector('.tip.big').getBoundingClientRect()
+        results.push({ left:r.left, top:r.top, right:r.right, bottom:r.bottom })
+        moon.dispatchEvent(new PointerEvent('pointerleave'))
+      }
+      return results
+    })()""")
+check(all(r['left'] >= 11 and r['top'] >= 11 and r['right'] <= 379 and r['bottom'] <= 833 for r in clamped), 'Phone hover previews stay inside every viewport edge')
 (output / 'results.json').write_text(json.dumps({'checks':checks,'assets':assets}, indent=2) + '\n')
 print(f'Passed {len(checks)} browser checks. Screenshots and report: {output}', flush=True)

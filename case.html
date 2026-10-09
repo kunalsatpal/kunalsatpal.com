@@ -259,23 +259,17 @@
   .nextmoons .nm-copy b { font-size: clamp(22px, 2vw, 28px); }
   @media (max-width: 760px) { .nextmoons { grid-template-columns: 1fr; } }
 
-  /* Forward cards v2: calm glow, small banded planet, phone rising from the bottom edge. */
-  .nextmoons .nm-sky { min-height: 300px; background: radial-gradient(70% 90% at 50% 100%, color-mix(in srgb, var(--nc) 32%, #0b0d14), #07080d 70%) !important; }
-  .nextmoons .nm-horizon { display: none; }
-  .nextmoons .nm-stars { opacity: .5; }
-  .nextmoons .nm-planet { width: 44px !important; right: 9% !important; top: 12% !important; box-shadow: 0 0 24px -6px var(--nc) !important;
-    background: radial-gradient(circle at 30% 26%, rgba(255,255,255,.45) 0 6%, transparent 24%),
-      radial-gradient(circle at 74% 76%, rgba(2,3,8,.9) 0 24%, transparent 62%),
-      repeating-linear-gradient(-18deg, color-mix(in srgb, var(--nc) 80%, #000) 0 10%, var(--nc) 10% 18%, color-mix(in srgb, var(--nc) 70%, #000) 18% 28%) !important; }
-  .nextmoons .nm-cover.phone { bottom: auto !important; top: 16%; height: 120% !important; transform: translateX(-50%) rotate(-6deg) !important;
-    filter: drop-shadow(0 30px 30px rgba(0,0,0,.6)); transition: transform .7s cubic-bezier(.2,.8,.2,1); }
-  .nextmoons .nextmoon:hover .nm-cover.phone { transform: translateX(-50%) rotate(-2deg) translateY(-14px) !important; }
-  .nextmoons .nm-sky::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 30%; background: linear-gradient(transparent, #07080d); pointer-events: none; }
-  .nextmoons .nm-copy { background: #07080d; }
+  /* Forward cards: show the same work preview used in the universe, without decorative tags. */
   .nextmoons .nextmoon { background: #07080d; }
+  .nextmoons .nm-sky { min-height: 0; aspect-ratio: 1.36; background: #f6f6f7 !important; }
+  .nextmoons .nm-cover.preview { position: static; width: 100%; height: 100%; max-height: none; object-fit: cover; transform: none; border-radius: 0; box-shadow: none; transition: transform .65s cubic-bezier(.2,.8,.2,1); }
+  .nextmoons .nextmoon:hover .nm-cover.preview { transform: scale(1.025); }
+  .nextmoons .nm-copy { gap: 9px; padding: 24px 26px 27px; background: #07080d; }
+  .nextmoons .nm-copy b { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+  .nextmoons .nm-copy b::after { content: "↗"; flex: none; color: rgba(255,255,255,.72); font-size: .8em; transition: transform .3s; }
+  .nextmoons .nextmoon:hover .nm-copy b::after { transform: translate(3px, -3px); }
   .parent { display: none !important; }  /* dropped: the header reads cleaner without it */
   .lander .heroimg { width: min(640px, 46vw) !important; height: auto !important; border-radius: 14px !important; box-shadow: 0 0 0 1px rgba(255,255,255,.12), 0 40px 80px -30px rgba(0,0,0,.9) !important; animation: float 7s ease-in-out infinite; }
-  .nextmoons .nm-cover.wideshot { left: 50%; top: 16%; bottom: auto; width: 86%; height: auto; max-height: none; transform: translateX(-50%) rotate(-3deg); border-radius: 10px; box-shadow: 0 24px 40px -18px rgba(0,0,0,.8); }
 
   /* ---------- Native blocks (rebuilt case studies) ---------- */
   .bstats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 14px; margin-top: 30px; }
@@ -347,9 +341,9 @@
 
   // Which planet each case belongs to (for colour and where "Back to orbit" lands you).
   const META = {
-    promo:              { title: 'Solving for promo discovery', planet: 'gojek',   c: '#3fe05a', kicker: 'Gojek · GoFood growth', summary: 'Streamlining the promo journey, leading to 4% incremental conversions and 5× ad revenue.', chips: [['4%', 'session conversions'], ['5×', 'ad revenue'], ['6', 'months of testing']] },
-    Fitclub:            { title: 'Designing for engagement: Fitclub V2', planet: 'cult',    c: '#ff5a85', kicker: 'Cult.fit', summary: 'Fitclub V2, a loyalty program built to lift retention and cross-sell products.', chips: [['V2', 'loyalty program'], ['Gamified', 'rewards']] },
-    cart_abandonment:   { title: 'Solving for cart abandonment', planet: 'cult',    c: '#ff5a85', kicker: 'Cult.fit', summary: 'Designing to bring people back on day two and after, once they have left a cart behind.', chips: [['Day 2+', 'recovery'], ['Nudges', 'and reminders']] },
+    promo:              { title: 'Solving for promo discovery', planet: 'gojek',   c: '#3fe05a', kicker: 'Gojek · GoFood growth', summary: 'Streamlining the promo journey, leading to 4% incremental conversions and 5× ad revenue.', preview: './site/cases/m/fe0ed5eb7d.png', chips: [['4%', 'session conversions'], ['5×', 'ad revenue'], ['6', 'months of testing']] },
+    Fitclub:            { title: 'Designing for engagement: Fitclub V2', planet: 'cult',    c: '#ff5a85', kicker: 'Cult.fit', summary: 'Fitclub V2, a loyalty program built to lift retention and cross-sell products.', preview: './site/img/fitclub.png', chips: [['V2', 'loyalty program'], ['Gamified', 'rewards']] },
+    cart_abandonment:   { title: 'Solving for cart abandonment', planet: 'cult',    c: '#ff5a85', kicker: 'Cult.fit', summary: 'Designing to bring people back on day two and after, once they have left a cart behind.', preview: './site/img/cart.png', chips: [['Day 2+', 'recovery'], ['Nudges', 'and reminders']] },
     Pibit:              { title: 'Starting my design journey with Pibit', planet: 'galaxy',  c: '#ffa45a', kicker: 'Pibit · Writing', summary: 'Starting my design journey as a founding product designer.', chips: [] },
     portfolio:          { title: 'Designing and iterating my portfolio', planet: 'writing', c: '#9fe8d2', kicker: 'Writing · Process', summary: 'Designing and iterating my portfolio website.', chips: [] },
     Internship_curefit: { title: 'My experience at Cure.fit', planet: 'writing', c: '#ff8fb0', kicker: 'Writing · Career', summary: 'What two internships at Cure.fit taught me.', chips: [] },
@@ -409,10 +403,9 @@
 
   // Two forward moons: windows onto the other case studies.
   const nexts = ORDER.filter(k => k !== key).slice(0, 2)
-  $('nextMoons').innerHTML = nexts.map((k, i) => `<a class="nextmoon" href="./case.html?c=${k}&home=${HOME}" style="--nc:${META[k].c}">
-      <span class="nm-sky"><span class="nm-stars" style="background-image:${starTile(41 + i * 13, 50)}"></span><span class="nm-planet"></span><span class="nm-horizon"></span><img class="nm-cover" data-k="${k}" alt="" /></span>
-      <span class="nm-copy"><span class="nm-k">${i ? 'Another moon' : 'Next moon'} · ${META[k].kicker}</span><b>${META[k].title}</b><span class="nm-s">${META[k].summary}</span><span class="nm-go">Land here <i>→</i></span></span></a>`).join('')
-  document.querySelectorAll('.nm-cover').forEach(im => { const h = META[im.dataset.k].hero; if (h) { im.src = h; im.classList.add('wideshot') } else { im.src = `./site/cases/media/phone_${im.dataset.k}.png`; im.classList.add('phone') } })
+  $('nextMoons').innerHTML = nexts.map(k => `<a class="nextmoon" href="./case.html?c=${k}&home=${HOME}" style="--nc:${META[k].c}" aria-label="Read ${META[k].title}">
+      <span class="nm-sky"><img class="nm-cover preview" src="${META[k].preview}" alt="" loading="lazy" /></span>
+      <span class="nm-copy"><b>${META[k].title}</b><span class="nm-s">${META[k].summary}</span></span></a>`).join('')
   document.querySelectorAll('.nextmoon').forEach(a => a.addEventListener('click', e => { if (reduce) return; e.preventDefault(); document.body.classList.add('leaving'); setTimeout(() => location.href = a.href, 820) }))
 
   // ---------- Motion ----------

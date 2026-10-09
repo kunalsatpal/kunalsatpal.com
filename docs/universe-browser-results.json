@@ -51,7 +51,14 @@
     "Direct cartoon scene skips the unused shader bundle",
     "Realistic theme can initialize lazily after a direct cartoon entry",
     "Generated texture requests succeed",
-    "Actual case-study navigation and browser Back restore the flight"
+    "Actual case-study navigation and browser Back restore the flight",
+    "Hover preview image spans the full card content width",
+    "Hover preview shows the complete image without cropping",
+    "Hover preview includes the final result numbers without a label",
+    "Hover preview omits redundant company and action tags",
+    "Case-study footer images span the full card width",
+    "Case-study footer cards omit decorative tags",
+    "Phone hover previews stay inside every viewport edge"
   ],
   "assets": [
     {
