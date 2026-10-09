@@ -6,7 +6,7 @@
 <title>Kunal Satpal — Product Designer (cartoon planets)</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,500;1,400&family=Inter+Tight:wght@600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="./node_modules/lenis/dist/lenis.css" />
+<link rel="stylesheet" href="./vendor/lenis.css" />
 <style>
   /* One night sky for the whole page: the stage is pinned and every section is a scene you fly through.
      The route runs forward in time; planet size = tenure, distance between planets = years between roles. */
@@ -658,8 +658,8 @@
 </div>
 
 <script type="module">
-  import Lenis from './node_modules/lenis/dist/lenis.mjs'
-  import { createShader, isWebGPUSupported } from './node_modules/shaders/dist/js/bundle.js'
+  import Lenis from './vendor/lenis.mjs'
+  import { createShader, isWebGPUSupported } from './vendor/shaders.bundle.js'
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches
   const $ = id => document.getElementById(id)
   const NOW = 2026.8
