@@ -59,7 +59,9 @@
     "Case-study footer images span the full card width",
     "Case-study footer cards omit decorative tags",
     "Phone hover previews stay inside every viewport edge",
-    "Every company logo fits inside its badge safe area"
+    "Every company logo fits inside its badge safe area",
+    "First field note carries the Kunal Satpal mark and New tag",
+    "Pibit field note uses the Pibit logo"
   ],
   "assets": [
     {

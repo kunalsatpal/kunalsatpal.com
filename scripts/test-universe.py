@@ -195,5 +195,15 @@ badges = b.js("""[...document.querySelectorAll('.mbadge')].map(badge => {
   return i.left >= b.left && i.top >= b.top && i.right <= b.right && i.bottom <= b.bottom && getComputedStyle(image).objectFit === 'contain'
 })""")
 check(len(badges) == 7 and all(badges), 'Every company logo fits inside its badge safe area')
+
+b.navigate(base + '?scene=writing&perf')
+wait_for("document.querySelectorAll('.log').length === 4")
+notes = b.js("""[...document.querySelectorAll('.log')].map(note => ({
+  fresh: !!note.querySelector('.log-new'),
+  icon: note.querySelector('.patch img').getAttribute('src'),
+  fit: getComputedStyle(note.querySelector('.patch img')).objectFit
+}))""")
+check(notes[0]['fresh'] and notes[0]['icon'] == './mark.svg' and notes[0]['fit'] == 'contain', 'First field note carries the Kunal Satpal mark and New tag')
+check(notes[2]['icon'] == './site/img/logo_07.png' and notes[2]['fit'] == 'contain', 'Pibit field note uses the Pibit logo')
 (output / 'results.json').write_text(json.dumps({'checks':checks,'assets':assets}, indent=2) + '\n')
 print(f'Passed {len(checks)} browser checks. Screenshots and report: {output}', flush=True)
