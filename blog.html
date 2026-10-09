@@ -116,8 +116,7 @@
   const $ = id => document.getElementById(id)
   const q = new URLSearchParams(location.search)
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches
-  const HOME = /^cinematic-(proof|cartoon)$/.test(q.get('home') || '') ? q.get('home') : 'cinematic-proof'
-  if (HOME === 'cinematic-cartoon') document.body.classList.add('cartoon')
+  const HOME = 'universe'
 
   const LOGS = {
     portfolio:          { n: 1, tag: 'Process', c: '#9fe8d2', icon: './site/img/blog_portfolio.png', title: 'Designing and <em>iterating</em> my portfolio', stand: 'How this website grew up, one version at a time.' },

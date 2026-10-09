@@ -205,5 +205,18 @@ notes = b.js("""[...document.querySelectorAll('.log')].map(note => ({
 }))""")
 check(notes[0]['fresh'] and notes[0]['icon'] == './mark.svg' and notes[0]['fit'] == 'contain', 'First field note carries the Kunal Satpal mark and New tag')
 check(notes[2]['icon'] == './site/img/blog_pibit.png' and notes[2]['fit'] == 'cover', 'Pibit field note uses the blue Pibit logo from the blog')
+
+# Legacy incoming URLs may still carry the old home parameter; every return action is canonicalized to Universe.
+b.call('Page.navigate', {'url':'http://127.0.0.1:8765/case.html?c=promo&home=cinematic-proof'})
+wait_for("document.readyState === 'complete' && document.querySelectorAll('.nextmoon').length === 2")
+b.js("document.getElementById('back').click()")
+wait_for("location.pathname.endsWith('/universe.html') && !!window.universePerformance && universePerformance().visibleScenes.includes('gojek')")
+check(True, 'Case-study Back to orbit returns to the matching Universe scene')
+
+b.call('Page.navigate', {'url':'http://127.0.0.1:8765/blog.html?c=Pibit&home=cinematic-proof'})
+wait_for("document.readyState === 'complete' && document.getElementById('title').textContent.length > 0")
+b.js("document.getElementById('back').click()")
+wait_for("location.pathname.endsWith('/universe.html') && !!window.universePerformance && universePerformance().visibleScenes.includes('writing')")
+check(True, 'Field-note Back to orbit returns to the Universe writing scene')
 (output / 'results.json').write_text(json.dumps({'checks':checks,'assets':assets}, indent=2) + '\n')
 print(f'Passed {len(checks)} browser checks. Screenshots and report: {output}', flush=True)

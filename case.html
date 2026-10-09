@@ -336,8 +336,7 @@
   const $ = id => document.getElementById(id)
   const q = new URLSearchParams(location.search)
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches
-  const HOME = /^cinematic-(proof|cartoon)$/.test(q.get('home') || '') ? q.get('home') : 'cinematic-proof'
-  if (HOME === 'cinematic-cartoon') document.body.classList.add('cartoon')
+  const HOME = 'universe'
 
   // Which planet each case belongs to (for colour and where "Back to orbit" lands you).
   const META = {
