@@ -206,6 +206,7 @@
   .patch img { width: 100%; height: 100%; object-fit: cover; display: block; }
   .patch.brand { padding: 10px; box-sizing: border-box; }
   .patch.brand img { object-fit: contain; }
+  .patch.pibit img { object-position: 8% 10%; transform: scale(6); transform-origin: 15% 12%; }
   .log:hover .patch { transform: rotate(-12deg) scale(1.06); }
   .log-meta { display: flex; align-items: center; gap: 8px; }
   .log-new { position: absolute; top: -12px; right: 16px; padding: 6px 9px; border-radius: 999px; background: #ff5a85; color: #fff; box-shadow: 0 7px 18px -8px rgba(255,90,133,.9); font: 700 10px/1 "JetBrains Mono", monospace; letter-spacing: .08em; text-transform: uppercase; }
@@ -1273,7 +1274,7 @@ html.theme-toon .rolechip { border: 2px solid #15132a; background: #1f1757; }
   const POSTS = [
     { t: 'Designing and iterating my portfolio', tag: 'Process', href: './blog.html?c=portfolio&home=cinematic-proof', c: '#9fe8d2', icon: './mark.svg', logo: true, fresh: true },
     { t: 'My experience at Cure.fit', tag: 'Career', href: './blog.html?c=Internship_curefit&home=cinematic-proof', c: '#ff8fb0', icon: './site/img/blog_cult.jpg' },
-    { t: 'Starting my career with Pibit', tag: 'Career', href: './blog.html?c=Pibit&home=cinematic-proof', c: '#ffb067', icon: './site/img/logo_07.png', logo: true },
+    { t: 'Starting my career with Pibit', tag: 'Career', href: './blog.html?c=Pibit&home=cinematic-proof', c: '#ffb067', icon: './site/img/blog_pibit.png', pibit: true },
     { t: 'A 4-hour sprint: WhatsApp Polls', tag: 'Sprint', href: './blog.html?c=whatsapp&home=cinematic-proof', c: '#7fd6ff', icon: './site/img/blog_whatsapp.png' },
   ]
   // Mission patches: a badge in the post's colour with a small motif.
@@ -1286,7 +1287,7 @@ html.theme-toon .rolechip { border: 2px solid #15132a; background: #1f1757; }
   const logs = $('logs')
   POSTS.forEach((p, i) => {
     const a = document.createElement('a'); a.className = 'log' + (p.fresh ? ' fresh' : ''); a.href = p.href; a.style.setProperty('--c', p.c)
-    a.innerHTML = `<div class="log-top"><span class="patch${p.logo ? ' brand' : ''}"><img src="${p.icon}" alt="" /></span>
+    a.innerHTML = `<div class="log-top"><span class="patch${p.logo ? ' brand' : ''}${p.pibit ? ' pibit' : ''}"><img src="${p.icon}" alt="" /></span>
       <span class="log-meta"><span class="log-no">LOG ${String(i + 1).padStart(2, '0')}</span></span></div>${p.fresh ? '<span class="log-new">New</span>' : ''}<h3>${p.t}</h3><div class="log-foot"><span>${p.tag}</span><span class="read">Read ↗</span></div>`
     logs.appendChild(a)
   })

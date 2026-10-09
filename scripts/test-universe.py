@@ -204,6 +204,6 @@ notes = b.js("""[...document.querySelectorAll('.log')].map(note => ({
   fit: getComputedStyle(note.querySelector('.patch img')).objectFit
 }))""")
 check(notes[0]['fresh'] and notes[0]['icon'] == './mark.svg' and notes[0]['fit'] == 'contain', 'First field note carries the Kunal Satpal mark and New tag')
-check(notes[2]['icon'] == './site/img/logo_07.png' and notes[2]['fit'] == 'contain', 'Pibit field note uses the Pibit logo')
+check(notes[2]['icon'] == './site/img/blog_pibit.png' and notes[2]['fit'] == 'cover', 'Pibit field note uses the blue Pibit logo from the blog')
 (output / 'results.json').write_text(json.dumps({'checks':checks,'assets':assets}, indent=2) + '\n')
 print(f'Passed {len(checks)} browser checks. Screenshots and report: {output}', flush=True)
