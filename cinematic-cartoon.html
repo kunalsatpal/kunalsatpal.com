@@ -1398,7 +1398,7 @@
   const range = (v, a, b) => ease((v - a) / (b - a))
   const params = new URLSearchParams(location.search), pinned = params.get('at')   // ?at=0..1 for previews
   const progress = () => pinned !== null ? +pinned : Math.min(1, Math.max(0, scrollY / (journey.offsetHeight - innerHeight)))
-  const cards = [...document.querySelectorAll('.proof')]
+  const cards = [...document.querySelectorAll('.proof')].map(el => ({ el, depth: +el.dataset.depth, dx: 0, dy: 0 }))
   const sceneNodes = SCENES.map(s => ({
     scene: s.el,
     floats: [...s.el.querySelectorAll('[data-z]')].map(el => ({ el, depth: +el.dataset.z * 0.12 })),
@@ -1409,15 +1409,32 @@
 
   let introStart = null
   let heldCard = null
-  document.querySelectorAll('.proof').forEach(c => { c.addEventListener('pointerenter', () => heldCard = c); c.addEventListener('pointerleave', () => { if (heldCard === c) heldCard = null }) })
+  cards.forEach(card => {
+    card.el.addEventListener('pointerenter', () => heldCard = card.el)
+    card.el.addEventListener('pointerleave', () => { if (heldCard === card.el) heldCard = null })
+  })
   const streaksEl = document.querySelector('.streaks')
   const writeStyle = (el, property, value) => {
     if (el.style[property] !== value) el.style[property] = value
   }
+  function cacheLayout() {
+    const W = innerWidth, H = innerHeight
+    cards.forEach(card => {
+      card.dx = card.el.offsetLeft + card.el.offsetWidth / 2 - W / 2
+      card.dy = card.el.offsetTop + card.el.offsetHeight / 2 - H / 2
+    })
+    systems.forEach(o => {
+      o.radius = o.sys.offsetWidth / 2
+      o.moons.forEach(m => { m.leftOrigin = m.el.offsetWidth - 11 })
+    })
+  }
+  cacheLayout()
+  addEventListener('resize', cacheLayout, { passive: true })
+  if (document.fonts) document.fonts.ready.then(cacheLayout)
   function frame(t) {
     if (introStart === null) introStart = t
     cx += (mxp - cx) * 0.05; cy += (myp - cy) * 0.05
-    const p = progress(), u = p * U, W = innerWidth, H = innerHeight
+    const p = progress(), u = p * U
 
     $('aurora').style.transform = `translate3d(${cx * -24}px, ${cy * -16 - p * 80}px, 0) scale(${1 + p * 0.25})`
     $('far').style.transform = `translate3d(${cx * -38}px, ${cy * -26}px, 0) scale(${1 + p * 0.6})`
@@ -1459,10 +1476,11 @@
 
     // Hero cards fly past the camera as you leave the first scene.
     const out = range(u, 0, 0.8)
-    cards.forEach((c, i) => {
+    cards.forEach((card, i) => {
+      const c = card.el
       if (c === heldCard && out < 0.05) return   // hovered: hold still so the hover doesn't flicker
-      const d = +c.dataset.depth, bob = Math.sin(t / 1000 * 0.6 + i * 1.7) * 8 * (1 - out), tilt = Math.sin(t / 1000 * 0.4 + i) * 1.2
-      const dx = c.offsetLeft + c.offsetWidth / 2 - W / 2, dy = c.offsetTop + c.offsetHeight / 2 - H / 2, k = out * (1.4 + d)
+      const d = card.depth, bob = Math.sin(t / 1000 * 0.6 + i * 1.7) * 8 * (1 - out), tilt = Math.sin(t / 1000 * 0.4 + i) * 1.2
+      const { dx, dy } = card, k = out * (1.4 + d)
       // Arrival: each card starts deep in space near the centre — tiny, blurred, dim — and drifts out to its place.
       const a = reduce ? 1 : ease(Math.min(1, Math.max(0, (t - introStart - 250 - i * 180) / 1700)))
       const far = 1 - a, spin = far * (i % 2 ? 14 : -14)
@@ -1475,7 +1493,7 @@
     // Planets turn, moons orbit (only while visible).
     systems.forEach(o => {
       if (o.s.el.style.visibility === 'hidden') return
-      const R = o.sys.offsetWidth / 2
+      const R = o.radius
       o.moons.forEach(m => {
         // A hovered moon stops in place (its clock pauses) so the preview stays put.
         const hov = m.el.matches(':hover'); m.clock = (m.clock ?? 0) + (hov || reduce ? 0 : Math.min(50, t - (m.last ?? t))); m.last = t
@@ -1483,7 +1501,7 @@
         const tilt = m.tilt * Math.PI / 180, rx = x * Math.cos(tilt) - y * Math.sin(tilt), ry = x * Math.sin(tilt) + y * Math.cos(tilt)
         m.el.classList.toggle('left', rx < 0)   // labels point outward, away from the planet
         m.el.classList.toggle('behind', !front && Math.hypot(rx, ry) < R * 0.78)
-        const ox = m.el.classList.contains('left') ? m.el.offsetWidth - 11 : 11   // keep the moon dot on its orbit when the label flips
+        const ox = m.el.classList.contains('left') ? m.leftOrigin : 11   // keep the moon dot on its orbit when the label flips
         m.el.style.transformOrigin = `${ox}px 11px`
         m.el.style.transform = `translate(${rx - ox}px, ${ry - 11}px) scale(${0.82 + 0.22 * (Math.sin(a) + 1) / 2})`
         m.el.style.zIndex = m.el.matches(':hover') ? 7 : front ? 4 : 1; m.el.style.opacity = front || m.el.matches(':hover') ? 1 : 0.55
