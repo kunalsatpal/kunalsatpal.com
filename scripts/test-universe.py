@@ -104,11 +104,11 @@ for width, height, mobile in [(390, 844, True), (768, 1024, False), (1440, 900, 
         const stage = document.querySelector('#stage');
         resolve({...departure, backward:stage.classList.contains('travel-backward'),
           lineScale:new DOMMatrix(getComputedStyle(document.querySelector('.streaks')).transform).a,
-          cameraScale:new DOMMatrix(getComputedStyle(document.querySelector('#camera')).transform).a})
+          sceneScale:new DOMMatrix(document.querySelector('[data-scene="hero"]').style.transform).a})
       }, 280)
     })""")
     check(jump_midpoint['outsideCamera'] and jump_midpoint['lines'] > .5 and jump_midpoint['camera'] < .35, f'{width}: speed lines remain visible while the camera switches scenes: {jump_midpoint}')
-    check(jump_midpoint['backward'] and jump_midpoint['lineScale'] < 1 and jump_midpoint['cameraScale'] > 1, f'{width}: backward travel pulls lines inward and eases the destination down')
+    check(jump_midpoint['backward'] and jump_midpoint['lineScale'] < 1 and jump_midpoint['sceneScale'] > 1, f'{width}: backward jump uses the single-page scene arrival')
     wait_for("universePerformance().snap.phase === 'idle' && universePerformance().snap.settledIndex === 0")
     check(b.js("(()=>{jumpObserver.disconnect();return [...jumpSeen].every(key=>['life','hero'].includes(key)) && getComputedStyle(document.querySelector('#camera')).opacity==='1'})()"), f'{width}: far route jump skips intermediate scenes and restores the camera')
     if width == 1440:
@@ -118,10 +118,10 @@ for width, height, mobile in [(390, 844, True), (768, 1024, False), (1440, 900, 
             const stage = document.querySelector('#stage');
             resolve({forward:stage.classList.contains('travel-forward'),
               lineScale:new DOMMatrix(getComputedStyle(document.querySelector('.streaks')).transform).a,
-              cameraScale:new DOMMatrix(getComputedStyle(document.querySelector('#camera')).transform).a})
+              sceneScale:new DOMMatrix(document.querySelector('[data-scene="hello"]').style.transform).a})
           }, 280)
         })""")
-        check(forward_midpoint['forward'] and forward_midpoint['lineScale'] > 1 and forward_midpoint['cameraScale'] < 1, 'Forward travel pushes lines outward and eases the destination up')
+        check(forward_midpoint['forward'] and forward_midpoint['lineScale'] > 1 and forward_midpoint['sceneScale'] < 1, 'Forward jump uses the single-page scene arrival')
         wait_for("universePerformance().snap.phase === 'idle' && universePerformance().snap.settledIndex === 8")
         b.js("document.querySelector('.stop[data-i=\"0\"]').dispatchEvent(new MouseEvent('click',{bubbles:true}))")
         time.sleep(.28)
