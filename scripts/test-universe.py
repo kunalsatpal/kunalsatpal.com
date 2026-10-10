@@ -93,7 +93,16 @@ for width, height, mobile in [(390, 844, True), (768, 1024, False), (1440, 900, 
         if (scene.style.visibility !== 'hidden' && Number(scene.style.opacity) > .01) jumpSeen.add(scene.dataset.scene)
       })
     }); jumpObserver.observe(document.getElementById('scenes'), {subtree:true, attributes:true, attributeFilter:['style']})""")
-    b.js("document.querySelector('.stop[data-i=\"0\"]').dispatchEvent(new MouseEvent('click',{bubbles:true}))")
+    jump_midpoint = b.js("""new Promise(resolve => {
+      document.querySelector('.stop[data-i="0"]').dispatchEvent(new MouseEvent('click', {bubbles:true}));
+      setTimeout(() => {
+        const lines = document.querySelector('.streaks');
+        resolve({outsideCamera:lines.parentElement === document.querySelector('#stage'),
+          lines:Number(getComputedStyle(lines).opacity),
+          camera:Number(getComputedStyle(document.querySelector('#camera')).opacity)})
+      }, 170)
+    })""")
+    check(jump_midpoint['outsideCamera'] and jump_midpoint['lines'] > .5 and jump_midpoint['camera'] < .2, f'{width}: speed lines remain visible while the camera switches scenes')
     wait_for("universePerformance().snap.phase === 'idle' && universePerformance().snap.settledIndex === 0")
     check(b.js("(()=>{jumpObserver.disconnect();return [...jumpSeen].every(key=>['life','hero'].includes(key)) && getComputedStyle(document.querySelector('#camera')).opacity==='1'})()"), f'{width}: far route jump skips intermediate scenes and restores the camera')
     if width == 1440:
