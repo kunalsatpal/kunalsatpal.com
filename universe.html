@@ -1298,12 +1298,33 @@ html.theme-toon .rolechip { border: 2px solid #15132a; background: #1f1757; }
   }
 
   const activeMoonTips = new Set()
+  const moonTipState = new WeakMap()
+  let moonTipLayout = 0
+  const invalidateMoonTips = () => { moonTipLayout++ }
+  addEventListener('resize', invalidateMoonTips, { passive: true })
+  window.visualViewport?.addEventListener('resize', invalidateMoonTips, { passive: true })
+  window.visualViewport?.addEventListener('scroll', invalidateMoonTips, { passive: true })
+  document.fonts?.addEventListener('loadingdone', invalidateMoonTips)
   function clampMoonTip(el) {
-    const tip = el.querySelector('.tip')
-    if (!tip) return
-    tip.style.translate = ''
-    tip.style.removeProperty('width')
-    tip.style.removeProperty('max-height')
+    let state = moonTipState.get(el)
+    const theme = document.documentElement.classList.contains('theme-toon')
+    if (!state || state.layout !== moonTipLayout || state.theme !== theme) {
+      const tip = state?.tip || el.querySelector('.tip')
+      if (!tip) return
+      // Measure the natural CSS size once per open/content/viewport change.
+      for (const property of ['translate', 'width', 'max-height']) tip.style.removeProperty(property)
+      const box = getComputedStyle(tip)
+      state = { tip, scene: el.closest('.scene'), camera: el.closest('.camera'), layout: moonTipLayout, theme,
+        naturalWidth: parseFloat(box.width), width: parseFloat(box.width), height: parseFloat(box.height),
+        dx: 0, dy: 0, until: performance.now() + 300, signature: null }
+      moonTipState.set(el, state)
+    }
+    const { tip, scene, camera } = state
+    if (!state.width || !state.height) { moonTipState.delete(el); return }
+    const signature = `${el.style.transform}:${el.style.transformOrigin}:${el.className}:${scene?.style.transform}:${camera?.className}:${camera?.style.transform}`
+    // A held moon is stationary. Mini planets still drift through CSS animations.
+    if (state.signature === signature && performance.now() >= state.until && !el.classList.contains('mini') && !camera?.classList.contains('diving')) return
+    state.signature = signature
     let r = tip.getBoundingClientRect()
     if (!r.width || !r.height) return
     const viewport = window.visualViewport, margin = 12
@@ -1311,18 +1332,33 @@ html.theme-toon .rolechip { border: 2px solid #15132a; background: #1f1757; }
     const top = (viewport?.offsetTop || 0) + margin
     const width = Math.max(1, (viewport?.width || document.documentElement.clientWidth) - margin * 2)
     const height = Math.max(1, (viewport?.height || document.documentElement.clientHeight) - margin * 2)
-    const scaleX = r.width / tip.offsetWidth || 1
-    const scaleY = r.height / tip.offsetHeight || 1
-    if (r.width > width) tip.style.width = `${width / scaleX}px`
-    tip.style.maxHeight = `${height / scaleY}px`
-    r = tip.getBoundingClientRect()
-    const dx = Math.max(left - r.left, Math.min(0, left + width - r.right))
-    const dy = Math.max(top - r.top, Math.min(0, top + height - r.bottom))
-    tip.style.translate = `${dx / scaleX}px ${dy / scaleY}px`
+    const scaleX = r.width / state.width || 1
+    const scaleY = r.height / state.height || 1
+    const tipWidth = state.naturalWidth > width / scaleX ? `${(width / scaleX).toFixed(3)}px` : ''
+    const maxHeight = `${(height / scaleY).toFixed(3)}px`
+    if (tip.style.width !== tipWidth || tip.style.maxHeight !== maxHeight) {
+      if (tip.style.width !== tipWidth) tip.style.width = tipWidth
+      if (tip.style.maxHeight !== maxHeight) tip.style.maxHeight = maxHeight
+      // Sizing can rewrap copy. Read it only after an actual size change.
+      r = tip.getBoundingClientRect()
+      const box = getComputedStyle(tip)
+      state.width = parseFloat(box.width)
+      state.height = parseFloat(box.height)
+    }
+    // Undo our prior offset mathematically instead of clearing it and forcing layout.
+    const x = r.left - state.dx * scaleX, y = r.top - state.dy * scaleY
+    state.dx = Math.max(left - x, Math.min(0, left + width - x - r.width)) / scaleX
+    state.dy = Math.max(top - y, Math.min(0, top + height - y - r.height)) / scaleY
+    const translate = `${state.dx}px ${state.dy}px`
+    if (tip.style.translate !== translate) tip.style.translate = translate
   }
 
   function trackMoonTip(el, onChange = () => {}) {
     let pointed = false, focused = false
+    const tip = el.querySelector('.tip')
+    const invalidate = () => { moonTipState.delete(el) }
+    tip.addEventListener('load', invalidate, true)
+    new MutationObserver(invalidate).observe(tip, { childList: true, characterData: true, subtree: true })
     const update = () => {
       const active = pointed || focused
       onChange(active)
@@ -1333,8 +1369,8 @@ html.theme-toon .rolechip { border: 2px solid #15132a; background: #1f1757; }
         requestFrame()
       } else {
         activeMoonTips.delete(el)
-        const tip = el.querySelector('.tip')
         for (const property of ['translate', 'width', 'max-height']) tip.style.removeProperty(property)
+        moonTipState.delete(el)
       }
     }
     el.addEventListener('pointerenter', () => { pointed = true; update() })
