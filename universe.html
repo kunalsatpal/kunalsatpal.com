@@ -179,7 +179,7 @@
     75% { transform: translate(3px, 0); clip-path: inset(8% 0 40% 0); filter: contrast(1.4); }
     100% { transform: none; clip-path: inset(0); filter: none; }
   }
-  .cue { display: inline-grid; justify-items: center; gap: 4px; margin-top: 30px; color: var(--muted); font-size: 15px; letter-spacing: .02em; }
+  .cue { display: inline-grid; justify-items: center; gap: 4px; margin-top: 30px; color: var(--muted); font-size: 15px; letter-spacing: .02em; cursor: pointer; }
   .cue-sky { width: 150px !important; height: 90px !important; display: block; overflow: visible; }
   .cue-orbit { stroke: rgba(255,255,255,.22); stroke-width: 1; stroke-dasharray: 2 4; }
   .cue-cap { fill: rgba(255,255,255,.04); stroke: rgba(255,255,255,.7); stroke-width: 2; }
@@ -899,7 +899,7 @@ html.theme-toon .rolechip { border: 2px solid #15132a; background: #1f1757; }
           <span>KUNAL SATPAL</span></div>
         <div class="rolechip"><i></i>Staff Product Designer at Hinge Health</div>
         <h1>Crafting with strategy<br />&amp; technical fluency</h1>
-        <div class="cue" aria-label="Scroll to explore">
+        <button class="cue" type="button" data-go="about" aria-label="Scroll to the next page">
           <svg class="cue-sky" viewBox="0 0 160 96" aria-hidden="true">
             <!-- A scroll capsule; the "wheel" is a little planet that drops down it. Two tiny planets orbit it. -->
             <ellipse cx="80" cy="44" rx="40" ry="11" fill="none" class="cue-orbit" transform="rotate(-14 80 44)"/>
@@ -908,7 +908,7 @@ html.theme-toon .rolechip { border: 2px solid #15132a; background: #1f1757; }
             <circle r="5" fill="#3fe05a" class="cue-moon"><animateMotion dur="5s" repeatCount="indefinite" rotate="0" path="M40 44 A40 11 0 1 0 120 44 A40 11 0 1 0 40 44"/></circle>
             <circle r="3.4" fill="#ff5a85" class="cue-moon"><animateMotion dur="5s" begin="-2.5s" repeatCount="indefinite" path="M40 44 A40 11 0 1 0 120 44 A40 11 0 1 0 40 44"/></circle>
             <path d="M72 76 L80 84 L88 76" class="cue-chev"/><path d="M72 84 L80 92 L88 84" class="cue-chev two"/>
-          </svg><span>Scroll</span></div>
+          </svg><span>Scroll</span></button>
       </div>
       <a class="proof p1" style="--pg:#5fe0a3" data-depth="1.0" data-go="hinge"><picture><source media="(min-width: 901px)" srcset="./site/img/proof_carehub.png" /><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1' height='1'/%3E" width="566" height="420" loading="eager" decoding="async" fetchpriority="high" onload="this.decode().catch(() => {}).then(() => this.closest('.proof').classList.add('image-ready'))" alt="CareHub member record" /></picture><span class="plabel"><b>CareHub · Hinge Health</b>Redesign • 6% efficiency gains</span></a>
       <a class="proof p2" style="--pg:#ee2737" data-depth="0.7" data-go="gojek"><picture><source media="(min-width: 901px)" srcset="./site/img/proof_promo.jpg" /><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1' height='1'/%3E" width="760" height="522" loading="eager" decoding="async" fetchpriority="high" onload="this.decode().catch(() => {}).then(() => this.closest('.proof').classList.add('image-ready'))" alt="GoFood promo screens" /></picture><span class="plabel"><b>Promo discovery · Gojek</b>4% conversions · 5× ad revenue</span></a>
