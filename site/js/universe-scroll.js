@@ -58,11 +58,19 @@ export function createSceneSnap({ getStops, getPosition, animateTo, stopAnimatio
     page(event.deltaY)
   }, { passive: false, capture: true })
 
-  // Hold native touch movement; a completed vertical swipe advances one scene.
+  // Consume vertical touch movement; only an idle, unlocked swipe advances a scene.
   listen('touchstart', event => {
-    if (!allowed(event) || event.touches.length !== 1 || phase !== 'idle' || performance.now() < unlockAt) return
+    if (!allowed(event) || event.touches.length !== 1) {
+      touch = null
+      return
+    }
     const point = event.touches[0]
-    touch = { x: point.clientX, y: point.clientY, dy: 0 }
+    touch = {
+      x: point.clientX,
+      y: point.clientY,
+      dy: 0,
+      canPage: phase === 'idle' && performance.now() >= unlockAt,
+    }
   }, { passive: true, capture: true })
   listen('touchmove', event => {
     if (!touch || !allowed(event) || event.touches.length !== 1) return
@@ -75,9 +83,9 @@ export function createSceneSnap({ getStops, getPosition, animateTo, stopAnimatio
   }, { passive: false, capture: true })
   const endTouch = () => {
     if (!touch) return
-    const dy = touch.dy
+    const { dy, canPage } = touch
     touch = null
-    if (Math.abs(dy) >= 36) page(-dy)
+    if (canPage && Math.abs(dy) >= 36) page(-dy)
   }
   listen('touchend', endTouch, { passive: true, capture: true })
   listen('touchcancel', () => { touch = null }, { passive: true, capture: true })

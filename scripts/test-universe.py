@@ -49,8 +49,11 @@ print(b.js("import('/scripts/test-universe-shaders.mjs').then(m=>m.testShaderLif
 for width, height, mobile in [(390, 844, True), (768, 1024, False), (1440, 900, False)]:
     b.call('Emulation.setDeviceMetricsOverride', {'width':width, 'height':height, 'deviceScaleFactor':3 if mobile else 1, 'mobile':mobile})
     if mobile:
-        check(b.js("(()=>{const s=getComputedStyle(document.querySelector('nav'));return parseFloat(s.paddingTop)>=12&&parseFloat(s.paddingRight)>=14&&parseFloat(s.paddingBottom)>=12&&parseFloat(s.paddingLeft)>=14})()"), '390px: mobile navigation has roomier padding')
-        check(b.js("parseFloat(getComputedStyle(document.querySelector('nav')).rowGap)>=10"), '390px: mobile navigation has more vertical space above the toggle')
+        check(b.js("(()=>{const n=document.querySelector('nav'),s=getComputedStyle(n);return s.display==='flex'&&parseFloat(s.paddingLeft)>=10&&parseFloat(s.paddingRight)>=10&&n.getBoundingClientRect().height<70})()"), '390px: mobile navigation stays compact on one row')
+        check(b.js("(()=>{const n=document.querySelector('nav'),r=n.querySelector('a[href*=resume]'),c=n.querySelector('.contact'),b=n.getBoundingClientRect();return getComputedStyle(r).display!=='none'&&r.getBoundingClientRect().left>=b.left&&c.getBoundingClientRect().right<=b.right&&r.getBoundingClientRect().right<c.getBoundingClientRect().left})()"), '390px: Resume and Contact remain visible and fit in the mobile navigation')
+        b.call('Emulation.setDeviceMetricsOverride', {'width':320, 'height':667, 'deviceScaleFactor':3, 'mobile':True})
+        check(b.js("(()=>{const n=document.querySelector('nav'),r=n.getBoundingClientRect(),items=[...n.children].filter(e=>getComputedStyle(e).display!=='none').map(e=>e.getBoundingClientRect());return document.documentElement.scrollWidth===innerWidth&&items.every(e=>e.left>=r.left-1&&e.right<=r.right+1)})()"), '320px: every mobile navigation item fits without horizontal overflow')
+        b.call('Emulation.setDeviceMetricsOverride', {'width':width, 'height':height, 'deviceScaleFactor':3, 'mobile':True})
     if width == 768:
         check(b.js("(()=>{const s=getComputedStyle(document.querySelector('nav'));return s.padding==='12px 16px'})()"), '768px: tablet navigation has balanced padding')
     b.call('Emulation.setTouchEmulationEnabled', {'enabled':mobile})
@@ -81,6 +84,33 @@ for width, height, mobile in [(390, 844, True), (768, 1024, False), (1440, 900, 
     b.call('Input.dispatchMouseEvent', {'type':'mouseWheel','x':width/2,'y':height/2,'deltaX':0,'deltaY':1400})
     wait_for("universePerformance().snap.phase === 'idle' && universePerformance().snap.settledIndex === 3")
     check(b.js("Math.abs(scrollY-(3/8)*(document.getElementById('journey').offsetHeight-innerHeight)) <= 2"), f'{width}: hard wheel gesture advances exactly one scene')
+    if mobile:
+        time.sleep(.35)
+        def touch_event(kind, y=None):
+            points = [] if y is None else [{'x':width // 2, 'y':y}]
+            b.call('Input.dispatchTouchEvent', {'type':kind, 'touchPoints':points})
+        touch_event('touchStart', round(height * .8))
+        touch_event('touchMove', round(height * .2))
+        touch_event('touchEnd')
+        wait_for("universePerformance().snap.targetIndex === 4")
+        time.sleep(.08)
+        touch_event('touchStart', round(height * .8))
+        check(b.js('universePerformance().snap.touchActive'), '390px: swipe starting during a scene snap is captured')
+        touch_event('touchMove', round(height * .2))
+        touch_event('touchEnd')
+        wait_for("universePerformance().snap.phase === 'idle' && universePerformance().snap.settledIndex === 4")
+        touch_resting_position = b.js('scrollY')
+        touch_event('touchStart', round(height * .8))
+        check(b.js('universePerformance().snap.touchActive'), '390px: swipe during the post-snap lock is captured')
+        touch_event('touchMove', round(height * .2))
+        touch_event('touchEnd')
+        time.sleep(.4)
+        check(b.js(f"universePerformance().snap.settledIndex===4&&Math.abs(scrollY-({touch_resting_position}))<=2"), '390px: blocked repeated swipes do not scroll past the current scene')
+        touch_event('touchStart', round(height * .8))
+        touch_event('touchMove', round(height * .2))
+        touch_event('touchEnd')
+        wait_for("universePerformance().snap.phase === 'idle' && universePerformance().snap.settledIndex === 5")
+        check(b.js('universePerformance().snap.settledIndex===5'), '390px: a fresh swipe after the lock advances exactly one scene')
     # Route navigation can still jump directly to a requested scene.
     b.js("document.querySelector('.stop[data-i=\"7\"]').dispatchEvent(new MouseEvent('click',{bubbles:true}))")
     wait_for("universePerformance().snap.phase === 'idle' && universePerformance().snap.settledIndex === 7")
@@ -170,6 +200,19 @@ for width, height, mobile in [(390, 844, True), (768, 1024, False), (1440, 900, 
     errors = [e for e in b.events if e.get('method') == 'Runtime.exceptionThrown']
     check(not errors, f'{width}: no uncaught browser errors')
     print(f'Passed viewport {width}x{height}', flush=True)
+
+# Short phones have enough room for each full-screen scene without clipping its content.
+b.call('Emulation.setDeviceMetricsOverride', {'width':375, 'height':667, 'deviceScaleFactor':3, 'mobile':True})
+b.navigate(base + '?perf')
+time.sleep(3)
+for index, key in enumerate(['hero','about','hinge','gojek','cult','galaxy','writing','life','hello']):
+    b.js(f"scrollTo(0,({index}/8)*(document.getElementById('journey').offsetHeight-innerHeight))")
+    wait_for(f"universePerformance().visibleScenes.includes('{key}')")
+    check(b.js(f"""(()=>{{
+      const scene=document.querySelectorAll('.scene')[{index}], r=scene.querySelector('.inner').getBoundingClientRect();
+      return r.top>=0&&r.bottom<=document.querySelector('#stage').getBoundingClientRect().height
+    }})()"""), f'375x667: {key} scene content fits inside the phone viewport')
+check(b.js("(()=>{const e=document.querySelector('[data-scene=hello] .email').getBoundingClientRect();return e.left>=0&&e.right<=innerWidth})()"), '375x667: contact email fits without horizontal clipping')
 
 b.js("localStorage.removeItem('universeTheme')")
 b.navigate(base + '?scene=hinge&theme=toon&perf')
