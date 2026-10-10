@@ -34,7 +34,7 @@ b.call('Emulation.setEmulatedMedia', {'features':[]})
 b.call('Storage.clearDataForOrigin', {'origin':'http://127.0.0.1:8765', 'storageTypes':'local_storage'})
 b.call('Page.addScriptToEvaluateOnNewDocument', {'source': '''
 (() => {
-window.startupProbe = {heroVisibleAt:null, shifts:[], longTasks:[], frames:[], flight:[], errors:[]};
+window.startupProbe = {heroVisibleAt:null, shifts:[], longTasks:[], frames:[], flight:[], flightDone:false, errors:[]};
 addEventListener('error', e => startupProbe.errors.push(e.message || 'resource failed'), true);
 new PerformanceObserver(list => list.getEntries().forEach(e => {
   if (!e.hadRecentInput) startupProbe.shifts.push({at:e.startTime, value:e.value});
@@ -43,6 +43,15 @@ new PerformanceObserver(list => list.getEntries().forEach(e => {
   startupProbe.longTasks.push({at:e.startTime, duration:e.duration});
 })).observe({type:'longtask', buffered:true});
 let last, sampleStart;
+const entranceSelectors=['.title .name','.title .rolechip','.title h1','.title .cue','.proof.p1','.proof.p2','.proof.p3','.proof.p4'];
+function entranceValue(selector) {
+  const el=document.querySelector(selector);
+  if (!el || !el.getBoundingClientRect().width) return null;
+  let opacity=1;
+  for(let node=el;node;node=node.parentElement) opacity*=Number(getComputedStyle(node).opacity);
+  return {opacity,depth:new DOMMatrix(getComputedStyle(el).transform).m43,
+    ready:el.classList.contains('image-ready')};
+}
 function sample(t) {
   sampleStart ??= t;
   if (last && t-sampleStart < 5000) startupProbe.frames.push(t-last);
@@ -55,18 +64,14 @@ function sample(t) {
       if(opacity>.5 && h.getBoundingClientRect().height>0) startupProbe.heroVisibleAt=t;
     }
   }
-  if (t-sampleStart<3000) {
-    const lines=document.querySelector('.streaks'), card=document.querySelector('.proof');
-    if (lines && card) startupProbe.flight.push({
-      lines:Number(getComputedStyle(lines).opacity),
-      lineScale:new DOMMatrix(getComputedStyle(lines).transform).a,
-      camera:Number(getComputedStyle(document.querySelector('.camera')).opacity),
-      nav:Number(getComputedStyle(document.querySelector('nav')).opacity),
-      card:Number(getComputedStyle(card).opacity),
-      depth:Number(card.style.transform.match(/translate3d\([^,]+,[^,]+,\s*(-?[\d.]+)px/)?.[1] || 0),
-      ready:card.classList.contains('image-ready')
+  if (t-sampleStart<5000) {
+    const camera=document.querySelector('.camera'), nav=document.querySelector('nav');
+    if (camera && nav) startupProbe.flight.push({
+      camera:Number(getComputedStyle(camera).opacity),
+      nav:Number(getComputedStyle(nav).opacity),
+      entrance:entranceSelectors.map(entranceValue)
     });
-  }
+  } else startupProbe.flightDone=true;
   if(t-sampleStart<10000) requestAnimationFrame(sample);
 }
 requestAnimationFrame(sample);
@@ -167,8 +172,15 @@ b.call('Page.navigate', {'url':base})
 wait('!!window.universePerformance')
 wait("[...document.querySelectorAll('.proof img')].every(i=>i.complete&&i.naturalWidth>1)")
 wait("[...document.querySelectorAll('.proof')].every(c=>c.classList.contains('image-ready')&&getComputedStyle(c).opacity==='1')")
-check(b.js("startupProbe.flight.some(f=>f.lines>.35&&f.camera<.5&&f.nav<.5) && startupProbe.flight.some(f=>f.ready&&f.card>.15&&f.card<.9&&f.depth < -20)"), 'Desktop first visit: speed lines lead into the scene and cards drift forward from depth')
-check(b.js("(()=>{const visible=startupProbe.flight.filter(f=>f.lines>.2);return visible.length>5&&visible.every((f,i)=>i===0||f.lineScale>=visible[i-1].lineScale-.05)})()"), 'Desktop first visit: speed lines keep moving forward without resetting')
+wait('startupProbe.flightDone')
+check(b.js("startupProbe.flight.some(f=>f.camera>.15&&f.camera<.95&&f.nav<.05) && startupProbe.flight.some(f=>f.camera>.9&&f.nav>.05&&f.nav<.95)"), 'Desktop first visit: scene fades in softly and navigation follows')
+check(b.js("startupProbe.flight.some(f=>f.entrance.slice(4).some(v=>v&&v.ready&&v.opacity>.05&&v.opacity<.95&&v.depth < -20))"), 'Desktop first visit: decoded cards drift forward from depth')
+check(b.js("startupProbe.flight.some(f=>f.entrance.slice(0,4).some(v=>v&&v.depth < -60))"), 'Desktop first visit: text arrives from depth')
+check(b.js("""(()=>{
+  const sequences=Array.from({length:8},(_,i)=>startupProbe.flight.map(f=>f.entrance[i]).filter(Boolean));
+  return sequences.every(seq=>seq.length>5&&seq.some(v=>v.opacity>.05&&v.opacity<.95)&&seq.at(-1).opacity>.99&&
+    seq.every((v,i)=>i===0||v.opacity>=seq[i-1].opacity-.025));
+})()"""), 'Desktop first visit: text and cards reveal continuously without flashing away')
 check(b.js("[...document.querySelectorAll('.proof img')].every(i=>i.currentSrc.includes('/site/img/proof_'))"), 'Desktop hero: all four original artwork images load')
 supported = b.js('navigator.gpu?.requestAdapter().then(a=>!!a) ?? false')
 if supported:

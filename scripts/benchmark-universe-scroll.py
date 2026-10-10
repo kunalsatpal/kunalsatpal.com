@@ -56,9 +56,20 @@ PROBE = r"""
     });
   }).observe({type:'long-animation-frame', buffered:true});
   for (const type of ['wheel','touchstart','touchmove','touchend','click']) {
-    addEventListener(type, e => keep(inputs, {type, at:performance.now(),
-      timestamp:e.timeStamp, deltaY:e.deltaY ?? null, trusted:e.isTrusted}),
-      {capture:true, passive:true});
+    addEventListener(type, e => {
+      const target=e.target, ignored=target.closest?.(
+        '.modal, .overview, input, textarea, select, [contenteditable="true"], [data-lenis-prevent]');
+      const describe=node => node ? {tag:node.tagName || node.nodeName, id:node.id || '',
+        class:node.getAttribute?.('class') || ''} : null;
+      keep(inputs, {type, at:performance.now(), timestamp:e.timeStamp,
+        deltaY:e.deltaY ?? null, trusted:e.isTrusted, target:describe(target),
+        ignoredAncestor:describe(ignored), page:{hidden:document.hidden,
+          cameraClass:document.getElementById('camera')?.className || '',
+          modalClass:document.getElementById('modal')?.className || '',
+          overviewClass:document.getElementById('overview')?.className || '',
+          firstFlight:document.documentElement.classList.contains('first-flight'),
+          snap:window.universePerformance?.().snap || null}});
+    }, {capture:true, passive:true});
   }
   addEventListener('error', e => keep(errors, {at:performance.now(),
     message:e.message || 'resource failed', source:e.filename || e.target?.src || ''}), true);
@@ -199,8 +210,15 @@ def click(browser, selector):
     point = browser.js(f"""(() => {{
       const e=document.querySelector({json.dumps(selector)});
       if (!e) throw new Error('Missing input target');
-      const r=e.getBoundingClientRect();
-      return {{x:r.left+r.width/2,y:r.top+r.height/2}};
+      // The SVG stop group also contains its text label, so the group bounds'
+      // center need not touch its clickable circle.
+      const target=e.querySelector('.hit,.dot') || e, r=target.getBoundingClientRect();
+      if (!r.width || !r.height) throw new Error('Input target has no visible bounds');
+      const x=r.left+r.width/2,y=r.top+r.height/2,hit=document.elementFromPoint(x,y);
+      if (!hit || !(hit===e || e.contains(hit) || hit.closest?.('.stop')===e)) {{
+        throw new Error('Input target is not hit-testable at its center: '+{json.dumps(selector)});
+      }}
+      return {{x,y}};
     }})()""")
     browser.call('Input.dispatchMouseEvent', {'type': 'mouseMoved', **point})
     for kind in ['mousePressed', 'mouseReleased']:

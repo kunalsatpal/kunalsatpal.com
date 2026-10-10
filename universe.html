@@ -975,7 +975,7 @@ html.theme-toon .rolechip { border: 2px solid #15132a; background: #1f1757; }
   import Lenis from './vendor/lenis.mjs'
   import { NOW, PLANETS, MAJOR, STOPS } from './site/js/universe-data.js'
   import { createUniverseShaders } from './site/js/universe-shaders.js'
-  import { createSceneSnap } from './site/js/universe-scroll.js?v=3'
+  import { createSceneSnap } from './site/js/universe-scroll.js?v=4'
   performance.mark('universe:boot')
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches
   const $ = id => document.getElementById(id)
@@ -1754,6 +1754,7 @@ html.theme-toon .rolechip { border: 2px solid #15132a; background: #1f1757; }
   })
   function measure() {
     const oldScrollRange = LC.journeyHeight - LC.innerHeight
+    const previousIndex = oldScrollRange > 0 ? nearest(Number.isFinite(lastSceneU) ? lastSceneU : scrollY / oldScrollRange * U) : 0
     LC.journeyHeight = journey.offsetHeight
     LC.innerWidth = innerWidth
     LC.innerHeight = innerHeight
@@ -1782,7 +1783,12 @@ html.theme-toon .rolechip { border: 2px solid #15132a; background: #1f1757; }
     layoutVersion++
     // Fonts and load/resize notifications often leave route stops unchanged.
     // Re-measure artwork, but do not cancel and replay an in-flight journey.
-    if (LC.journeyHeight - LC.innerHeight !== oldScrollRange) sceneSnap?.layoutChanged()
+    if (LC.journeyHeight - LC.innerHeight !== oldScrollRange) {
+      // Lenis otherwise refreshes its limits after a debounced resize, too late
+      // to map an in-flight destination into the new scroll range.
+      lenis?.resize()
+      sceneSnap?.layoutChanged({ previousIndex })
+    }
   }
   measure()
   let measurePending = false
@@ -1800,6 +1806,15 @@ html.theme-toon .rolechip { border: 2px solid #15132a; background: #1f1757; }
     if (suspended || frameId || ticking) return
     previousFrame = null
     frameId = requestAnimationFrame(frame)
+  }
+  function beginScrollClock() {
+    if (previousFrame !== null) {
+      const now = performance.now()
+      scrollClock += Math.max(0, now - previousFrame)
+      previousFrame = Math.max(previousFrame, now)
+    }
+    // Time spent before this gesture must not advance its new animation.
+    lenis?.raf(scrollClock)
   }
   addEventListener('scroll', requestFrame, { passive: true })
   addEventListener('wheel', requestFrame, { passive: true })
@@ -1858,7 +1873,7 @@ html.theme-toon .rolechip { border: 2px solid #15132a; background: #1f1757; }
     ticking = true
     const elapsed = previousFrame === null ? 1000 / 60 : Math.max(0, t - previousFrame)
     const dt = Math.min(50, elapsed)
-    previousFrame = t
+    previousFrame = Math.max(previousFrame ?? t, t)
     // Keep scroll and scene timelines aligned after active-frame stalls.
     // requestFrame resets the timestamp on idle wake, excluding the idle gap.
     scrollClock += elapsed
@@ -2039,8 +2054,11 @@ html.theme-toon .rolechip { border: 2px solid #15132a; background: #1f1757; }
     lenis = new Lenis({ lerp: 0.12, smoothWheel: true, wheelMultiplier: 1, syncTouch: false })
     lenis.on('scroll', requestFrame)
   }
-  let jumpTimer = 0, jumpFrame = 0
+  let jumpTimer = 0, jumpFrame = 0, pendingJump = null, scrollMotion = null
+  const scrollEase = x => 1 - Math.pow(1 - x, 4)
   const clearJump = () => {
+    pendingJump = null
+    scrollMotion = null
     clearTimeout(jumpTimer); jumpTimer = 0
     cancelAnimationFrame(jumpFrame); jumpFrame = 0
     if (jumpArrival) { jumpArrival = null; lastSceneU = NaN }
@@ -2060,25 +2078,66 @@ html.theme-toon .rolechip { border: 2px solid #15132a; background: #1f1757; }
       else scrollTo({ top: scrollY, behavior: 'instant' })
       requestFrame()
     },
+    resizeAnimation: index => {
+      const scrollRange = LC.journeyHeight - LC.innerHeight
+      if (jumpArrival?.index === index) {
+        // The destination moves in pixels, but its arrival timeline stays intact.
+        if (lenis) lenis.scrollTo(yFor(index), { immediate: true, force: true })
+        else scrollTo({ top: yFor(index), behavior: 'instant' })
+        requestFrame()
+        return true
+      }
+      if (pendingJump?.index === index) {
+        // Keep the original preparation timer and departure position.
+        if (lenis) lenis.scrollTo(pendingJump.from * scrollRange, { immediate: true, force: true })
+        else scrollTo({ top: pendingJump.from * scrollRange, behavior: 'instant' })
+        requestFrame()
+        return true
+      }
+      const motion = scrollMotion
+      if (!lenis || !motion || motion.index !== index) return false
+      const elapsed = Math.max(0, scrollClock - motion.startClock)
+      const fraction = Math.min(1, elapsed / motion.duration)
+      const destination = SCENES[index].u / U
+      const from = motion.from + (destination - motion.from) * scrollEase(fraction)
+      const remaining = Math.max(0, motion.duration - elapsed)
+      lenis.scrollTo(from * scrollRange, { immediate: true, force: true })
+      if (remaining === 0) {
+        lenis.scrollTo(yFor(index), { immediate: true, force: true })
+        motion.complete()
+      } else {
+        // Quartic ease-out has the same curve for its remaining segment when
+        // restarted from the current progress with only the remaining duration.
+        scrollMotion = { ...motion, from, startClock: scrollClock, duration: remaining }
+        lenis.scrollTo(yFor(index), { duration: remaining / 1000, easing: scrollEase, onComplete: motion.complete })
+      }
+      requestFrame()
+      return true
+    },
     animateTo: (target, { kind, duration, onComplete }) => {
       cancelFirstFlight()
       clearJump()
       requestFrame()
       const dist = Math.abs(target - scrollY) / LC.innerHeight
-      const complete = () => { stage.classList.remove('warping'); onComplete() }
+      const complete = () => { scrollMotion = null; pendingJump = null; stage.classList.remove('warping'); onComplete() }
       if (kind === 'navigate' && dist > 2 && !reduce) {
         // A long smooth scroll wakes and loads every scene along the route.
         // Replay the same one-scene arrival while rendering only the selected destination.
         const index = nearest(target / (LC.journeyHeight - LC.innerHeight) * U)
         const destination = SCENES[index]
         const direction = target > scrollY ? 'travel-forward' : 'travel-backward'
+        const arrivalDuration = Math.min(2.1, .65 + (LC.journeyHeight - LC.innerHeight) / U / LC.innerHeight * .14) * 1000
+        pendingJump = { index, from: scrollY / (LC.journeyHeight - LC.innerHeight) }
         loadSceneAssets(destination.el)
         stage.classList.add('warping', 'jumping', 'traveling', direction)
         jumpTimer = setTimeout(() => {
           jumpTimer = 0
+          pendingJump = null
+          const destinationY = yFor(index)
+          const from = direction === 'travel-forward' ? -1 : 1
           jumpArrival = {
-            index, from: target > scrollY ? -1 : 1, offset: target > scrollY ? -1 : 1, start: null,
-            duration: Math.min(2.1, .65 + (LC.journeyHeight - LC.innerHeight) / U / LC.innerHeight * .14) * 1000,
+            index, from, offset: from, start: null,
+            duration: arrivalDuration,
             complete: () => {
               complete()
               jumpTimer = setTimeout(() => {
@@ -2087,8 +2146,8 @@ html.theme-toon .rolechip { border: 2px solid #15132a; background: #1f1757; }
               }, 320)
             },
           }
-          if (lenis) lenis.scrollTo(target, { immediate: true, force: true })
-          else scrollTo({ top: target, behavior: 'instant' })
+          if (lenis) lenis.scrollTo(destinationY, { immediate: true, force: true })
+          else scrollTo({ top: destinationY, behavior: 'instant' })
           requestFrame()
           jumpFrame = requestAnimationFrame(() => {
             jumpFrame = requestAnimationFrame(() => {
@@ -2105,11 +2164,14 @@ html.theme-toon .rolechip { border: 2px solid #15132a; background: #1f1757; }
         if (lenis) lenis.scrollTo(target, { immediate: true, force: true })
         else scrollTo({ top: target, behavior: 'instant' })
         complete()
-      } else lenis.scrollTo(target, {
-        duration: kind === 'navigate' ? Math.min(2.1, .65 + dist * .14) : Math.max(1.05, duration ?? .95),
-        easing: x => 1 - Math.pow(1 - x, 4),
-        onComplete: complete,
-      })
+      } else {
+        beginScrollClock()
+        const seconds = kind === 'navigate' ? Math.min(2.1, .65 + dist * .14) : Math.max(1.05, duration ?? .95)
+        scrollMotion = { index: nearest(target / (LC.journeyHeight - LC.innerHeight) * U),
+          from: lenis.animatedScroll / (LC.journeyHeight - LC.innerHeight), startClock: scrollClock,
+          duration: seconds * 1000, complete }
+        lenis.scrollTo(target, { duration: seconds, easing: scrollEase, onComplete: complete })
+      }
     },
   })
   function warpTo(i) {
@@ -2229,6 +2291,7 @@ html.theme-toon .rolechip { border: 2px solid #15132a; background: #1f1757; }
   if (params.has('moon')) { const [k, mi] = params.get('moon').split(':'), sy = systems.find(o => o.pl.key === k); if (sy) setTimeout(() => land(sy.pl, sy.pl.moons[+mi || 0], sy.moons[+mi || 0].el), 600) }
   if (params.has('perf')) window.universePerformance = () => ({
     shaders: shaders.status(), suspended, framePending: !!frameId, snap: sceneSnap.state(),
+    route: lastSceneU, viewport: { width: LC.innerWidth, height: LC.innerHeight },
     visibleScenes: sceneNodes.filter(n => n.scene.style.visibility !== 'hidden').map(n => n.scene.dataset.scene),
   })
   performance.mark('universe:ready')

@@ -3,7 +3,7 @@ export function nearestStop(stops, position) {
   return stops.reduce((best, value, index) => Math.abs(value - position) < Math.abs(stops[best] - position) ? index : best, 0)
 }
 
-export function createSceneSnap({ getStops, getPosition, animateTo, stopAnimation, enabled, ignoreInput }) {
+export function createSceneSnap({ getStops, getPosition, animateTo, resizeAnimation, stopAnimation, enabled, ignoreInput }) {
   let phase = 'idle', targetIndex = null, settledIndex = nearestStop(getStops(), getPosition())
   let token = 0, unlockAt = 0, settleTimer = 0, touch = null
   const listeners = []
@@ -108,9 +108,11 @@ export function createSceneSnap({ getStops, getPosition, animateTo, stopAnimatio
       clearSettle()
       settleTimer = setTimeout(() => { if (enabled() && phase === 'idle') move(settledIndex) }, 80)
     },
-    layoutChanged() {
+    layoutChanged({ previousIndex } = {}) {
       if (!enabled()) return
-      const index = targetIndex ?? nearestStop(getStops(), getPosition())
+      const index = targetIndex ?? previousIndex ?? nearestStop(getStops(), getPosition())
+      // A renderer can remap its active motion without changing ownership or easing.
+      if (phase !== 'idle' && resizeAnimation?.(index) === true) return
       if (phase !== 'idle') { cancel(); move(index, 'navigate') }
       else move(index, 'resize')
     },

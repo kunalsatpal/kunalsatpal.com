@@ -62,9 +62,6 @@ def viewport(width, height=None):
         'width': width, 'height': height, 'deviceScaleFactor': 3 if width < 600 else 1,
         'mobile': width < 600,
     })
-    # Keep a mouse available even on the narrow layout to exercise hover and
-    # keyboard affordances. Touch pagination has separate existing coverage.
-    b.call('Emulation.setTouchEmulationEnabled', {'enabled': False})
     return height
 
 
@@ -392,8 +389,212 @@ def dynamics_checks():
               f'{width}: idle wake lands on a fully visible destination')
 
 
+def start_route_probe(target, stall_ms=0):
+    """Read final geometry after all callbacks in a frame, including resize remaps."""
+    b.js('''(() => {
+      let started=null, sawMovement=false, done=false, finish;
+      const values=[], skippedGeometry=[];
+      const keys=[...document.querySelectorAll('.scene')].map(el=>el.dataset.scene);
+      const destination=document.querySelectorAll('.scene')[TARGET];
+      window.routeResizeProbe={started,values,promise:new Promise(resolve=>finish=resolve),begin(input) {
+        if(started!==null || done) return;
+        clearTimeout(inputDeadline);
+        started=performance.now(); this.started=started; this.input=input;
+        if(STALL) setTimeout(()=>{
+          this.stallStart=performance.now()-started;
+          const end=performance.now()+STALL;
+          while(performance.now()<end) { /* Controlled event-loop stall. */ }
+          this.stallEnd=performance.now()-started;
+        },250);
+        setTimeout(complete,4500);
+      }};
+      const inputDeadline=setTimeout(()=>{
+        if(started===null) { done=true; finish({error:'No gesture reached the probe',elapsed:0,values,keys}); }
+      },1500);
+      function complete() {
+        if(done) return; done=true;
+        finish({elapsed:performance.now()-started,values,keys,input:routeResizeProbe.input,skippedGeometry});
+      }
+      function sample() {
+        if(done || started===null) return;
+        const diagnostic=universePerformance(), state=diagnostic.snap, stage=document.querySelector('#stage');
+        if((diagnostic.viewport && (diagnostic.viewport.width!==innerWidth || diagnostic.viewport.height!==innerHeight)) ||
+           ('route' in diagnostic && !Number.isFinite(diagnostic.route))) {
+          skippedGeometry.push({at:performance.now()-started,measured:diagnostic.viewport,current:{width:innerWidth,height:innerHeight}});
+          return;
+        }
+        const range=document.querySelector('#journey').offsetHeight-innerHeight;
+        const destinationStyle=getComputedStyle(destination), cameraStyle=getComputedStyle(document.querySelector('#camera'));
+        const rawRoute=scrollY/range*(keys.length-1);
+        values.push({at:performance.now()-started,route:Number.isFinite(diagnostic.route) ? diagnostic.route : rawRoute,rawRoute,
+          phase:state.phase,target:state.targetIndex,settled:state.settledIndex,
+          preparing:stage.classList.contains('jumping'),traveling:stage.classList.contains('traveling'),
+          destinationScale:new DOMMatrix(destinationStyle.transform).a,
+          destinationOpacity:destinationStyle.visibility==='hidden' ? 0 : Number(destinationStyle.opacity)*Number(cameraStyle.opacity),
+          visible:universePerformance().visibleScenes});
+        if(state.phase!=='idle') sawMovement=true;
+        if(sawMovement && state.phase==='idle') complete();
+      }
+      function frame() {
+        if(done) return;
+        // A viewport metric update changes layout immediately, while the page
+        // remaps its route during rAF. Sample once those frame callbacks finish.
+        setTimeout(sample,0); requestAnimationFrame(frame);
+      }
+      requestAnimationFrame(frame);
+    })()'''.replace('TARGET', str(target)).replace('STALL', str(stall_ms)))
+
+
+def route_motion(width, theme, source, target, resize=False, stall_ms=0, jump=False):
+    height = viewport(width)
+    keys = ['hero', 'about', 'hinge', 'gojek', 'cult', 'galaxy', 'writing', 'life', 'hello']
+    load(keys[source], theme)
+    time.sleep(.55)
+    start_route_probe(target, stall_ms)
+    if jump:
+        b.js(f"routeResizeProbe.begin('jump'); document.querySelector('.stop[data-i=\"{target}\"]').dispatchEvent(new MouseEvent('click',{{bubbles:true}}))")
+    else:
+        wheel(1200 if target > source else -1200, width, height)
+    resize_states = []
+    if resize:
+        time.sleep(.04)
+        resize_states.append(b.js("({at:performance.now()-routeResizeProbe.started,...universePerformance().snap,preparing:document.querySelector('#stage').classList.contains('jumping')})"))
+        viewport(width, height + 80)
+        if jump:
+            # The second real metric change happens once the selected page is
+            # visibly arriving, rather than relying on a timer racing the GPU.
+            wait(f"!document.querySelector('#stage').classList.contains('jumping') && Number(getComputedStyle(document.querySelector('[data-scene={keys[target]}]')).opacity)>.15")
+            time.sleep(.04)
+        else:
+            time.sleep(.08)
+        resize_states.append(b.js("({at:performance.now()-routeResizeProbe.started,...universePerformance().snap,preparing:document.querySelector('#stage').classList.contains('jumping')})"))
+        viewport(width, height - 50)
+    data = b.js('routeResizeProbe.promise')
+    assert not data.get('error'), data.get('error')
+    assert data['input'] == ('jump' if jump else 'wheel'), 'Route timing was not aligned with the intended gesture'
+    data['resizeStates'] = resize_states
+    if stall_ms:
+        data['stall'] = b.js('({start:routeResizeProbe.stallStart,end:routeResizeProbe.stallEnd})')
+    return data
+
+
+def resized_route_motion(width, theme, source, target, jump=False):
+    attempts = []
+    for attempt in range(2):
+        data = route_motion(width, theme, source, target, resize=True, jump=jump)
+        states = data['resizeStates']
+        # A slow CDP command response can leave Python unable to issue the next
+        # real metric change before the animation ends. That attempt did not
+        # exercise an in-flight resize; record it and retry once. A wrong phase,
+        # target or early completion remains a product failure, not a retry.
+        late = any(s['phase'] == 'idle' and s['settledIndex'] == target and s['at'] > 650 for s in states)
+        late |= bool(jump and states and not states[0]['preparing'] and states[0]['at'] > 260)
+        attempts.append({'status': 'invalid_intervention' if late else 'measured',
+                         'elapsedMs': data['elapsed'], 'resizeStates': states})
+        data['interventionAttempts'] = attempts.copy()
+        if not late or attempt == 1:
+            return data
+        print(f'RETRY {width}/{theme}/{source}->{target}: CDP response missed the resize window; prior attempt is invalid', flush=True)
+
+
+def route_monotonic(data, source, target):
+    direction = 1 if target > source else -1
+    values = data['values']
+    backwards = [{'at': c['at'], 'before': a['route'], 'after': c['route']}
+                 for a, c in zip(values, values[1:])
+                 if direction * (c['route'] - a['route']) < -.012]
+    final = values[-1] if values else None
+    return (not backwards and final is not None and final['phase'] == 'idle' and
+            final['settled'] == target and abs(final['route'] - target) < .006 and
+            abs(final['rawRoute'] - target) < .006), {'reversals': backwards[:3], 'final': final}
+
+
+def control_route_at(control, at):
+    values = control['values']
+    for a, c in zip(values, values[1:]):
+        if a['at'] <= at <= c['at']:
+            t = (at - a['at']) / max(.001, c['at'] - a['at'])
+            return a['route'] + t * (c['route'] - a['route'])
+    return values[0]['route'] if at < values[0]['at'] else values[-1]['route']
+
+
+def resized_motion_checks():
+    for width in args.widths:
+        for theme in args.themes:
+            prefix = f'{width}/{theme}'
+            control = route_motion(width, theme, 3, 4)
+            good, detail = route_monotonic(control, 3, 4)
+            check(good, f'{prefix}: reference wheel gesture lands monotonically', detail)
+            for source, target in [(3, 4), (3, 2)]:
+                data = resized_route_motion(width, theme, source, target)
+                samples[f'{prefix}/wheel-resize/{source}-{target}'] = data
+                states = data['resizeStates']
+                check(len(states) == 2 and all(s['phase'] == 'snapping' and s['targetIndex'] == target for s in states),
+                      f'{prefix}/{source}->{target}: both height changes occur during the requested wheel snap', states)
+                good, detail = route_monotonic(data, source, target)
+                check(good, f'{prefix}/{source}->{target}: height changes never reverse normalized scroll', detail)
+                check(all(v['phase'] in ('snapping', 'idle') for v in data['values']) and
+                      data['elapsed'] <= control['elapsed'] + 130,
+                      f'{prefix}/{source}->{target}: height changes preserve snap phase and timing',
+                      {'controlMs': control['elapsed'], 'resizedMs': data['elapsed'], 'phases': sorted({v['phase'] for v in data['values']})})
+
+            stalled = route_motion(width, theme, 3, 4, stall_ms=200)
+            samples[f'{prefix}/wheel-stall'] = stalled
+            stall = stalled['stall']
+            check(stall['end'] - stall['start'] >= 190,
+                  f'{prefix}: controlled main-thread stall actually occurred', stall)
+            drift = [abs(v['route'] - control_route_at(control, v['at']))
+                     for v in stalled['values']
+                     if stall['end'] + 40 <= v['at'] <= control['elapsed'] - 80]
+            check(len(drift) > 3 and max(drift, default=1) < .055,
+                  f'{prefix}: active-frame stall does not leave scroll behind its animation timeline',
+                  {'maxRouteDrift': max(drift, default=None), 'samples': len(drift)})
+            good, detail = route_monotonic(stalled, 3, 4)
+            check(good and stalled['elapsed'] <= control['elapsed'] + 90,
+                  f'{prefix}: stalled wheel gesture keeps its original landing time',
+                  {'controlMs': control['elapsed'], 'stalledMs': stalled['elapsed'], **detail})
+
+            for source, target in [(3, 7), (7, 3)]:
+                control_jump = route_motion(width, theme, source, target, jump=True)
+                data = resized_route_motion(width, theme, source, target, jump=True)
+                samples[f'{prefix}/jump-resize/{source}-{target}'] = data
+                states = data['resizeStates']
+                check(len(states) == 2 and states[0]['preparing'] and not states[1]['preparing'] and
+                      all(s['phase'] == 'navigating' and s['targetIndex'] == target for s in states),
+                      f'{prefix}/{source}->{target}: jump is resized during preparation and selected-page arrival', states)
+                good, detail = route_monotonic(data, source, target)
+                check(good and data['elapsed'] <= control_jump['elapsed'] + 140,
+                      f'{prefix}/{source}->{target}: resized jump keeps route direction, target and timing',
+                      {'controlMs': control_jump['elapsed'], 'resizedMs': data['elapsed'], **detail})
+                runs = sum(v['preparing'] and (i == 0 or not data['values'][i-1]['preparing'])
+                           for i, v in enumerate(data['values']))
+                arrival = [v for v in data['values'] if v['destinationOpacity'] > .05]
+                opacity_drops = [c for a, c in zip(arrival, arrival[1:])
+                                 if c['destinationOpacity'] < a['destinationOpacity'] - .025]
+                scale_direction = 1 if target > source else -1
+                scale_reversals = [c for a, c in zip(arrival, arrival[1:])
+                                   if scale_direction * (c['destinationScale'] - a['destinationScale']) < -.015]
+                allowed = {data['keys'][source], data['keys'][target]}
+                unexpected = sorted({key for v in data['values'] for key in v['visible'] if key not in allowed})
+                check(runs == 1 and len(arrival) > 4 and not opacity_drops and not scale_reversals and not unexpected,
+                      f'{prefix}/{source}->{target}: resized jump neither replays nor flashes its selected-page entrance',
+                      {'preparationRuns': runs, 'arrivalSamples': len(arrival), 'opacityDrops': opacity_drops[:2],
+                       'scaleReversals': scale_reversals[:2], 'unexpectedScenes': unexpected})
+
+
 try:
     b.call('Emulation.setFocusEmulationEnabled', {'enabled': True})
+    # Register before application wheel capture listeners, which consume the
+    # event with stopImmediatePropagation. Time measurements begin at the actual
+    # trusted gesture, excluding Python/CDP command delivery latency.
+    b.call('Page.addScriptToEvaluateOnNewDocument', {'source': '''
+      addEventListener('wheel',event=>{
+        if(event.isTrusted && window.routeResizeProbe) routeResizeProbe.begin('wheel');
+      },{capture:true,passive:true});
+    '''})
+    # Keep a mouse available on narrow layouts for real hover/focus affordances;
+    # touch pagination has separate coverage. Height updates only change metrics.
+    b.call('Emulation.setTouchEmulationEnabled', {'enabled': False})
     b.call('Emulation.setCPUThrottlingRate', {'rate': 1})
     b.call('Network.emulateNetworkConditions', {'offline': False, 'latency': 0, 'downloadThroughput': -1, 'uploadThroughput': -1})
     origin = urlunsplit((*urlsplit(args.url)[:2], '', '', ''))
@@ -404,6 +605,7 @@ try:
         preview_checks()
     if args.only in ('all', 'dynamics'):
         dynamics_checks()
+        resized_motion_checks()
     exceptions = [e for e in b.events if e.get('method') == 'Runtime.exceptionThrown']
     check(not exceptions, 'No uncaught browser errors during scroll regressions', exceptions[:3])
 finally:
