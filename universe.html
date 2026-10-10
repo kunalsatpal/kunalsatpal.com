@@ -1896,7 +1896,7 @@ html.theme-toon .rolechip { border: 2px solid #15132a; background: #1f1757; }
         const ry = (dx < 0 ? 1 : -1) * 4, rxx = (dy < 0 ? -1 : 1) * 2
         const spin = far * (i % 2 ? 14 : -14)
         writeStyle(c, 'transform', `perspective(900px) translate3d(${cx * 60 * d * motion + dx * k - dx * far * .82}px, ${cy * 40 * d * motion + bob + dy * k - dy * far * .82}px, ${-360 * far}px) scale(${(1 + k * 1.3) * (0.16 + 0.84 * e)}) rotateY(${ry + cx * 3 * motion}deg) rotateX(${rxx - cy * 2 * motion}deg) rotate(${tilt + cx * 3 * d * motion + spin}deg)`)
-        writeStyle(c, 'opacity', a < 1 ? String(Math.min(1, e * 1.6).toFixed(3)) : '')
+        writeStyle(c, 'opacity', a < 1 ? String(Math.min(1, e * 1.6).toFixed(3)) : '1')
       })
     }
 
