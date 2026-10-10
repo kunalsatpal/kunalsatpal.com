@@ -155,15 +155,18 @@ check(b.js("document.body.style.opacity !== '0' && document.getElementById('came
 # Project previews keep the complete image prominent and strip redundant badge copy.
 preview = b.js("""(() => {
   const tip = document.querySelector('[data-scene=gojek] .moon.open .tip.big')
-  const image = tip.querySelector('img')
+  const frame = tip.querySelector('.tip-img'), image = frame.querySelector('img')
   const ir = image.getBoundingClientRect()
-  return { imageWidth: image.offsetWidth, tipWidth: tip.clientWidth, renderedRatio: ir.width / ir.height,
-    naturalRatio: image.naturalWidth / image.naturalHeight,
+  return { imageWidth: image.offsetWidth, tipWidth: tip.clientWidth, frameHeight: frame.offsetHeight,
+    renderedRatio: image.offsetWidth / image.offsetHeight, naturalRatio: image.naturalWidth / image.naturalHeight,
+    float: tip.classList.contains('tip-float'), phone: frame.classList.contains('is-phone'),
+    planet: !!frame.querySelector('.tp-planet'), glow: getComputedStyle(tip).getPropertyValue('--glow').trim(),
     result: tip.querySelector('.tip-result')?.textContent,
     redundantTags: tip.querySelectorAll('.tip-k,.tip-go').length }
 })()""")
-check(preview['imageWidth'] == preview['tipWidth'], 'Hover preview image spans the full card content width')
-check(abs(preview['renderedRatio'] - preview['naturalRatio']) < .02, 'Hover preview shows the complete image without cropping')
+check(preview['float'] and preview['frameHeight'] == 168 and preview['imageWidth'] < preview['tipWidth'], 'Hover preview uses the fixed-height sky window with a floating image')
+check(preview['phone'] and preview['planet'] and preview['glow'], 'Gojek hover preview uses its phone cut-out, tiny planet, and scene glow')
+check(abs(preview['renderedRatio'] - preview['naturalRatio']) < .02, 'Hover preview preserves the phone cut-out aspect ratio')
 check(preview['result'] == '+4% conversions · 5× ad revenue', 'Hover preview includes the final result numbers without a label')
 check(preview['redundantTags'] == 0, 'Hover preview omits redundant company and action tags')
 
@@ -182,18 +185,29 @@ clamped = []
 for scene in ('gojek', 'cult'):
     b.navigate(base + f'?scene={scene}&perf')
     wait_for("[...document.querySelectorAll('.moon.open .tip-img img')].every(image => image.complete)")
+    phone_previews = b.js(f"""[...document.querySelectorAll('[data-scene={scene}] .moon.open')].map(moon => {{
+      const key = new URL(moon.href).searchParams.get('c'), frame = moon.querySelector('.tip-img'), image = frame?.querySelector('img')
+      return {{ key, src: image?.getAttribute('src'), phone: frame?.classList.contains('is-phone'),
+        planet: !!frame?.querySelector('.tp-planet'), loaded: image?.complete && image.naturalWidth > 0 }}
+    }}).filter(preview => ['promo', 'Fitclub', 'cart_abandonment'].includes(preview.key))""")
+    expected_phones = {'gojek': {'promo'}, 'cult': {'Fitclub', 'cart_abandonment'}}[scene]
+    check({preview['key'] for preview in phone_previews} == expected_phones and
+          all(preview['src'] == f'./site/cases/media/phone_{preview["key"]}.png' and preview['phone'] and preview['planet'] and preview['loaded'] for preview in phone_previews),
+          f'{scene}: phone case studies use the matching loaded cut-outs')
+    selector = json.dumps(f'[data-scene="{scene}"] .moon.open')
     clamped += b.js("""(async () => {
       const results = []
-      for (const moon of document.querySelectorAll('.moon.open')) {
+      for (const moon of document.querySelectorAll(SELECTOR)) {
         moon.dispatchEvent(new PointerEvent('pointerenter'))
         await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)))
         const r = moon.querySelector('.tip.big').getBoundingClientRect()
-        results.push({ left:r.left, top:r.top, right:r.right, bottom:r.bottom })
+        results.push({ left:r.left, top:r.top, right:r.right, bottom:r.bottom,
+          active: moon.querySelector('.tip-float').classList.contains('on') })
         moon.dispatchEvent(new PointerEvent('pointerleave'))
       }
       return results
-    })()""")
-check(all(r['left'] >= 11 and r['top'] >= 11 and r['right'] <= 379 and r['bottom'] <= 833 for r in clamped), 'Phone hover previews stay inside every viewport edge')
+    })()""".replace('SELECTOR', selector))
+check(all(r['left'] >= 11 and r['top'] >= 11 and r['right'] <= 379 and r['bottom'] <= 833 and r['active'] for r in clamped), 'Phone hover previews lift and stay inside every viewport edge')
 
 b.navigate(base + '?scene=galaxy&perf')
 wait_for("[...document.querySelectorAll('.mbadge img')].every(image => image.complete)")
