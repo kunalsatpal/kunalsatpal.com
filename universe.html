@@ -735,6 +735,16 @@ html.theme-toon .nebula { position: absolute; inset: -6%; pointer-events: none; 
 html.theme-toon .nebula svg { width: 100%; height: 100%; }
 html.theme-toon .vignette { position: absolute; inset: 0; pointer-events: none; z-index: 2;
     background: radial-gradient(90% 80% at 50% 45%, transparent 60%, rgba(10,6,34,.45)); }
+/* Multi-page travel keeps the cartoon's bold colours and crisp outlines. */
+html.theme-toon .stage.traveling .streaks {
+  background: repeating-conic-gradient(from 0deg at 50% 50%,
+    transparent 0deg 10.7deg, #bbaaff 10.8deg 11.25deg, transparent 11.35deg 22.7deg,
+    #9fe8d2 22.8deg 23.25deg, transparent 23.35deg 24deg);
+  -webkit-mask-image: radial-gradient(circle at 50% 50%, transparent 22%, #000 22.5%);
+  mask-image: radial-gradient(circle at 50% 50%, transparent 22%, #000 22.5%);
+}
+html.theme-toon .stage.traveling.warping .streaks { opacity: .55; }
+html.theme-toon .stage.traveling .scene { filter: none !important; }
 html.theme-toon .cue-cap { stroke: #fff; stroke-width: 3; fill: #1f1757; }
 html.theme-toon .cue-moon { stroke: #15132a; stroke-width: 1.5; }
 html.theme-toon .cue-pl circle:first-child { stroke: #15132a; stroke-width: 2; }
