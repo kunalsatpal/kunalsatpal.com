@@ -22,31 +22,17 @@
 
   /* Zoom the first screen on landing; the long article keeps its scroll geometry. */
   .world { transition: opacity .38s ease; }
-  body.arriving .world, body.leaving .world { opacity: 0; }
+  body.arriving .world { opacity: 0; }
+  body.leaving .world, body.card-leaving .world { opacity: 0; transition-duration: .24s; }
   .hero2 { transition: transform .52s cubic-bezier(.18,.82,.22,1), opacity .38s ease; transform-origin: 50% 55%; }
   .horizon { transition: transform .52s cubic-bezier(.18,.82,.22,1); transform-origin: 50% 0; }
   .sky { transition: transform .42s cubic-bezier(.55,.05,.75,.25); transform-origin: 50% 65%; }
   body.arriving .hero2 { transform: translateY(-28px) scale(.88); opacity: 0; }
   body.arriving .horizon { transform: translateY(48px) scale(.88); }
-  body.leaving .hero2 { transform: scale(.9); opacity: 0; }
-  body.leaving.leaving-sky .sky { transform: scale(.8); }
   .bar, .progress { transition: opacity .22s ease; }
   body.leaving .bar, body.leaving .progress { opacity: 0; }
-  /* A viewport-sized moon contracts on lift-off, including from the article's end. */
-  .liftoff-overlay { position: fixed; inset: 0; z-index: 60; overflow: hidden; display: grid; place-items: center;
-    pointer-events: none; background: #020308; opacity: 0; visibility: hidden; transition: opacity .14s ease, visibility 0s linear .4s; }
-  .liftoff-moon { width: 110vmax; aspect-ratio: 1; border-radius: 50%;
-    background: radial-gradient(circle at 30% 28%, rgba(255,255,255,.55) 0 3%, transparent 3.5%),
-      radial-gradient(circle at 62% 46%, rgba(74,70,68,.18) 0 6%, transparent 6.5%),
-      radial-gradient(circle at 42% 70%, rgba(74,70,68,.13) 0 8%, transparent 8.5%), var(--dust);
-    box-shadow: 0 0 0 2px rgba(255,255,255,.25), 0 0 100px -30px var(--c);
-    transform: scale(1.5); transition: transform .38s cubic-bezier(.55,.05,.75,.25); }
-  body.leaving .liftoff-overlay { opacity: 1; visibility: visible; transition: opacity .14s ease; }
-  body.leaving .liftoff-moon { transform: scale(.025); will-change: transform; }
-  body.leaving.leaving-sky .liftoff-overlay { opacity: 0; visibility: hidden; }
   body.restoring .world, body.restoring .bar, body.restoring .progress,
-  body.restoring .sky, body.restoring .hero2, body.restoring .horizon,
-  body.restoring .liftoff-overlay, body.restoring .liftoff-moon { transition: none !important; }
+  body.restoring .sky, body.restoring .hero2, body.restoring .horizon { transition: none !important; }
 
   /* ---------- Top bar ---------- */
   .bar { position: fixed; z-index: 50; top: 20px; left: 20px; right: 20px; display: flex; justify-content: space-between; align-items: center; pointer-events: none; }
@@ -243,7 +229,7 @@
     .layout { grid-template-columns: 1fr; padding: 0 20px; } .toc { display: none; }
     .parent { width: 40vw; right: -6%; } .coords { display: none; }
   }
-  @media (prefers-reduced-motion: reduce) { .world, .shot.rise { transition: none; } .shot.rise { opacity: 1; transform: none; } }
+  @media (prefers-reduced-motion: reduce) { .world, .shot.rise, .nextmoons .nm-cover.phone { transition: none; } .shot.rise { opacity: 1; transform: none; } }
 
   /* Lists, tables and galleries from the original pages. */
   .blist { margin: 18px 0 0; padding-left: 22px; color: var(--rock-muted, var(--muted)); }
@@ -283,9 +269,25 @@
 
   /* Forward cards: show the same work preview used in the universe, without decorative tags. */
   .nextmoons .nextmoon { background: #07080d; }
-  .nextmoons .nm-sky { min-height: 0; aspect-ratio: 1.36; background: #f6f6f7 !important; }
-  .nextmoons .nm-cover.preview { position: static; width: 100%; height: 100%; max-height: none; object-fit: cover; transform: none; border-radius: 0; box-shadow: none; transition: transform .65s cubic-bezier(.2,.8,.2,1); }
-  .nextmoons .nextmoon:hover .nm-cover.preview { transform: scale(1.025); }
+  .nextmoons .nm-sky { min-height: 0; aspect-ratio: 1.36; background:
+    radial-gradient(1.2px 1.2px at 16% 28%, rgba(255,255,255,.75), transparent),
+    radial-gradient(1px 1px at 70% 16%, rgba(255,255,255,.55), transparent),
+    radial-gradient(1px 1px at 38% 58%, rgba(255,255,255,.4), transparent),
+    radial-gradient(1.2px 1.2px at 90% 50%, rgba(255,255,255,.5), transparent),
+    radial-gradient(70% 90% at 50% 100%, color-mix(in srgb, var(--nc) 32%, #0b0d14), #07080d 70%) !important; }
+  .nextmoons .nm-stars { z-index: 0; }
+  .nextmoons .nm-planet { z-index: 1; width: 42px; background:
+    radial-gradient(circle at 30% 26%, rgba(255,255,255,.45) 0 6%, transparent 24%),
+    radial-gradient(circle at 74% 76%, rgba(2,3,8,.9) 0 24%, transparent 62%),
+    repeating-linear-gradient(-18deg, color-mix(in srgb, var(--nc) 80%, #000) 0 10%, var(--nc) 10% 18%, color-mix(in srgb, var(--nc) 70%, #000) 18% 28%); }
+  .nextmoons .nm-horizon { display: none; }
+  .nextmoons .nm-sky::after { content: ""; position: absolute; z-index: 3; left: 0; right: 0; bottom: 0; height: 32%;
+    background: linear-gradient(transparent, rgba(12,14,21,.97)); pointer-events: none; }
+  .nextmoons .nm-cover.phone { z-index: 2; left: 50%; top: 50%; bottom: auto; width: 84%; height: auto; max-height: 84%;
+    object-fit: contain; border-radius: 8px; box-shadow: 0 18px 30px -14px rgba(0,0,0,.85); filter: none;
+    transform: translate(-50%, -50%) rotate(-3deg); transition: transform .6s cubic-bezier(.2,.8,.2,1); }
+  .nextmoons .nextmoon:hover .nm-cover.phone { transform: translate(-50%, calc(-50% - 6px)) rotate(-1.5deg); }
+  .cartoon .nextmoons .nm-cover.phone { border: 3px solid #15132a; box-shadow: 0 5px 0 #15132a; }
   .nextmoons .nm-copy { gap: 9px; padding: 24px 26px 27px; background: #07080d; }
   .nextmoons .nm-copy b { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
   .nextmoons .nm-copy b::after { content: "↗"; flex: none; color: rgba(255,255,255,.72); font-size: .8em; transition: transform .3s; }
@@ -294,9 +296,8 @@
   .lander .heroimg { width: min(640px, 46vw) !important; height: auto !important; border-radius: 14px !important; box-shadow: 0 0 0 1px rgba(255,255,255,.12), 0 40px 80px -30px rgba(0,0,0,.9) !important; animation: float 7s ease-in-out infinite; }
   @media (prefers-reduced-motion: reduce) {
     .sky, .hero2, .horizon { transition: none; }
-    body.arriving .hero2, body.arriving .horizon, body.leaving .hero2, body.leaving.leaving-sky .sky { transform: none; }
+    body.arriving .hero2, body.arriving .horizon { transform: none; }
     body.arriving .hero2 { opacity: 1; }
-    .liftoff-overlay { display: none; }
   }
 
   /* ---------- Native blocks (rebuilt case studies) ---------- */
@@ -358,8 +359,6 @@
     </section>
   </main>
 </div>
-<div class="liftoff-overlay" aria-hidden="true"><div class="liftoff-moon"></div></div>
-
 <script type="module">
   import Lenis from './vendor/lenis.mjs'
   const $ = id => document.getElementById(id)
@@ -369,9 +368,9 @@
 
   // Which planet each case belongs to (for colour and where "Back to orbit" lands you).
   const META = {
-    promo:              { title: 'Solving for promo discovery', planet: 'gojek',   c: '#3fe05a', kicker: 'Gojek · GoFood growth', summary: 'Streamlining the promo journey, leading to 4% incremental conversions and 5× ad revenue.', preview: './site/cases/m/fe0ed5eb7d.png', chips: [['4%', 'session conversions'], ['5×', 'ad revenue'], ['6', 'months of testing']] },
-    Fitclub:            { title: 'Designing for engagement: Fitclub V2', planet: 'cult',    c: '#ff5a85', kicker: 'Cult.fit', summary: 'Fitclub V2, a loyalty program built to lift retention and cross-sell products.', preview: './site/img/fitclub.png', chips: [['V2', 'loyalty program'], ['Gamified', 'rewards']] },
-    cart_abandonment:   { title: 'Solving for cart abandonment', planet: 'cult',    c: '#ff5a85', kicker: 'Cult.fit', summary: 'Designing to bring people back on day two and after, once they have left a cart behind.', preview: './site/img/cart.png', chips: [['Day 2+', 'recovery'], ['Nudges', 'and reminders']] },
+    promo:              { title: 'Solving for promo discovery', planet: 'gojek',   c: '#3fe05a', kicker: 'Gojek · GoFood growth', summary: 'Streamlining the promo journey, leading to 4% incremental conversions and 5× ad revenue.', preview: './site/cases/media/phone_promo.png', chips: [['4%', 'session conversions'], ['5×', 'ad revenue'], ['6', 'months of testing']] },
+    Fitclub:            { title: 'Designing for engagement: Fitclub V2', planet: 'cult',    c: '#ff5a85', kicker: 'Cult.fit', summary: 'Fitclub V2, a loyalty program built to lift retention and cross-sell products.', preview: './site/cases/media/phone_Fitclub.png', chips: [['V2', 'loyalty program'], ['Gamified', 'rewards']] },
+    cart_abandonment:   { title: 'Solving for cart abandonment', planet: 'cult',    c: '#ff5a85', kicker: 'Cult.fit', summary: 'Designing to bring people back on day two and after, once they have left a cart behind.', preview: './site/cases/media/phone_cart_abandonment.png', chips: [['Day 2+', 'recovery'], ['Nudges', 'and reminders']] },
     Pibit:              { title: 'Starting my design journey with Pibit', planet: 'galaxy',  c: '#ffa45a', kicker: 'Pibit · Writing', summary: 'Starting my design journey as a founding product designer.', chips: [] },
     portfolio:          { title: 'Designing and iterating my portfolio', planet: 'writing', c: '#9fe8d2', kicker: 'Writing · Process', summary: 'Designing and iterating my portfolio website.', chips: [] },
     Internship_curefit: { title: 'My experience at Cure.fit', planet: 'writing', c: '#ff8fb0', kicker: 'Writing · Career', summary: 'What two internships at Cure.fit taught me.', chips: [] },
@@ -433,11 +432,11 @@
   // Two forward moons: windows onto the other case studies.
   const nexts = ORDER.filter(k => k !== key).slice(0, 2)
   $('nextMoons').innerHTML = nexts.map(k => `<a class="nextmoon" href="./case.html?c=${k}&home=${HOME}" style="--nc:${META[k].c}" aria-label="Read ${META[k].title}">
-      <span class="nm-sky"><img class="nm-cover preview" src="${META[k].preview}" alt="" loading="lazy" /></span>
+      <span class="nm-sky"><span class="nm-stars" aria-hidden="true"></span><span class="nm-planet" aria-hidden="true"></span><span class="nm-horizon" aria-hidden="true"></span><img class="nm-cover phone" src="${META[k].preview}" alt="" loading="lazy" /></span>
       <span class="nm-copy"><b>${META[k].title}</b><span class="nm-s">${META[k].summary}</span></span></a>`).join('')
   document.querySelectorAll('.nextmoon').forEach(a => a.addEventListener('click', e => {
     if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return
-    e.preventDefault(); leave(a.href)
+    e.preventDefault(); leave(a.href, true)
   }))
 
   // ---------- Motion ----------
@@ -470,14 +469,18 @@
   }, { passive: true })
 
   // ---------- Navigation and browser back/forward restoration ----------
-  function leave(url) {
+  function leave(url, soft = false) {
     if (leaving) return
     leaving = true
     lenis?.stop()
     if (reduce) { location.href = url; return }
-    document.body.classList.toggle('leaving-sky', scrollY < $('sky').offsetHeight * .75)
+    if (soft) {
+      document.body.classList.add('card-leaving')
+      navigationTimer = setTimeout(() => location.href = url, 260)
+      return
+    }
     document.body.classList.add('leaving')
-    navigationTimer = setTimeout(() => location.href = url, 420)
+    navigationTimer = setTimeout(() => location.href = url, 280)
   }
   function toOrbit(e) {
     e?.preventDefault()
@@ -494,7 +497,7 @@
     clearTimeout(navigationTimer)
     leaving = false
     document.body.classList.add('restoring')
-    document.body.classList.remove('leaving', 'leaving-sky', 'arriving')
+    document.body.classList.remove('leaving', 'card-leaving', 'arriving')
     lenis?.start()
     if (lenis && !motionFrame) motionFrame = requestAnimationFrame(raf)
     requestAnimationFrame(() => requestAnimationFrame(() => document.body.classList.remove('restoring')))
