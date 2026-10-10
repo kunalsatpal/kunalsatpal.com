@@ -76,13 +76,11 @@ for width, height, mobile in [(390, 844, True), (768, 1024, False), (1440, 900, 
     b.js("scrollTo(0,(2.42/8)*(document.getElementById('journey').offsetHeight-innerHeight))")
     wait_for("universePerformance().snap.phase === 'idle' && universePerformance().snap.settledIndex === 2")
     check(b.js("Math.abs(scrollY-(2/8)*(document.getElementById('journey').offsetHeight-innerHeight)) <= 2"), f'{width}: an in-between position settles exactly on Hinge Health')
-    # Any wheel strength advances exactly one page; momentum events are swallowed.
+    # A strong wheel gesture advances exactly one page.
     time.sleep(.4)
     b.call('Input.dispatchMouseEvent', {'type':'mouseWheel','x':width/2,'y':height/2,'deltaX':0,'deltaY':1400})
-    for _ in range(5):
-        b.call('Input.dispatchMouseEvent', {'type':'mouseWheel','x':width/2,'y':height/2,'deltaX':0,'deltaY':1400})
     wait_for("universePerformance().snap.phase === 'idle' && universePerformance().snap.settledIndex === 3")
-    check(b.js("Math.abs(scrollY-(3/8)*(document.getElementById('journey').offsetHeight-innerHeight)) <= 2"), f'{width}: hard wheel momentum advances exactly one scene')
+    check(b.js("Math.abs(scrollY-(3/8)*(document.getElementById('journey').offsetHeight-innerHeight)) <= 2"), f'{width}: hard wheel gesture advances exactly one scene')
     # Route navigation can still jump directly to a requested scene.
     b.js("document.querySelector('.stop[data-i=\"7\"]').dispatchEvent(new MouseEvent('click',{bubbles:true}))")
     wait_for("universePerformance().snap.phase === 'idle' && universePerformance().snap.settledIndex === 7")
@@ -95,17 +93,38 @@ for width, height, mobile in [(390, 844, True), (768, 1024, False), (1440, 900, 
     }); jumpObserver.observe(document.getElementById('scenes'), {subtree:true, attributes:true, attributeFilter:['style']})""")
     jump_midpoint = b.js("""new Promise(resolve => {
       document.querySelector('.stop[data-i="0"]').dispatchEvent(new MouseEvent('click', {bubbles:true}));
+      let departure;
       setTimeout(() => {
         const lines = document.querySelector('.streaks');
-        resolve({outsideCamera:lines.parentElement === document.querySelector('#stage'),
+        departure = {outsideCamera:lines.parentElement === document.querySelector('#stage'),
           lines:Number(getComputedStyle(lines).opacity),
-          camera:Number(getComputedStyle(document.querySelector('#camera')).opacity)})
-      }, 170)
+          camera:Number(getComputedStyle(document.querySelector('#camera')).opacity)};
+      }, 170);
+      setTimeout(() => {
+        const stage = document.querySelector('#stage');
+        resolve({...departure, backward:stage.classList.contains('travel-backward'),
+          lineScale:new DOMMatrix(getComputedStyle(document.querySelector('.streaks')).transform).a,
+          cameraScale:new DOMMatrix(getComputedStyle(document.querySelector('#camera')).transform).a})
+      }, 280)
     })""")
-    check(jump_midpoint['outsideCamera'] and jump_midpoint['lines'] > .5 and jump_midpoint['camera'] < .2, f'{width}: speed lines remain visible while the camera switches scenes')
+    check(jump_midpoint['outsideCamera'] and jump_midpoint['lines'] > .5 and jump_midpoint['camera'] < .2, f'{width}: speed lines remain visible while the camera switches scenes: {jump_midpoint}')
+    check(jump_midpoint['backward'] and jump_midpoint['lineScale'] < 1 and jump_midpoint['cameraScale'] > 1, f'{width}: backward travel pulls lines inward and eases the destination down')
     wait_for("universePerformance().snap.phase === 'idle' && universePerformance().snap.settledIndex === 0")
     check(b.js("(()=>{jumpObserver.disconnect();return [...jumpSeen].every(key=>['life','hero'].includes(key)) && getComputedStyle(document.querySelector('#camera')).opacity==='1'})()"), f'{width}: far route jump skips intermediate scenes and restores the camera')
     if width == 1440:
+        forward_midpoint = b.js("""new Promise(resolve => {
+          document.querySelector('.stop[data-i="8"]').dispatchEvent(new MouseEvent('click',{bubbles:true}));
+          setTimeout(() => {
+            const stage = document.querySelector('#stage');
+            resolve({forward:stage.classList.contains('travel-forward'),
+              lineScale:new DOMMatrix(getComputedStyle(document.querySelector('.streaks')).transform).a,
+              cameraScale:new DOMMatrix(getComputedStyle(document.querySelector('#camera')).transform).a})
+          }, 280)
+        })""")
+        check(forward_midpoint['forward'] and forward_midpoint['lineScale'] > 1 and forward_midpoint['cameraScale'] < 1, 'Forward travel pushes lines outward and eases the destination up')
+        wait_for("universePerformance().snap.phase === 'idle' && universePerformance().snap.settledIndex === 8")
+        b.js("document.querySelector('.stop[data-i=\"0\"]').dispatchEvent(new MouseEvent('click',{bubbles:true}))")
+        time.sleep(.28)
         b.js("document.querySelector('.stop[data-i=\"8\"]').dispatchEvent(new MouseEvent('click',{bubbles:true}))")
         time.sleep(.08)
         b.js("document.querySelector('.stop[data-i=\"7\"]').dispatchEvent(new MouseEvent('click',{bubbles:true}))")

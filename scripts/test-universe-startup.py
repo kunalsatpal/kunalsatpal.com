@@ -34,7 +34,7 @@ b.call('Emulation.setEmulatedMedia', {'features':[]})
 b.call('Storage.clearDataForOrigin', {'origin':'http://127.0.0.1:8765', 'storageTypes':'local_storage'})
 b.call('Page.addScriptToEvaluateOnNewDocument', {'source': '''
 (() => {
-window.startupProbe = {heroVisibleAt:null, shifts:[], longTasks:[], frames:[], errors:[]};
+window.startupProbe = {heroVisibleAt:null, shifts:[], longTasks:[], frames:[], flight:[], errors:[]};
 addEventListener('error', e => startupProbe.errors.push(e.message || 'resource failed'), true);
 new PerformanceObserver(list => list.getEntries().forEach(e => {
   if (!e.hadRecentInput) startupProbe.shifts.push({at:e.startTime, value:e.value});
@@ -54,6 +54,18 @@ function sample(t) {
       for(let el=h;el;el=el.parentElement) opacity*=Number(getComputedStyle(el).opacity);
       if(opacity>.5 && h.getBoundingClientRect().height>0) startupProbe.heroVisibleAt=t;
     }
+  }
+  if (t-sampleStart<3000) {
+    const lines=document.querySelector('.streaks'), card=document.querySelector('.proof');
+    if (lines && card) startupProbe.flight.push({
+      lines:Number(getComputedStyle(lines).opacity),
+      lineScale:new DOMMatrix(getComputedStyle(lines).transform).a,
+      camera:Number(getComputedStyle(document.querySelector('.camera')).opacity),
+      nav:Number(getComputedStyle(document.querySelector('nav')).opacity),
+      card:Number(getComputedStyle(card).opacity),
+      depth:Number(card.style.transform.match(/translate3d\([^,]+,[^,]+,\s*(-?[\d.]+)px/)?.[1] || 0),
+      ready:card.classList.contains('image-ready')
+    });
   }
   if(t-sampleStart<10000) requestAnimationFrame(sample);
 }
@@ -155,6 +167,8 @@ b.call('Page.navigate', {'url':base})
 wait('!!window.universePerformance')
 wait("[...document.querySelectorAll('.proof img')].every(i=>i.complete&&i.naturalWidth>1)")
 wait("[...document.querySelectorAll('.proof')].every(c=>c.classList.contains('image-ready')&&getComputedStyle(c).opacity==='1')")
+check(b.js("startupProbe.flight.some(f=>f.lines>.35&&f.camera<.5&&f.nav<.5) && startupProbe.flight.some(f=>f.ready&&f.card>.15&&f.card<.9&&f.depth < -20)"), 'Desktop first visit: speed lines lead into the scene and cards drift forward from depth')
+check(b.js("(()=>{const visible=startupProbe.flight.filter(f=>f.lines>.2);return visible.length>5&&visible.every((f,i)=>i===0||f.lineScale>=visible[i-1].lineScale-.05)})()"), 'Desktop first visit: speed lines keep moving forward without resetting')
 check(b.js("[...document.querySelectorAll('.proof img')].every(i=>i.currentSrc.includes('/site/img/proof_'))"), 'Desktop hero: all four original artwork images load')
 supported = b.js('navigator.gpu?.requestAdapter().then(a=>!!a) ?? false')
 if supported:
