@@ -20,12 +20,33 @@
   :focus-visible { outline: 2px solid var(--c); outline-offset: 3px; border-radius: 6px; }
   .cartoon { --regolith: #191338; --regolith-2: #20184a; }
 
-  /* Fade without transforming the long article or changing fixed-position anchors. */
-  .world { transition: opacity .28s ease; }
+  /* Zoom the first screen on landing; the long article keeps its scroll geometry. */
+  .world { transition: opacity .38s ease; }
   body.arriving .world, body.leaving .world { opacity: 0; }
+  .hero2 { transition: transform .52s cubic-bezier(.18,.82,.22,1), opacity .38s ease; transform-origin: 50% 55%; }
+  .horizon { transition: transform .52s cubic-bezier(.18,.82,.22,1); transform-origin: 50% 0; }
+  .sky { transition: transform .42s cubic-bezier(.55,.05,.75,.25); transform-origin: 50% 65%; }
+  body.arriving .hero2 { transform: translateY(-28px) scale(.88); opacity: 0; }
+  body.arriving .horizon { transform: translateY(48px) scale(.88); }
+  body.leaving .hero2 { transform: scale(.9); opacity: 0; }
+  body.leaving.leaving-sky .sky { transform: scale(.8); }
   .bar, .progress { transition: opacity .22s ease; }
   body.leaving .bar, body.leaving .progress { opacity: 0; }
-  body.restoring .world, body.restoring .bar, body.restoring .progress { transition: none !important; }
+  /* A viewport-sized moon contracts on lift-off, including from the article's end. */
+  .liftoff-overlay { position: fixed; inset: 0; z-index: 60; overflow: hidden; display: grid; place-items: center;
+    pointer-events: none; background: #020308; opacity: 0; visibility: hidden; transition: opacity .14s ease, visibility 0s linear .4s; }
+  .liftoff-moon { width: 110vmax; aspect-ratio: 1; border-radius: 50%;
+    background: radial-gradient(circle at 30% 28%, rgba(255,255,255,.55) 0 3%, transparent 3.5%),
+      radial-gradient(circle at 62% 46%, rgba(74,70,68,.18) 0 6%, transparent 6.5%),
+      radial-gradient(circle at 42% 70%, rgba(74,70,68,.13) 0 8%, transparent 8.5%), var(--dust);
+    box-shadow: 0 0 0 2px rgba(255,255,255,.25), 0 0 100px -30px var(--c);
+    transform: scale(1.5); transition: transform .38s cubic-bezier(.55,.05,.75,.25); }
+  body.leaving .liftoff-overlay { opacity: 1; visibility: visible; transition: opacity .14s ease; }
+  body.leaving .liftoff-moon { transform: scale(.025); will-change: transform; }
+  body.leaving.leaving-sky .liftoff-overlay { opacity: 0; visibility: hidden; }
+  body.restoring .world, body.restoring .bar, body.restoring .progress,
+  body.restoring .sky, body.restoring .hero2, body.restoring .horizon,
+  body.restoring .liftoff-overlay, body.restoring .liftoff-moon { transition: none !important; }
 
   /* ---------- Top bar ---------- */
   .bar { position: fixed; z-index: 50; top: 20px; left: 20px; right: 20px; display: flex; justify-content: space-between; align-items: center; pointer-events: none; }
@@ -271,6 +292,12 @@
   .nextmoons .nextmoon:hover .nm-copy b::after { transform: translate(3px, -3px); }
   .parent { display: none !important; }  /* dropped: the header reads cleaner without it */
   .lander .heroimg { width: min(640px, 46vw) !important; height: auto !important; border-radius: 14px !important; box-shadow: 0 0 0 1px rgba(255,255,255,.12), 0 40px 80px -30px rgba(0,0,0,.9) !important; animation: float 7s ease-in-out infinite; }
+  @media (prefers-reduced-motion: reduce) {
+    .sky, .hero2, .horizon { transition: none; }
+    body.arriving .hero2, body.arriving .horizon, body.leaving .hero2, body.leaving.leaving-sky .sky { transform: none; }
+    body.arriving .hero2 { opacity: 1; }
+    .liftoff-overlay { display: none; }
+  }
 
   /* ---------- Native blocks (rebuilt case studies) ---------- */
   .bstats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 14px; margin-top: 30px; }
@@ -331,6 +358,7 @@
     </section>
   </main>
 </div>
+<div class="liftoff-overlay" aria-hidden="true"><div class="liftoff-moon"></div></div>
 
 <script type="module">
   import Lenis from './vendor/lenis.mjs'
@@ -447,8 +475,9 @@
     leaving = true
     lenis?.stop()
     if (reduce) { location.href = url; return }
+    document.body.classList.toggle('leaving-sky', scrollY < $('sky').offsetHeight * .75)
     document.body.classList.add('leaving')
-    navigationTimer = setTimeout(() => location.href = url, 280)
+    navigationTimer = setTimeout(() => location.href = url, 420)
   }
   function toOrbit(e) {
     e?.preventDefault()
@@ -465,7 +494,7 @@
     clearTimeout(navigationTimer)
     leaving = false
     document.body.classList.add('restoring')
-    document.body.classList.remove('leaving', 'arriving')
+    document.body.classList.remove('leaving', 'leaving-sky', 'arriving')
     lenis?.start()
     if (lenis && !motionFrame) motionFrame = requestAnimationFrame(raf)
     requestAnimationFrame(() => requestAnimationFrame(() => document.body.classList.remove('restoring')))

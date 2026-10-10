@@ -15,8 +15,7 @@ def check(value, label):
     checks.append(label)
     print(label,flush=True)
 def ready():
-    wait("!!document.querySelector('#nextMoons .nextmoon') && !document.body.classList.contains('arriving')")
-    time.sleep(.35)
+    wait("!!document.querySelector('#nextMoons .nextmoon') && !document.body.classList.contains('arriving') && getComputedStyle(document.querySelector('#world')).opacity === '1' && getComputedStyle(document.querySelector('.hero2')).transform === 'none'")
 for width,height in [(1440,900),(390,844)]:
     b.call('Emulation.setDeviceMetricsOverride', {'width':width,'height':height,'deviceScaleFactor':1,'mobile':width<500})
     for key,planet in [('promo','gojek'),('Fitclub','cult'),('cart_abandonment','cult')]:
@@ -31,9 +30,12 @@ for width,height in [(1440,900),(390,844)]:
           document.querySelector('#back2').click(); document.querySelector('#back2').click();
           setTimeout(()=>resolve({before,y:scrollY,height:document.documentElement.scrollHeight,
             transform:getComputedStyle(document.querySelector('#world')).transform,
-            filter:getComputedStyle(document.querySelector('#world')).filter}),120)
+            filter:getComputedStyle(document.querySelector('#world')).filter,
+            moon:getComputedStyle(document.querySelector('.liftoff-moon')).transform,
+            overlay:Number(getComputedStyle(document.querySelector('.liftoff-overlay')).opacity)}),120)
         })""")
         check(result['transform']=='none' and result['filter']=='none' and abs(result['height']-result['before']['height'])<2 and abs(result['y']-result['before']['y'])<2,f'{width} {key}: closing from article bottom preserves scroll and layout: {result}')
+        check(result['overlay']>.5 and result['moon']!='matrix(1.5, 0, 0, 1.5, 0, 0)',f'{width} {key}: lift-off zoom animates above the stable article')
         wait("location.pathname.endsWith('universe.html') && !!document.querySelector('.mini')")
         wait("document.querySelector('.scene[data-scene=\""+planet+"\"]')?.classList.contains('active')")
         time.sleep(.5)
@@ -49,6 +51,19 @@ for width,height in [(1440,900),(390,844)]:
         check(b.js("location.pathname.endsWith('case.html') && getComputedStyle(document.querySelector('#world')).opacity === '1' && !document.documentElement.classList.contains('lenis-stopped')"),f'{width} {key}: cached restoration cancels pending navigation')
         b.js("scrollTo(0,0)")
         if key=='promo': b.screenshot('/tmp/case-navigation-'+str(width)+'.png')
+# Leaving from the dark hero zooms that visible sky instead of flashing the pale surface.
+b.call('Page.navigate', {'url':base+'case.html?c=promo'})
+ready()
+top_exit=b.js("""new Promise(resolve=>{
+  document.querySelector('#back').click();
+  setTimeout(()=>resolve({sky:getComputedStyle(document.querySelector('#sky')).transform,
+    overlay:Number(getComputedStyle(document.querySelector('.liftoff-overlay')).opacity),
+    world:getComputedStyle(document.querySelector('#world')).transform}),120)
+})""")
+check(top_exit['sky']!='none' and top_exit['overlay']==0 and top_exit['world']=='none','Leaving from the hero zooms the sky without a pale overlay or article transform')
+wait("location.pathname.endsWith('universe.html') && !!document.querySelector('.mini')")
+b.call('Page.navigate', {'url':base+'case.html?c=promo'})
+ready()
 # Link semantics and switching between case studies.
 check(b.js("(()=>{let prevented; document.addEventListener('click', e=>{prevented=e.defaultPrevented;e.preventDefault()},{once:true}); const e=new MouseEvent('click',{bubbles:true,cancelable:true,ctrlKey:true});document.querySelector('.nextmoon').dispatchEvent(e);return prevented===false})()"),'Modified next-case clicks retain native browser behavior')
 next_url=b.js("document.querySelector('.nextmoon').href")
