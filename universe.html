@@ -106,7 +106,8 @@
   @media (pointer: coarse) { .journey { height: 765vh; } }
   .stage { position: sticky; top: 0; height: 100vh; height: 100svh; overflow: hidden;
     background: radial-gradient(120% 90% at 50% 110%, #0b1124 0%, #05070f 55%, #020308 100%); }
-  .camera { position: absolute; inset: 0; transform-origin: 50% 50%; transition: transform .75s cubic-bezier(.6,.05,.25,1), filter .75s; }
+  .camera { position: absolute; inset: 0; transform-origin: 50% 50%; transition: transform .75s cubic-bezier(.6,.05,.25,1), filter .75s, opacity .2s ease; }
+  .stage.jumping .camera { opacity: 0; }
   .camera.diving { transform: scale(3.2); filter: blur(8px) brightness(1.3); }
   .layer { position: absolute; inset: -4%; will-change: transform; pointer-events: none; }
   .layer canvas { width: 100% !important; height: 100% !important; display: block; }
@@ -1885,6 +1886,12 @@ html.theme-toon .rolechip { border: 2px solid #15132a; background: #1f1757; }
     lenis = new Lenis({ lerp: 0.12, smoothWheel: true, wheelMultiplier: 1, syncTouch: false })
     lenis.on('scroll', requestFrame)
   }
+  let jumpTimer = 0, jumpFrame = 0
+  const clearJump = () => {
+    clearTimeout(jumpTimer); jumpTimer = 0
+    cancelAnimationFrame(jumpFrame); jumpFrame = 0
+    stage.classList.remove('jumping')
+  }
   sceneSnap = createSceneSnap({
     getStops: () => SCENES.map((_, i) => yFor(i)),
     getPosition: () => scrollY,
@@ -1893,6 +1900,7 @@ html.theme-toon .rolechip { border: 2px solid #15132a; background: #1f1757; }
     isMoving: () => !!lenis && lenis.isScrolling === 'smooth' && Math.abs(lenis.velocity) > .25,
     ignoreInput: event => !!event.target.closest?.('.modal, .overview, input, textarea, select, [contenteditable="true"], [data-lenis-prevent]'),
     stopAnimation: () => {
+      clearJump()
       stage.classList.remove('warping')
       if (lenis) lenis.scrollTo(scrollY, { immediate: true, force: true })
       else scrollTo({ top: scrollY, behavior: 'instant' })
@@ -1901,8 +1909,26 @@ html.theme-toon .rolechip { border: 2px solid #15132a; background: #1f1757; }
     animateTo: (target, { kind, duration, onComplete }) => {
       requestFrame()
       const dist = Math.abs(target - scrollY) / LC.innerHeight
-      if (kind === 'navigate' && dist > 2 && !reduce) stage.classList.add('warping')
       const complete = () => { stage.classList.remove('warping'); onComplete() }
+      if (kind === 'navigate' && dist > 2 && !reduce) {
+        // A long smooth scroll wakes and loads every scene along the route.
+        // Fade the camera, jump directly to the requested stop, then reveal it.
+        const destination = SCENES[nearest(target / (LC.journeyHeight - LC.innerHeight) * U)]
+        loadSceneAssets(destination.el)
+        stage.classList.add('warping', 'jumping')
+        jumpTimer = setTimeout(() => {
+          jumpTimer = 0
+          if (lenis) lenis.scrollTo(target, { immediate: true, force: true })
+          else scrollTo({ top: target, behavior: 'instant' })
+          requestFrame()
+          jumpFrame = requestAnimationFrame(() => {
+            jumpFrame = 0
+            stage.classList.remove('jumping')
+            jumpTimer = setTimeout(() => { jumpTimer = 0; complete() }, 220)
+          })
+        }, 220)
+        return
+      }
       if (!lenis || reduce || duration === 0) {
         if (lenis) lenis.scrollTo(target, { immediate: true, force: true })
         else scrollTo({ top: target, behavior: 'instant' })

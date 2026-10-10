@@ -87,6 +87,22 @@ for width, height, mobile in [(390, 844, True), (768, 1024, False), (1440, 900, 
     b.js("document.querySelector('.stop[data-i=\"7\"]').dispatchEvent(new MouseEvent('click',{bubbles:true}))")
     wait_for("universePerformance().snap.phase === 'idle' && universePerformance().snap.settledIndex === 7")
     check(b.js("Math.abs(scrollY-(7/8)*(document.getElementById('journey').offsetHeight-innerHeight)) <= 2"), f'{width}: route navigation lands on its exact requested scene')
+    # A far map jump should reveal its destination without rendering each stop in between.
+    b.js("""window.jumpSeen = new Set(); window.jumpObserver = new MutationObserver(() => {
+      document.querySelectorAll('.scene').forEach(scene => {
+        if (scene.style.visibility !== 'hidden' && Number(scene.style.opacity) > .01) jumpSeen.add(scene.dataset.scene)
+      })
+    }); jumpObserver.observe(document.getElementById('scenes'), {subtree:true, attributes:true, attributeFilter:['style']})""")
+    b.js("document.querySelector('.stop[data-i=\"0\"]').dispatchEvent(new MouseEvent('click',{bubbles:true}))")
+    wait_for("universePerformance().snap.phase === 'idle' && universePerformance().snap.settledIndex === 0")
+    check(b.js("(()=>{jumpObserver.disconnect();return [...jumpSeen].every(key=>['life','hero'].includes(key)) && getComputedStyle(document.querySelector('#camera')).opacity==='1'})()"), f'{width}: far route jump skips intermediate scenes and restores the camera')
+    if width == 1440:
+        b.js("document.querySelector('.stop[data-i=\"8\"]').dispatchEvent(new MouseEvent('click',{bubbles:true}))")
+        time.sleep(.08)
+        b.js("document.querySelector('.stop[data-i=\"7\"]').dispatchEvent(new MouseEvent('click',{bubbles:true}))")
+        wait_for("universePerformance().snap.phase === 'idle' && universePerformance().snap.settledIndex === 7")
+        time.sleep(.3)
+        check(b.js("getComputedStyle(document.querySelector('#camera')).opacity==='1' && !document.querySelector('.stage').classList.contains('jumping') && universePerformance().snap.settledIndex===7"), 'Rapid route retargeting cancels the earlier jump cleanly')
     if mobile:
         # A strong swipe is also consumed and paginated by one scene.
         b.js("scrollTo(0,(3/8)*(document.getElementById('journey').offsetHeight-innerHeight))")
