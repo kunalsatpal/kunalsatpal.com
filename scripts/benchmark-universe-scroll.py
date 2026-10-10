@@ -100,41 +100,48 @@ PROBE = r"""
       const overlap=e => e.startTime < end && e.startTime+e.duration > start;
       const events=inputs.filter(e => e.at >= c.armedAt && e.at <= end);
       // Swipe motion starts on release in the site's current pagination model.
-      const trigger=events.find(e => e.type==='touchend') || events[0];
+      const trigger=events.find(e => ['wheel','touchend','click'].includes(e.type));
       return {...c, initialKey:undefined, lastState:undefined,
         final:snapshot(), longTasks:tasks.filter(overlap), longAnimationFrames:loaf.filter(overlap),
         inputEvents:events, errors:errors.filter(e => e.at >= c.armedAt && e.at <= end),
         motionDurationMs:c.firstMotionAt === null ? null : end-c.firstMotionAt,
         armedToSettledMs:end-c.armedAt,
         inputToSettledMs:trigger ? end-trigger.at : null,
-        inputToFirstObservedMotionMs:trigger && c.firstMotionAt !== null
-          ? Math.max(0,c.firstMotionAt-trigger.at) : null};
+        inputToFirstObservedMotionMs:trigger && c.firstMotionAt !== null && c.firstMotionAt>=trigger.at
+          ? c.firstMotionAt-trigger.at : null,
+        inputLatencyNote:'Event capture and DOM-motion observation use performance.now(), not the earlier '
+          +'rAF frame timestamp. This is callback-observed motion, not input-to-presented-pixel latency.'};
     }
   };
   function sample(t) {
     const c=current;
     if (!c || c.done) return;
+    const observedAt=performance.now();
     const s=snapshot(), key=motionKey(s);
-    if (c.firstMotionAt === null && key !== c.initialKey) c.firstMotionAt=t;
+    const trigger=inputs.find(e => e.at>=c.armedAt && ['wheel','touchend','click'].includes(e.type));
+    if (c.firstMotionAt === null && trigger && key !== c.initialKey) {
+      c.firstMotionAt=observedAt;
+      c.firstMotionFrameTimestamp=t;
+    }
     if (c.firstMotionAt !== null) {
       if (c.lastFrame !== null) c.intervals.push(t-c.lastFrame);
       c.lastFrame=t;
-      c.frames.push({at:t, scrollY:s.scrollY, target:s.snap?.targetIndex,
+      c.frames.push({at:t, observedAt, scrollY:s.scrollY, target:s.snap?.targetIndex,
         settled:s.snap?.settledIndex, phase:s.snap?.phase,
         visibleScenes:s.visibleScenes, viewport:s.viewport});
     }
     const state=JSON.stringify([s.snap,s.viewport,s.stageClass]);
-    if (state !== c.lastState) { c.states.push({at:t,...s}); c.lastState=state; }
+    if (state !== c.lastState) { c.states.push({at:observedAt,...s}); c.lastState=state; }
     const atTarget=s.snap?.phase==='idle' && s.snap?.settledIndex===c.target
       && !/\b(?:jumping|traveling)\b/.test(s.stageClass);
     if (c.steadyMs) {
-      if (t-c.firstMotionAt >= c.steadyMs) c.done=true;
+      if (observedAt-c.firstMotionAt >= c.steadyMs) c.done=true;
     } else if (c.firstMotionAt !== null && atTarget) {
-      c.stableAt ??= t;
-      if (t-c.stableAt >= 50) c.done=true;
+      c.stableAt ??= observedAt;
+      if (observedAt-c.stableAt >= 50) c.done=true;
     } else c.stableAt=null;
-    if (t-c.armedAt >= c.timeoutMs) { c.done=true; c.timedOut=true; }
-    if (c.done) c.endAt=t;
+    if (observedAt-c.armedAt >= c.timeoutMs) { c.done=true; c.timedOut=true; }
+    if (c.done) c.endAt=observedAt;
     else requestAnimationFrame(sample);
   }
 })();
@@ -157,7 +164,9 @@ def page_url(base, theme, scene):
     query = dict(parse_qsl(parts.query, keep_blank_values=True))
     for key in ['at', 'from', 'moon', 'scene', 'theme']:
         query.pop(key, None)
-    query.update({'perf': '', 'theme': theme, 'scene': SCENES[scene]})
+    query.update({'perf': '', 'theme': theme})
+    if scene is not None:
+        query['scene'] = SCENES[scene]
     return urlunsplit((parts.scheme, parts.netloc, parts.path, urlencode(query), ''))
 
 
@@ -286,10 +295,12 @@ def run_case(browser, args, name, device_name, theme, cpu, repetition):
     browser.call('Network.setCacheDisabled', {'cacheDisabled': cold})
     if cold:
         browser.call('Network.clearBrowserCache')
+        # Repeated cold trials must not restore the previous trial's About stop.
+        browser.js("history.replaceState(null,'',location.href)")
     # Prevent a ready probe in the departing document from satisfying this wait
     # before the new navigation commits (including reloads of the same URL).
     browser.js('window.__scrollBenchmark = null')
-    browser.call('Page.navigate', {'url': page_url(args.url, theme, start)})
+    browser.call('Page.navigate', {'url': page_url(args.url, theme, None if cold else start)})
     wait_for(browser, '!!window.universePerformance && !!window.__scrollBenchmark', args.timeout)
     gpu_supported = browser.js('navigator.gpu?.requestAdapter().then(a=>!!a).catch(()=>false) ?? false')
     if not cold:
@@ -317,6 +328,8 @@ def run_case(browser, args, name, device_name, theme, cpu, repetition):
         raise RuntimeError('Invalid trial: document is not visible and focused')
     if setup['theme'] != theme:
         raise RuntimeError('Invalid trial: theme differs from requested theme')
+    if cold and not browser.js("document.documentElement.classList.contains('first-flight') && !document.documentElement.classList.contains('scene-entry')"):
+        raise RuntimeError('Invalid cold trial: initial entrance ended or was bypassed before input')
     setup['gpuAdapterAvailable'] = gpu_supported
     setup['renderingPath'] = ('startup-not-warmed' if cold else
                               'full-quality-ready' if gpu_supported else 'gpu-unavailable-fallback')
@@ -351,6 +364,7 @@ def run_case(browser, args, name, device_name, theme, cpu, repetition):
            'timeoutMs': args.timeout * 1000}
     browser.js('__scrollBenchmark.arm(' + json.dumps(arm) + ')')
     trace_result = None
+    active_error = None
     try:
         if name in ['wheel-forward', 'trackpad-burst', 'cold-wheel', 'resize-scroll',
                     'unchanged-resize-scroll', 'stall-scroll']:
@@ -390,9 +404,19 @@ def run_case(browser, args, name, device_name, theme, cpu, repetition):
         sample = wait_for(browser, '__scrollBenchmark.result()', args.timeout + 3)
         after = metrics(browser)
         cpu_window_ms = (time.monotonic() - cpu_window_start) * 1000
+    except Exception as error:
+        active_error = error
+        raise
     finally:
         if tracing:
-            trace_result = stop_trace(browser, trace_path)
+            try:
+                trace_result = stop_trace(browser, trace_path)
+            except Exception as error:
+                if active_error is None:
+                    raise
+                # Preserve the original CDP/input error if Chrome also refuses
+                # trace shutdown. The caller records both errors separately.
+                active_error.trace_cleanup_error = str(error)
     intervals = sample.pop('intervals')
     summary = {
         'callbacks': len(intervals) + (1 if sample['frames'] else 0),
@@ -457,19 +481,21 @@ def main():
         parser.error('Invalid device, theme, case, CPU rate, repeat count or duration')
     output = Path(args.output)
     output.parent.mkdir(parents=True, exist_ok=True)
-    browser = Browser(new_tab=True)
+    browser = None
     report = {
         'createdAtUTC': datetime.now(timezone.utc).isoformat(), 'url': args.url,
-        'parameters': vars(args), 'browser': browser.call('Browser.getVersion'),
+        'parameters': vars(args), 'browser': None,
         'host': {'platform': platform.platform(), 'machine': platform.machine()},
         'environment': 'Isolated local Chrome tab, focus emulation, host GPU, emulated viewport/input/CPU. '
                        'Physical device, display refresh, thermal and power state are not measured.',
         'presentedFrameMeasurement': 'Not available from rAF. Optional traces preserve compositor evidence; '
                                      'do not treat callback statistics as presented FPS.',
-        'runs': [], 'failures': [],
+        'runs': [], 'failures': [], 'cleanupErrors': [],
     }
     script_id = None
     try:
+        browser = Browser(new_tab=True)
+        report['browser'] = browser.call('Browser.getVersion')
         browser.call('Emulation.setFocusEmulationEnabled', {'enabled': True})
         browser.call('Emulation.setEmulatedMedia', {'features': []})
         browser.call('Performance.enable', {'timeDomain': 'timeTicks'})
@@ -494,18 +520,37 @@ def main():
                                     'forcedStyleAndLayoutMs': result['sample']['forcedStyleAndLayoutMs'],
                                     'inputToFirstObservedMotionMs': result['sample']['inputToFirstObservedMotionMs']}), flush=True)
                             except Exception as error:
-                                report['failures'].append({'run': label, 'error': str(error)})
+                                failure = {'run': label, 'error': str(error),
+                                           'exceptionType': type(error).__name__}
+                                if hasattr(error, 'trace_cleanup_error'):
+                                    failure['traceCleanupError'] = error.trace_cleanup_error
+                                report['failures'].append(failure)
                                 print(json.dumps({'run': label, 'error': str(error)}), flush=True)
                             output.write_text(json.dumps(report, indent=2) + '\n')
+    except Exception as error:
+        report['failures'].append({'run': 'browser-setup-or-harness',
+                                   'error': str(error), 'exceptionType': type(error).__name__})
     finally:
-        if script_id:
-            browser.call('Page.removeScriptToEvaluateOnNewDocument', {'identifier': script_id})
-        browser.call('Emulation.setCPUThrottlingRate', {'rate': 1})
-        browser.close()
+        if browser is not None:
+            cleanup = []
+            if script_id:
+                cleanup.append(('remove-probe', lambda: browser.call(
+                    'Page.removeScriptToEvaluateOnNewDocument', {'identifier': script_id})))
+            cleanup.extend([
+                ('reset-cpu-throttle', lambda: browser.call('Emulation.setCPUThrottlingRate', {'rate': 1})),
+                ('close-test-tab', browser.close),
+                ('close-local-websocket', browser.ws.close),
+            ])
+            for name, operation in cleanup:
+                try:
+                    operation()
+                except Exception as error:
+                    report['cleanupErrors'].append({'action': name, 'error': str(error),
+                                                    'exceptionType': type(error).__name__})
         output.write_text(json.dumps(report, indent=2) + '\n')
     invalid = sum(not run['valid'] for run in report['runs'])
     print(f"Saved {len(report['runs'])} samples, {invalid} invalid, {len(report['failures'])} failures to {output}", flush=True)
-    return 1 if invalid or report['failures'] else 0
+    return 1 if invalid or report['failures'] or report['cleanupErrors'] else 0
 
 
 if __name__ == '__main__':

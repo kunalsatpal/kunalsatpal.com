@@ -1753,6 +1753,7 @@ html.theme-toon .rolechip { border: 2px solid #15132a; background: #1f1757; }
     card.el.addEventListener('pointerleave', () => { if (heldCard === card.el) heldCard = null })
   })
   function measure() {
+    const oldScrollRange = LC.journeyHeight - LC.innerHeight
     LC.journeyHeight = journey.offsetHeight
     LC.innerWidth = innerWidth
     LC.innerHeight = innerHeight
@@ -1779,7 +1780,9 @@ html.theme-toon .rolechip { border: 2px solid #15132a; background: #1f1757; }
       o.moons.forEach((m, mi) => { m.leftOrigin = LC.systems[i].moonWidths[mi] - 11 })
     })
     layoutVersion++
-    sceneSnap?.layoutChanged()
+    // Fonts and load/resize notifications often leave route stops unchanged.
+    // Re-measure artwork, but do not cancel and replay an in-flight journey.
+    if (LC.journeyHeight - LC.innerHeight !== oldScrollRange) sceneSnap?.layoutChanged()
   }
   measure()
   let measurePending = false
@@ -1853,10 +1856,12 @@ html.theme-toon .rolechip { border: 2px solid #15132a; background: #1f1757; }
     frameId = 0
     if (suspended) return
     ticking = true
-    const dt = previousFrame === null ? 1000 / 60 : Math.min(50, t - previousFrame)
+    const elapsed = previousFrame === null ? 1000 / 60 : Math.max(0, t - previousFrame)
+    const dt = Math.min(50, elapsed)
     previousFrame = t
-    // An elapsed-time clock avoids a scroll jump when waking from an idle scene.
-    scrollClock += dt
+    // Keep scroll and scene timelines aligned after active-frame stalls.
+    // requestFrame resets the timestamp on idle wake, excluding the idle gap.
+    scrollClock += elapsed
     lenis?.raf(scrollClock)
     if (measurePending) { measurePending = false; measure() }
     if (introStart === null) introStart = t
