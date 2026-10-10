@@ -334,6 +334,8 @@
   .starmap .stop { cursor: pointer; }
   .starmap .stop circle.hit { fill: transparent; }
   .starmap .stop:hover circle.dot { stroke: #fff; stroke-width: 1.5; }
+  .starmap .stop-label { opacity: 0; transition: opacity .16s ease; pointer-events: none; font-size: 9px !important; fill: #fff !important; letter-spacing: .02em !important; paint-order: stroke; stroke: rgba(14,16,24,.95); stroke-width: 3px; stroke-linejoin: round; }
+  .starmap .stop:is(:hover, :focus-visible) .stop-label { opacity: 1; }
   .starmap .ship { fill: #fff; filter: drop-shadow(0 0 6px var(--mint)); }
   .starmap text { font: 500 10px "JetBrains Mono", monospace; fill: rgba(255,255,255,.55); letter-spacing: .04em; }
 
@@ -544,21 +546,19 @@
   .p3 { left: 4.5%; top: 60%; width: 11.5%; } .p4 { right: 4.5%; top: 64%; width: 12.5%; }
 
 
-  /* Readable immediately; only a brief fade, with artwork following the copy. */
-  /* Soft arrival: the mark sharpens in, then the name, role, headline and cue rise into place one after another. */
+  /* One continuous entrance: removing first-flight must not restart the copy. */
   .title .object { animation: hero-mark-in 1.1s ease-out .35s backwards; }
-  .title .name { animation: hero-rise .9s cubic-bezier(.2,.8,.2,1) .55s backwards; }
-  .title .rolechip { animation: hero-rise .9s cubic-bezier(.2,.8,.2,1) .7s backwards; }
-  .title h1 { animation: hero-rise .9s cubic-bezier(.2,.8,.2,1) .8s backwards; }
-  .title .cue { animation: hero-rise .9s cubic-bezier(.2,.8,.2,1) 1.2s backwards; }
-  @keyframes hero-rise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+  .title .name { animation: hero-rise .8s cubic-bezier(.16,1,.3,1) .7s backwards; }
+  .title .rolechip { animation: hero-rise .8s cubic-bezier(.16,1,.3,1) .82s backwards; }
+  .title h1 { animation: hero-rise .9s cubic-bezier(.16,1,.3,1) .95s backwards; }
+  .title .cue { animation: hero-rise .8s cubic-bezier(.16,1,.3,1) 1.18s backwards; }
+  @keyframes hero-rise {
+    from { opacity: 0; transform: perspective(900px) translate3d(0, 28px, -240px) scale(.86); }
+    to { opacity: 1; transform: perspective(900px) translate3d(0, 0, 0) scale(1); }
+  }
   @keyframes hero-mark-in { from { opacity: 0; filter: blur(10px) brightness(2); } to { opacity: 1; filter: none; } }
   html.scene-entry .title .object { animation: none; }
   @media (prefers-reduced-motion: reduce) { .title .object { animation: none; } }
-  html.first-flight .title .name { animation: first-flight-copy .8s cubic-bezier(.16,1,.3,1) .7s both; }
-  html.first-flight .title .rolechip { animation: first-flight-copy .8s cubic-bezier(.16,1,.3,1) .82s both; }
-  html.first-flight .title h1 { animation: first-flight-copy .9s cubic-bezier(.16,1,.3,1) .95s both; }
-  html.first-flight .title .cue { animation: first-flight-copy .8s cubic-bezier(.16,1,.3,1) 1.18s both; }
   .sky-art { position: absolute; inset: 0; pointer-events: none; animation: hero-art-in .45s ease-out .2s backwards; }
   .proof { opacity: 0; will-change: transform, opacity; }
   .proof.image-ready { opacity: 1; }   /* the frame loop flies each card in once its image is ready */
@@ -567,10 +567,6 @@
   @keyframes hero-art-in { from { opacity: 0; } to { opacity: 1; } }
   html.scene-entry .title .name, html.scene-entry .title h1, html.scene-entry .title .rolechip, html.scene-entry .title .cue { animation: none; }
   @keyframes hero-copy-in { from { opacity: .65; } to { opacity: 1; } }
-  @keyframes first-flight-copy {
-    from { opacity: 0; transform: translateY(22px) scale(.96); filter: blur(7px); }
-    to { opacity: 1; transform: none; filter: none; }
-  }
   @media (prefers-reduced-motion: reduce) {
     .title .name, .title h1, .title .rolechip, .title .cue, .sky-art { animation: none; }
     .object canvas, .object .fallback, .aurora, .far { transition: none; }
@@ -704,8 +700,8 @@
   @media (max-width: 600px) {
     nav {
       display: grid;
-      grid-template-areas: "mark sep work about spacer" "toggle toggle resume contact contact";
-      grid-template-columns: auto auto auto auto 1fr;
+      grid-template-areas: "mark sep toggle spacer" "resume resume contact contact";
+      grid-template-columns: auto auto auto 1fr;
       gap: 10px 8px;
       width: calc(100vw - 24px);
       padding: 12px 14px;
@@ -714,8 +710,6 @@
     }
     nav .pmark { grid-area: mark; }
     nav .sep { grid-area: sep; }
-    nav a[data-go="hinge"] { grid-area: work; }
-    nav a[data-go="about"] { grid-area: about; }
     nav .grow { grid-area: spacer; }
     nav .styletoggle { grid-area: toggle; justify-self: start; font-size: 12px !important; }
     nav .styletoggle span:not(.st-knob) { padding: 4px 8px; }
@@ -838,9 +832,16 @@ html.theme-toon .rolechip { border: 2px solid #15132a; background: #1f1757; }
   }
   /* Icon toggle (Real = ringed planet, Toon = cartoon star) */
   .styletoggle span:not(.st-knob) { display: grid; place-items: center; width: 30px; height: 26px; padding: 0 !important; }
-  .styletoggle svg { width: 17px; height: 17px; display: block; }
+  .styletoggle svg { width: 17px; height: 17px; display: block; transform-origin: center;
+    transition: transform .28s cubic-bezier(.2,.8,.2,1), color .28s, filter .28s; }
   .styletoggle .st-toon svg { color: rgba(255,255,255,.55); }
   .styletoggle[aria-pressed="true"] .st-toon svg { color: #ffd36b; }
+  .styletoggle .st-real:hover svg { color: #b9e9ff; transform: rotate(-14deg) scale(1.12); filter: drop-shadow(0 0 5px rgba(127,214,255,.7)); }
+  .styletoggle .st-toon:hover svg { color: #ffd36b; transform: rotate(12deg) scale(1.12); filter: drop-shadow(0 0 6px rgba(255,211,107,.7)); }
+  @media (prefers-reduced-motion: reduce) {
+    .styletoggle svg { transition: none; }
+    .styletoggle .st-real:hover svg, .styletoggle .st-toon:hover svg { transform: none; }
+  }
   @media (max-width: 560px) { nav { gap: 12px !important; } nav a[href*="resume"] { display: none; } .sep { display: none; } }
 
   /* Pause only animation that cannot contribute visible pixels. */
@@ -868,10 +869,9 @@ html.theme-toon .rolechip { border: 2px solid #15132a; background: #1f1757; }
 <nav aria-label="Main navigation">
   <a class="pmark" href="#" data-go="hero" aria-label="Home"><svg viewBox="0 0 33 31" aria-hidden="true"><rect y="1.09" width="7.68" height="28.36" rx="1.4" fill="currentColor"/><path fill="currentColor" d="M31.24.92c.77 0 1.4.63 1.4 1.4v25.52c0 .77-.63 1.4-1.4 1.4h-6.1c-.27 0-.52-.11-.7-.31L12.18 15.08 24.44 1.22c.18-.19.43-.3.7-.3z"/></svg></a>
   <span class="sep"></span>
-  <a href="#" data-go="hinge">Work</a><a href="#" data-go="about">About</a>
+  <button class="styletoggle" id="styleToggle" aria-label="Switch between realistic and cartoon universe" aria-pressed="false"><span class="st-real" title="Realistic"><svg viewBox="0 0 20 20" aria-hidden="true"><defs><radialGradient id="stg" cx=".35" cy=".3" r=".8"><stop offset="0" stop-color="#fff"/><stop offset=".55" stop-color="#9aa3b5"/><stop offset="1" stop-color="#2a2f3b"/></radialGradient></defs><circle cx="10" cy="10" r="6" fill="url(#stg)"/><ellipse cx="10" cy="10" rx="9" ry="3" fill="none" stroke="currentColor" stroke-width="1.2" transform="rotate(-18 10 10)"/></svg></span><span class="st-knob"></span><span class="st-toon" title="Cartoon"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 1.8 C 10.9 6.4, 13.6 9.1, 18.2 10 C 13.6 10.9, 10.9 13.6, 10 18.2 C 9.1 13.6, 6.4 10.9, 1.8 10 C 6.4 9.1, 9.1 6.4, 10 1.8 Z" fill="currentColor" stroke="#15132a" stroke-width="1.4" stroke-linejoin="round"/></svg></span></button>
   <span class="grow"></span>
   <button class="skip" id="skipBtn" aria-controls="overview">Skip the flight</button>
-  <button class="styletoggle" id="styleToggle" aria-label="Switch between realistic and cartoon universe" aria-pressed="false"><span class="st-real" title="Realistic"><svg viewBox="0 0 20 20" aria-hidden="true"><defs><radialGradient id="stg" cx=".35" cy=".3" r=".8"><stop offset="0" stop-color="#fff"/><stop offset=".55" stop-color="#9aa3b5"/><stop offset="1" stop-color="#2a2f3b"/></radialGradient></defs><circle cx="10" cy="10" r="6" fill="url(#stg)"/><ellipse cx="10" cy="10" rx="9" ry="3" fill="none" stroke="currentColor" stroke-width="1.2" transform="rotate(-18 10 10)"/></svg></span><span class="st-knob"></span><span class="st-toon" title="Cartoon"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 1.8 C 10.9 6.4, 13.6 9.1, 18.2 10 C 13.6 10.9, 10.9 13.6, 10 18.2 C 9.1 13.6, 6.4 10.9, 1.8 10 C 6.4 9.1, 9.1 6.4, 10 1.8 Z" fill="currentColor" stroke="#15132a" stroke-width="1.4" stroke-linejoin="round"/></svg></span></button>
   <a href="https://kunalsatpal.com/kunalsatpal_resume.pdf">Resume</a><a class="contact" href="#" data-go="hello">Contact</a>
 </nav>
 
@@ -1353,7 +1353,7 @@ html.theme-toon .rolechip { border: 2px solid #15132a; background: #1f1757; }
       const thumb = m.open && m.img ? `<span class="tip-img"><img data-src="${m.img}" decoding="async" alt="" /></span>` : ''
       const detail = m.open
         ? `<span class="tip-t">${m.t}</span><span class="tip-s">${m.s}</span>${m.stat ? `<span class="tip-result">${m.stat}</span>` : ''}`
-        : `${m.stat ? `<b>${m.stat}</b>` : ''}${m.s}${m.soon ? '<small class="soon">Case study coming soon</small>' : ''}`
+        : `${m.stat ? `<b>${m.stat}</b>` : ''}${m.s}${m.soon ? '<small class="soon">Coming soon</small>' : ''}`
       b.innerHTML = `<i></i><em>${m.t}</em><span class="tip${m.open ? ' big tip-float' : ''}" role="tooltip">${thumb}<span class="tip-body">${detail}</span></span>`
       const floatTip = b.querySelector('.tip-float')
       if (floatTip) {
@@ -1614,7 +1614,9 @@ html.theme-toon .rolechip { border: 2px solid #15132a; background: #1f1757; }
   map.innerHTML = `<line class="route" x1="${mx0}" y1="${my}" x2="${mx1}" y2="${my}"/><line class="done" id="done" x1="${mx0}" y1="${my}" x2="${mx0}" y2="${my}"/>` +
     SCENES.map((s, i) => {
       const x = ux(s.u), pl = s.planet, r = pl ? 3 + sizeFor(pl) * 5 : 2
-      return `<g class="stop" data-i="${i}" role="button" tabindex="0" aria-label="Go to ${s.label}"><title>${s.label}</title><circle class="hit" cx="${x}" cy="${my}" r="10"/><circle class="dot" cx="${x}" cy="${my}" r="${r}" fill="${pl ? pl.glow : 'rgba(255,255,255,.55)'}"/>${pl && (i < 1 || !SCENES[i - 1].planet || Math.floor(SCENES[i - 1].planet.start) !== Math.floor(pl.start)) ? `<text x="${x}" y="${my - 12}" text-anchor="middle">${Math.floor(pl.start)}</text>` : ''}</g>`
+      const anchor = x < 50 ? 'start' : x > MW - 50 ? 'end' : 'middle'
+      const labelX = anchor === 'start' ? x + 5 : anchor === 'end' ? x - 5 : x
+      return `<g class="stop" data-i="${i}" role="button" tabindex="0" aria-label="Go to ${s.label}"><title>${s.label}</title><circle class="hit" cx="${x}" cy="${my}" r="10"/>${!pl ? `<text class="stop-label" x="${labelX}" y="${my - 10}" text-anchor="${anchor}">${s.label}</text>` : ''}<circle class="dot" cx="${x}" cy="${my}" r="${r}" fill="${pl ? pl.glow : 'rgba(255,255,255,.55)'}"/>${pl && (i < 1 || !SCENES[i - 1].planet || Math.floor(SCENES[i - 1].planet.start) !== Math.floor(pl.start)) ? `<text x="${x}" y="${my - 12}" text-anchor="middle">${Math.floor(pl.start)}</text>` : ''}</g>`
     }).join('') + `<circle class="ship" id="ship" cx="${mx0}" cy="${my}" r="3.2"/>`
   map.querySelectorAll('.stop').forEach(g => {
     g.addEventListener('click', () => warpTo(+g.dataset.i))
