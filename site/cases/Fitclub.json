@@ -5,6 +5,8 @@
   {
    "t": "img",
    "src": "./site/cases/m/c4f18367d3.png",
+   "width": 1800,
+   "height": 992,
    "size": "bleed"
   },
   {
@@ -59,6 +61,8 @@
   {
    "t": "img",
    "src": "./site/cases/m/90ca8d563a.png",
+   "width": 1800,
+   "height": 784,
    "size": "large"
   },
   {
@@ -110,6 +114,8 @@
   {
    "t": "img",
    "src": "./site/cases/m/789aa401c9.png",
+   "width": 1800,
+   "height": 726,
    "size": "bleed"
   },
   {
@@ -123,16 +129,22 @@
   {
    "t": "img",
    "src": "./site/cases/m/e79fa376dc.png",
+   "width": 1800,
+   "height": 1160,
    "size": "bleed"
   },
   {
    "t": "img",
    "src": "./site/cases/m/76292e56a3.png",
+   "width": 1800,
+   "height": 784,
    "size": "large"
   },
   {
    "t": "img",
    "src": "./site/cases/m/13f35bb84b.png",
+   "width": 1800,
+   "height": 696,
    "size": "bleed"
   },
   {
@@ -142,10 +154,13 @@
   {
    "t": "img",
    "src": "./site/cases/m/3bb5f1d9d0.png",
+   "width": 1440,
+   "height": 116,
    "size": "bleed"
   },
   {
    "t": "gallery",
+   "dimensions": [[375, 900], [375, 693], [375, 693], [375, 693]],
    "srcs": [
     "./site/cases/m/52f42b1abe.gif",
     "./site/cases/m/7d3104fb88.gif",
@@ -156,6 +171,8 @@
   {
    "t": "img",
    "src": "./site/cases/m/9670dbfd0d.png",
+   "width": 1440,
+   "height": 128,
    "size": "bleed"
   },
   {
@@ -165,6 +182,8 @@
   {
    "t": "img",
    "src": "./site/cases/m/e79cbcb6d1.png",
+   "width": 1800,
+   "height": 844,
    "size": "bleed"
   },
   {
@@ -182,11 +201,15 @@
   {
    "t": "img",
    "src": "./site/cases/m/c3d0d8ea65.png",
+   "width": 1800,
+   "height": 1006,
    "size": "bleed"
   },
   {
    "t": "img",
    "src": "./site/cases/m/75b4a64aae.png",
+   "width": 1331,
+   "height": 1592,
    "size": "text"
   },
   {
@@ -200,11 +223,15 @@
   {
    "t": "img",
    "src": "./site/cases/m/81ca3bdb52.png",
+   "width": 1800,
+   "height": 736,
    "size": "bleed"
   },
   {
    "t": "img",
    "src": "./site/cases/m/d012e14b6c.png",
+   "width": 1800,
+   "height": 784,
    "size": "large"
   },
   {

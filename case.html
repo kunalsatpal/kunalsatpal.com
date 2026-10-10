@@ -20,11 +20,12 @@
   :focus-visible { outline: 2px solid var(--c); outline-offset: 3px; border-radius: 6px; }
   .cartoon { --regolith: #191338; --regolith-2: #20184a; }
 
-  /* Zoom-out to orbit (and the matching zoom-in on arrival). */
-  .world { transform-origin: 50% 30vh; transition: transform .9s cubic-bezier(.6,.05,.25,1), filter .9s, opacity .9s; }
-  body.arriving .world { transform: scale(1.6); filter: blur(14px) brightness(1.4); opacity: 0; }
-  body.leaving .world { transform: scale(.18); filter: blur(10px); opacity: 0; }
-  body.leaving { background: #020308; }
+  /* Fade without transforming the long article or changing fixed-position anchors. */
+  .world { transition: opacity .28s ease; }
+  body.arriving .world, body.leaving .world { opacity: 0; }
+  .bar, .progress { transition: opacity .22s ease; }
+  body.leaving .bar, body.leaving .progress { opacity: 0; }
+  body.restoring .world, body.restoring .bar, body.restoring .progress { transition: none !important; }
 
   /* ---------- Top bar ---------- */
   .bar { position: fixed; z-index: 50; top: 20px; left: 20px; right: 20px; display: flex; justify-content: space-between; align-items: center; pointer-events: none; }
@@ -92,7 +93,7 @@
   .shot .tray { position: relative; border-radius: 22px; padding: 10px; background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.015));
     border: 1px solid var(--line); box-shadow: 0 30px 60px -36px rgba(0,0,0,.9), inset 0 1px 0 rgba(255,255,255,.06); }
   .cartoon .shot .tray { border: 3px solid #15132a; box-shadow: 0 8px 0 #15132a; background: #251c5a; }
-  .shot img, .shot video { display: block; width: 100%; height: auto; aspect-ratio: auto; object-fit: contain; border-radius: 14px; background: #f5f5f3; }
+  .shot img, .shot video { display: block; width: 100%; height: auto; object-fit: contain; border-radius: 14px; background: #f5f5f3; }
   .shot video { max-width: 360px; margin: 0 auto; border-radius: 28px; background: #000; }
   .shot.rise { opacity: 0; transform: translateY(30px); transition: opacity .8s cubic-bezier(.2,.8,.2,1), transform .8s cubic-bezier(.2,.8,.2,1); }
   .shot.rise.in { opacity: 1; transform: none; }
@@ -233,7 +234,7 @@
   .bk { padding: 16px 18px; font-weight: 600; color: var(--rock, var(--ink)); background: rgba(0,0,0,.035); }
   .bv { padding: 16px 18px; color: var(--rock-muted, var(--muted)); font-size: .92em; line-height: 1.6; }
   .bgallery { margin: 36px 0 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 14px; }
-  .bgallery img { width: 100%; border-radius: 14px; background: #fff; }
+  .bgallery img { width: 100%; height: auto; border-radius: 14px; background: #fff; }
   @media (max-width: 600px) { .br { grid-template-columns: 1fr; } }
 
   .toc { display: none !important; }
@@ -348,6 +349,7 @@
     Internship_curefit: { title: 'My experience at Cure.fit', planet: 'writing', c: '#ff8fb0', kicker: 'Writing · Career', summary: 'What two internships at Cure.fit taught me.', chips: [] },
     whatsapp:           { title: 'A 4-hour sprint: WhatsApp Polls', planet: 'writing', c: '#7fd6ff', kicker: 'Writing · Sprint', summary: 'A 4-hour design sprint: WhatsApp Polls.', chips: [] },
   }
+  const PHONE_SIZE = { promo: [296, 611], Fitclub: [299, 607], cart_abandonment: [954, 1460] }
   const ORDER = ['promo', 'Fitclub', 'cart_abandonment']  // case studies only; blogs have their own template
   const key = META[q.get('c')] ? q.get('c') : 'promo', meta = META[key]
   document.documentElement.style.setProperty('--c', meta.c)
@@ -377,7 +379,7 @@
   $('sum').textContent = meta.summary
   $('chips').innerHTML = meta.chips.map(([b, t]) => `<span><b>${b}</b>${t}</span>`).join('')
   // The final design, as a phone floating in the sky on the right (cut from the original cover).
-  $('lander').innerHTML = meta.hero ? `<img class="heroimg" src="${meta.hero}" alt="Final design" />` : `<img class="phone" src="./site/cases/media/phone_${key}.png" alt="Final design" onerror="this.remove()" />`
+  $('lander').innerHTML = meta.hero ? `<img class="heroimg" src="${meta.hero}" alt="Final design" />` : `<img class="phone" src="./site/cases/media/phone_${key}.png" width="${PHONE_SIZE[key]?.[0] || 296}" height="${PHONE_SIZE[key]?.[1] || 611}" fetchpriority="high" alt="Final design" onerror="this.remove()" />`
   $('coords').textContent = `SURFACE · ${key.toUpperCase().replace(/_/g, ' ')}`
 
   const body = $('body'), toc = $('toc'); let n = 0
@@ -394,9 +396,9 @@
     else if (b.t === 'compare') body.insertAdjacentHTML('beforeend', `<div class="bcompare shot large"><figure><span>${b.labels[0]}</span><img src="${b.a}" alt="" loading="lazy" /></figure><figure><span>${b.labels[1]}</span><img src="${b.b}" alt="" loading="lazy" /></figure></div>`)
     else if (b.t === 'list') body.insertAdjacentHTML('beforeend', `<${b.ordered ? 'ol' : 'ul'} class="blist">${b.items.map(x => `<li>${x}</li>`).join('')}</${b.ordered ? 'ol' : 'ul'}>`)
     else if (b.t === 'table') body.insertAdjacentHTML('beforeend', `<div class="btable">${b.rows.map(r => `<div class="br"><div class="bk">${r[0] || ''}</div><div class="bv">${r.slice(1).join(' ')}</div></div>`).join('')}</div>`)
-    else if (b.t === 'gallery') body.insertAdjacentHTML('beforeend', `<div class="bgallery">${b.srcs.map(x => `<img src="${x}" alt="" loading="lazy" />`).join('')}</div>`)
+    else if (b.t === 'gallery') body.insertAdjacentHTML('beforeend', `<div class="bgallery">${b.srcs.map((x, i) => `<img src="${x}" ${b.dimensions?.[i] ? `width="${b.dimensions[i][0]}" height="${b.dimensions[i][1]}"` : ''} alt="" loading="lazy" />`).join('')}</div>`)
     else if (b.t === 'p') body.insertAdjacentHTML('beforeend', `<p>${b.html}</p>`)
-    else if (b.t === 'img') body.insertAdjacentHTML('beforeend', `<figure class="shot rise ${b.size || 'large'}"><div class="tray"><img src="${b.src}" alt="" loading="lazy" /></div></figure>`)
+    else if (b.t === 'img') body.insertAdjacentHTML('beforeend', `<figure class="shot rise ${b.size || 'large'}"><div class="tray"><img src="${b.src}" ${b.width && b.height ? `width="${b.width}" height="${b.height}" class="${b.height > b.width * 1.15 ? 'tall' : ''}"` : ''} alt="" loading="lazy" /></div></figure>`)
     else if (b.t === 'video') body.insertAdjacentHTML('beforeend', `<figure class="shot rise"><div class="tray"><video src="${b.src}" muted loop playsinline autoplay controls></video></div></figure>`)
   })
 
@@ -405,12 +407,26 @@
   $('nextMoons').innerHTML = nexts.map(k => `<a class="nextmoon" href="./case.html?c=${k}&home=${HOME}" style="--nc:${META[k].c}" aria-label="Read ${META[k].title}">
       <span class="nm-sky"><img class="nm-cover preview" src="${META[k].preview}" alt="" loading="lazy" /></span>
       <span class="nm-copy"><b>${META[k].title}</b><span class="nm-s">${META[k].summary}</span></span></a>`).join('')
-  document.querySelectorAll('.nextmoon').forEach(a => a.addEventListener('click', e => { if (reduce) return; e.preventDefault(); document.body.classList.add('leaving'); setTimeout(() => location.href = a.href, 820) }))
+  document.querySelectorAll('.nextmoon').forEach(a => a.addEventListener('click', e => {
+    if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return
+    e.preventDefault(); leave(a.href)
+  }))
 
   // ---------- Motion ----------
-  let lenis = null
-  if (!reduce) { lenis = new Lenis({ lerp: 0.08, smoothWheel: true, anchors: { offset: -90 } }); const raf = t => { lenis.raf(t); requestAnimationFrame(raf) }; requestAnimationFrame(raf) }
-  requestAnimationFrame(() => requestAnimationFrame(() => document.body.classList.remove('arriving')))
+  let lenis = null, motionFrame = 0, navigationTimer = 0, leaving = false
+  const raf = t => { lenis?.raf(t); motionFrame = requestAnimationFrame(raf) }
+  if (!reduce) {
+    lenis = new Lenis({ lerp: 0.08, smoothWheel: true, anchors: { offset: -90 } })
+    motionFrame = requestAnimationFrame(raf)
+  }
+  // Give the hero a chance to decode before revealing it, without blocking on a slow image.
+  const heroImage = $('lander').querySelector('img')
+  Promise.race([
+    heroImage?.decode().catch(() => {}),
+    new Promise(resolve => setTimeout(resolve, 350)),
+  ]).then(() => requestAnimationFrame(() => requestAnimationFrame(() => {
+    document.body.classList.remove('arriving')
+  })))
   body.querySelectorAll('.shot img').forEach(im => { const tag = () => { if (im.naturalHeight > im.naturalWidth * 1.15) im.classList.add('tall') }; im.complete ? tag() : im.addEventListener('load', tag) })
   const io = new IntersectionObserver(es => es.forEach(e => e.isIntersecting && (e.target.classList.add('in'), io.unobserve(e.target))), { rootMargin: '0px 0px -10% 0px' })
   document.querySelectorAll('.shot.rise').forEach(el => io.observe(el))
@@ -425,16 +441,35 @@
     toc.classList.toggle('show', y > H * .8)
   }, { passive: true })
 
-  // ---------- Back to orbit: zoom out, then land on home at this case's planet ----------
+  // ---------- Navigation and browser back/forward restoration ----------
+  function leave(url) {
+    if (leaving) return
+    leaving = true
+    lenis?.stop()
+    if (reduce) { location.href = url; return }
+    document.body.classList.add('leaving')
+    navigationTimer = setTimeout(() => location.href = url, 280)
+  }
   function toOrbit(e) {
     e?.preventDefault()
-    const url = `./${HOME}.html?from=${meta.planet}`
-    if (reduce) { location.href = url; return }
-    lenis?.stop(); document.body.classList.add('leaving'); setTimeout(() => location.href = url, 820)
+    leave(`./${HOME}.html?from=${meta.planet}`)
   }
   $('back').addEventListener('click', toOrbit); $('back2').addEventListener('click', toOrbit)
   addEventListener('keydown', e => { if (e.key === 'Escape') toOrbit() })
-  addEventListener('pageshow', e => { if (e.persisted) document.body.classList.remove('leaving') })
+  addEventListener('pagehide', () => {
+    clearTimeout(navigationTimer)
+    cancelAnimationFrame(motionFrame); motionFrame = 0
+  })
+  addEventListener('pageshow', e => {
+    if (!e.persisted) return
+    clearTimeout(navigationTimer)
+    leaving = false
+    document.body.classList.add('restoring')
+    document.body.classList.remove('leaving', 'arriving')
+    lenis?.start()
+    if (lenis && !motionFrame) motionFrame = requestAnimationFrame(raf)
+    requestAnimationFrame(() => requestAnimationFrame(() => document.body.classList.remove('restoring')))
+  })
   if (q.has('y')) { lenis?.destroy(); document.querySelectorAll('.shot.rise').forEach(el => el.classList.add('in')); const w = $('world'); w.style.transition = 'none'; const yy = q.get("y") === "end" ? document.documentElement.scrollHeight - innerHeight : +q.get("y"); setTimeout(() => w.style.transform = `translateY(${-(q.get("y") === "end" ? document.documentElement.scrollHeight - innerHeight : yy)}px)`, 600) }  // preview helper (headless can't scroll)
 </script>
 </body>

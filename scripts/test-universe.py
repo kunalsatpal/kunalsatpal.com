@@ -210,16 +210,24 @@ for scene in ('gojek', 'cult'):
 check(all(r['left'] >= 11 and r['top'] >= 11 and r['right'] <= 379 and r['bottom'] <= 833 and r['active'] for r in clamped), 'Phone hover previews lift and stay inside every viewport edge')
 
 b.navigate(base + '?scene=galaxy&perf')
-wait_for("[...document.querySelectorAll('.mbadge img')].every(image => image.complete)")
-badges = b.js("""[...document.querySelectorAll('.mbadge')].map(badge => {
-  const image = badge.querySelector('img'), b = badge.getBoundingClientRect(), i = image.getBoundingClientRect()
-  return { mark: badge.className, src: image.currentSrc, loaded: image.complete && image.naturalWidth > 0,
-    contained: i.left >= b.left && i.top >= b.top && i.right <= b.right && i.bottom <= b.bottom && getComputedStyle(image).objectFit === 'contain',
-    background: getComputedStyle(badge).backgroundColor, transform: getComputedStyle(image).transform }
-})""")
-pibit_badge = next((badge for badge in badges if 'mark-pibit' in badge['mark']), None)
-check(len(badges) == 7 and all(badge['contained'] for badge in badges if 'mark-pibit' not in badge['mark']), 'Every earlier-stop logo fits inside its badge safe area')
-check(pibit_badge and pibit_badge['src'] == 'https://kunalsatpal.com/images/whatsapp/pibit-logo.png' and pibit_badge['loaded'] and pibit_badge['background'] == 'rgb(76, 99, 239)' and pibit_badge['transform'] == 'matrix(1.35, 0, 0, 1.35, 0, 0)', 'Earlier stops uses the blue Pibit logo at the field-note scale')
+wait_for("document.querySelectorAll('.mwatermark .company-logo image[href]').length === 7")
+badges = b.js("""Promise.all([...document.querySelectorAll('.mwatermark')].map(async badge => {
+  const logo = badge.querySelector('svg'), source = logo.querySelector('image').getAttribute('href')
+  const image = new Image(); image.src = source
+  await image.decode()
+  const b = badge.getBoundingClientRect(), i = logo.getBoundingClientRect()
+  return { mark: badge.className, src: source, loaded: image.naturalWidth === 750 && image.naturalHeight === 300,
+    contained: i.left >= b.left && i.top >= b.top && i.right <= b.right && i.bottom <= b.bottom,
+    background: getComputedStyle(badge).backgroundColor, opacity: Number(getComputedStyle(badge).opacity) }
+}))""")
+check(len(badges) == 7 and all(badge['contained'] and badge['loaded'] for badge in badges), 'Every supplied company watermark loads and fits inside its planet')
+check(all(badge['src'].startswith('./site/img/about-logos/') and badge['background'] == 'rgba(0, 0, 0, 0)' and 0 < badge['opacity'] <= 1 for badge in badges), 'Earlier stops uses local surface logos without badge backgrounds')
+
+for toon in (True, False):
+    if b.js("document.documentElement.classList.contains('theme-toon')") != toon:
+        b.js("document.getElementById('styleToggle').click()")
+    layers = b.js("[...document.querySelectorAll('.mini .msurf, .mini .mshade')].map(e=>getComputedStyle(e).display)")
+    check(all((display == 'none') == toon for display in layers), f'Earlier-stop realistic layers follow cartoon theme: {toon}')
 
 b.navigate(base + '?scene=writing&perf')
 wait_for("document.querySelectorAll('.log').length === 4")

@@ -4,9 +4,15 @@ Requires websocket-client; connect only to an isolated local debugging browser.
 import json, urllib.request, websocket, time, base64
 
 class Browser:
-    def __init__(self):
-        tabs = json.load(urllib.request.urlopen('http://127.0.0.1:9222/json/list'))
-        self.ws = websocket.create_connection(next(t['webSocketDebuggerUrl'] for t in tabs if t['type'] == 'page'), origin='http://localhost:9222', timeout=60)
+    def __init__(self, new_tab=False):
+        if new_tab:
+            request = urllib.request.Request('http://127.0.0.1:9222/json/new?about:blank', method='PUT')
+            tab = json.load(urllib.request.urlopen(request))
+        else:
+            tabs = json.load(urllib.request.urlopen('http://127.0.0.1:9222/json/list'))
+            tab = next(t for t in tabs if t['type'] == 'page')
+        self.target_id = tab['id'] if new_tab else None
+        self.ws = websocket.create_connection(tab['webSocketDebuggerUrl'], origin='http://localhost:9222', timeout=60)
         self.seq = 0
         self.events = []
         self.call('Runtime.enable')
@@ -37,3 +43,8 @@ class Browser:
     def screenshot(self,path):
         data=self.call('Page.captureScreenshot',{'format':'png'})['data']
         open(path,'wb').write(base64.b64decode(data))
+
+    def close(self):
+        if self.target_id:
+            self.call('Target.closeTarget', {'targetId': self.target_id})
+        self.ws.close()

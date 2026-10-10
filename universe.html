@@ -5,7 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <script>
   (() => {
-    const queryTheme = new URLSearchParams(location.search).get('theme')
+    const entry = new URLSearchParams(location.search)
+    const queryTheme = entry.get('theme')
+    if (entry.has('from') || (entry.has('scene') && entry.get('scene') !== 'hero') || +entry.get('at') > 0 || (history.state?.universeScene && history.state.universeScene !== 'hero')) {
+      document.documentElement.classList.add('scene-entry')
+    }
     if (localStorage.universeTheme === 'toon' || queryTheme === 'toon') {
       document.documentElement.classList.add('theme-toon')
     }
@@ -13,10 +17,67 @@
   })()
 </script>
 <title>Kunal Satpal — Product Designer</title>
-<link rel="preconnect" href="https://fonts.googleapis.com" />
-<link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,500;1,400&family=Inter+Tight:wght@600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<link rel="preload" href="./site/fonts/inter-tight-normal-latin.woff2" as="font" type="font/woff2" crossorigin />
+<link rel="preload" href="./site/fonts/inter-normal-latin.woff2" as="font" type="font/woff2" crossorigin />
 <link rel="stylesheet" href="./vendor/lenis.css" />
 <style>
+@font-face {
+  font-family: 'Inter';
+  font-style: italic;
+  font-weight: 400;
+  font-display: optional;
+  src: url(./site/fonts/inter-italic-latin.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 400;
+  font-display: optional;
+  src: url(./site/fonts/inter-normal-latin.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 500;
+  font-display: optional;
+  src: url(./site/fonts/inter-normal-latin.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Inter Tight';
+  font-style: normal;
+  font-weight: 600;
+  font-display: optional;
+  src: url(./site/fonts/inter-tight-normal-latin.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Inter Tight';
+  font-style: normal;
+  font-weight: 700;
+  font-display: optional;
+  src: url(./site/fonts/inter-tight-normal-latin.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'JetBrains Mono';
+  font-style: normal;
+  font-weight: 400;
+  font-display: optional;
+  src: url(./site/fonts/jetbrains-mono-normal-latin.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'JetBrains Mono';
+  font-style: normal;
+  font-weight: 500;
+  font-display: optional;
+  src: url(./site/fonts/jetbrains-mono-normal-latin.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
   /* One night sky for the whole page: the stage is pinned and every section is a scene you fly through.
      The route runs forward in time; planet size = tenure, distance between planets = years between roles. */
   :root { --mint: #9fe8d2; --ink: #fff; --muted: rgba(255,255,255,.66); --faint: rgba(255,255,255,.42); --line: rgba(255,255,255,.14); }
@@ -41,7 +102,8 @@
   @media (min-width: 601px) and (max-width: 900px) { nav { padding: 12px 16px; } }
 
   /* ---------- The journey ---------- */
-  .journey { position: relative; }
+  .journey { position: relative; min-height: 100svh; height: 945vh; }
+  @media (pointer: coarse) { .journey { height: 765vh; } }
   .stage { position: sticky; top: 0; height: 100vh; height: 100svh; overflow: hidden;
     background: radial-gradient(120% 90% at 50% 110%, #0b1124 0%, #05070f 55%, #020308 100%); }
   .camera { position: absolute; inset: 0; transform-origin: 50% 50%; transition: transform .75s cubic-bezier(.6,.05,.25,1), filter .75s; }
@@ -50,6 +112,8 @@
   .layer canvas { width: 100% !important; height: 100% !important; display: block; }
   .aurora canvas { mix-blend-mode: screen; opacity: .22; filter: saturate(.6); }
   .far { mix-blend-mode: screen; opacity: .7; }
+  .aurora, .far { transition: opacity .45s ease; }
+  .aurora:not(.effect-ready), .far:not(.effect-ready) { opacity: 0; }
   .warp { inset: 0; background-size: 100% 100%; mix-blend-mode: screen; }
   /* Warp jump: radial speed lines while the camera rushes to another stop. */
   .streaks { position: absolute; inset: -20%; pointer-events: none; z-index: 3; opacity: 0; transition: opacity .35s;
@@ -64,6 +128,8 @@
   .scene { position: absolute; inset: 0; z-index: 5; display: grid; place-items: center; text-align: center; padding: 110px 6vw 110px;
     opacity: 0; pointer-events: none; will-change: transform, opacity, filter; }
   .scene.active { pointer-events: auto; }
+  .scene[data-scene="hero"] { opacity: 1; }
+  html.scene-entry .scene[data-scene="hero"] { opacity: 0; }
   .scene .inner { max-width: 980px; width: 100%; }
   .kicker { display: inline-block; color: var(--mint); font-size: 15px; letter-spacing: .02em; margin-bottom: 20px; padding: 5px 14px; border-radius: 999px; border: 1px solid rgba(159,232,210,.35); }
   h1 { font: 700 clamp(44px, 5.4vw, 82px)/1.08 "Inter Tight", sans-serif; letter-spacing: -0.03em; }
@@ -76,8 +142,12 @@
   /* Hero */
   .name { display: flex; align-items: center; justify-content: center; gap: 12px; margin-bottom: 26px; }
   .name span { font: 500 22px/1 "Inter", sans-serif; letter-spacing: .01em; }
-  .object { position: relative; width: 46px; aspect-ratio: 1; }
+  .object { position: relative; flex: none; width: 46px; height: 46px; }
   .object canvas, .object .fallback { position: absolute; inset: 0; width: 100%; height: 100%; }
+  /* The shader writes a measured pixel size inline while the hero is zoomed.
+     Keep the visible canvas inside its fixed-size logo wrapper on return. */
+  .object canvas { width: 100% !important; height: 100% !important; }
+  .object canvas, .object .fallback { transition: opacity .3s ease; }
   .object canvas { opacity: 0; } .object canvas.on { opacity: 1; } .object.live .fallback { opacity: 0; }
   .object.glitch, .gword.glitch { animation: glitch .42s steps(1) both; }
   @keyframes glitch {
@@ -99,6 +169,7 @@
   .cue-chev.two { animation-delay: .2s; } @keyframes chev { 0%, 100% { opacity: .15; } 50% { opacity: .9; } }
 
   .proof { position: absolute; z-index: 4; padding: 7px; border-radius: 20px; background: #f1f3f6; box-shadow: 0 30px 60px -20px rgba(0,0,10,.7), 0 0 0 1px rgba(255,255,255,.2); will-change: transform; cursor: pointer; }
+  .proof picture { display: block; width: 100%; height: 100%; }
   .proof img { display: block; width: 100%; height: 100%; object-fit: cover; border-radius: 14px; }
   .p1 { left: 2.8%; top: 16%; width: 21%; aspect-ratio: 283 / 210; }
   .p2 { right: 2.8%; top: 16%; width: 21%; aspect-ratio: 1.45; }
@@ -147,6 +218,8 @@
   .tip b { display: block; color: #fff; font: 600 15px/1.25 "Inter Tight", sans-serif; margin-bottom: 3px; }
   .moon:hover .tip, .moon:focus-visible .tip { opacity: 1; transform: translateY(-50%); }
   .moon:hover em { opacity: 0; }
+  .moon .tip, .mini .tip { box-sizing: border-box; overflow: auto; overflow-wrap: anywhere; }
+  .moon:hover .tip, .moon:focus-visible .tip, .mini:hover .tip, .mini:focus-visible .tip { pointer-events: auto; }
   /* Cratered moons, lit from the same side as the planet. */
   .moon i { width: 22px; height: 22px; border-radius: 50%; flex: none; transition: transform .3s, box-shadow .3s;
     background:
@@ -454,14 +527,20 @@
   .p3 { left: 4.5%; top: 60%; width: 11.5%; } .p4 { right: 4.5%; top: 64%; width: 12.5%; }
 
 
-  /* ---------- Arrival: warp in, the mark settles, then the headline ---------- */
-  body.arriving .title .name, body.arriving .title h1, body.arriving .title .cue { opacity: 0; transform: translateY(14px); }
-  .title .name, .title h1, .title .cue { transition: opacity .9s cubic-bezier(.2,.8,.2,1), transform .9s cubic-bezier(.2,.8,.2,1); }
-  .title .name { transition-delay: .55s; } .title h1 { transition-delay: .8s; } .title .cue { transition-delay: 1.2s; }
-  /* No scale here: the shader sizes its canvas from the element's on-screen box, so the mark only fades and sharpens in. */
-  body.arriving .object { filter: blur(10px) brightness(2); opacity: 0; }
-  .object { transition: filter 1.1s ease-out .35s, opacity .7s ease-out .35s; }
-  @media (prefers-reduced-motion: reduce) { body.arriving .title .name, body.arriving .title h1, body.arriving .title .cue, body.arriving .object { opacity: 1; transform: none; filter: none; } }
+  /* Readable immediately; only a brief fade, with artwork following the copy. */
+  .title .name, .title h1, .title .rolechip { animation: hero-copy-in .36s ease-out both; }
+  .title .cue { animation: hero-copy-in .36s ease-out .12s both; }
+  .sky-art { position: absolute; inset: 0; pointer-events: none; animation: hero-art-in .45s ease-out .2s backwards; }
+  .proof { opacity: 0; }
+  .proof.image-ready { opacity: 1; animation: hero-art-in .45s ease-out .18s backwards; }
+  .proof:not(.image-ready) { pointer-events: none !important; }
+  @keyframes hero-art-in { from { opacity: 0; } to { opacity: 1; } }
+  html.scene-entry .title .name, html.scene-entry .title h1, html.scene-entry .title .rolechip, html.scene-entry .title .cue { animation: none; }
+  @keyframes hero-copy-in { from { opacity: .65; } to { opacity: 1; } }
+  @media (prefers-reduced-motion: reduce) {
+    .title .name, .title h1, .title .rolechip, .title .cue, .proof.image-ready, .sky-art { animation: none; }
+    .object canvas, .object .fallback, .aurora, .far { transition: none; }
+  }
 
   .tip .soon { display: block; margin-top: 8px; font: 500 11px/1 "JetBrains Mono", monospace; letter-spacing: .1em; text-transform: uppercase; color: var(--glow); }
   @media (max-width: 900px) { .about-hats { grid-template-columns: 1fr; text-align: center; } .about-hats .hatdots { justify-content: center; } }
@@ -517,18 +596,20 @@
   .moon.left .tip { left: auto; right: 34px; }
   .moon em { transition: opacity .3s; } .moon.behind em { opacity: 0; }
 
-  /* Logo badge: a small white chip on each earlier-stop planet, like a flag planted on it. */
+  /* Realistic planets use luminous marks; cartoon planets use ink silhouettes for contrast. */
   .mini i { overflow: visible !important; }
-  .mbadge { position: absolute; right: -6%; bottom: -4%; width: 42%; min-width: 26px; aspect-ratio: 1; overflow: hidden; border-radius: 50%; background: #fff; z-index: 2;
-    box-shadow: 0 4px 12px rgba(0,0,0,.45), 0 0 0 2px color-mix(in srgb, var(--c) 60%, transparent); }
-  .mbadge img { position: absolute; inset: 17%; display: block; width: 66%; height: 66%; object-fit: contain; }
-  .mbadge.mark-pibit { background: #4c63ef; }
-  .mbadge.mark-pibit img { inset: 0; width: 100%; height: 100%; object-fit: cover; transform: scale(1.35); }
-  .mbadge.wide { width: 74%; aspect-ratio: 2.4; border-radius: 999px; right: -24%; }
-  .mbadge.wide img { inset: 7%; width: 86%; height: 86%; }
-  .mbadge.mark-img img, .mbadge.mark-cult img { transform: translateX(-5%); }
-  .mbadge.mark-mobily img { transform: translateX(-4%); }
-  .mbadge.mark-west img { transform: translateX(-6%); }
+  .mwatermark { position: absolute; inset: 0; border-radius: 50%; overflow: hidden; pointer-events: none;
+    opacity: .58; mix-blend-mode: normal; transition: opacity .25s ease; }
+  .mwatermark .company-logo { display: block; position: absolute; inset: 28%; width: 44%; height: 44%;
+    overflow: hidden; filter: brightness(0) invert(1) drop-shadow(0 1px 2px rgba(0,0,0,.65));
+    transition: transform .25s ease; transform-origin: center; }
+  .mini:is(:hover, :focus-visible) .mwatermark { opacity: .9; }
+  .mini:is(:hover, :focus-visible) .company-logo { transform: scale(1.05); }
+  html.theme-toon .mini .msurf, html.theme-toon .mini .mshade { display: none; }
+  html.theme-toon .mwatermark { opacity: .88; }
+  html.theme-toon .mwatermark .company-logo { filter: brightness(0) drop-shadow(0 1px 0 rgba(255,255,255,.5)); }
+  html.theme-toon .mini:is(:hover, :focus-visible) .mwatermark { opacity: 1; }
+  @media (prefers-reduced-motion: reduce) { .mwatermark, .mwatermark .company-logo { transition: none; } }
 
   /* ---------- Moons, second pass: readable info moons, real-looking moons, focus on case-study orbits ---------- */
   .moon:not(.open) i { width: 16px !important; height: 16px !important; opacity: 1 !important; }
@@ -543,7 +624,7 @@
 
   /* Landable moons: a bigger preview tooltip; clicking dives straight into the case study. */
   .moon.open { text-decoration: none; color: inherit; }
-  .tip.big { width: min(340px, calc(100vw - 32px)); max-width: none; padding: 0; overflow: hidden; display: block; }
+  .tip.big { width: min(340px, calc(100vw - 32px)); max-width: none; padding: 0; overflow: auto; display: block; }
   .tip-img { display: block; width: 100%; line-height: 0; background: radial-gradient(120% 90% at 30% 20%, color-mix(in srgb, var(--glow) 30%, #10131c), #0b0d14); }
   .tip-img img { display: block; width: 100%; height: auto; }
   .tip-body { display: block; padding: 14px 16px 16px; }
@@ -570,9 +651,6 @@
   .rolechip { display: inline-flex; align-items: center; gap: 8px; margin-bottom: 18px; padding: 6px 14px; border-radius: 999px; font-size: 14px; color: rgba(255,255,255,.85);
     background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.14); backdrop-filter: blur(8px); }
   .rolechip i { width: 7px; height: 7px; border-radius: 50%; background: #5fe0a3; box-shadow: 0 0 10px #5fe0a3; }
-  .title .rolechip { transition: opacity .9s cubic-bezier(.2,.8,.2,1) .7s, transform .9s cubic-bezier(.2,.8,.2,1) .7s; }
-  body.arriving .title .rolechip { opacity: 0; transform: translateY(12px); }
-  @media (prefers-reduced-motion: reduce) { body.arriving .title .rolechip { opacity: 1; transform: none; } }
   /* No glow under the cards. */
   .proof::after { display: none !important; }
   .proof { box-shadow: 0 0 0 1px rgba(255,255,255,.14), 0 24px 50px -30px rgba(0,0,0,.85) !important; }
@@ -675,7 +753,6 @@ html.theme-toon .m-stats div { border: 3px solid #15132a; background: #2a1f6e; b
 html.theme-toon .panel .close { border: 3px solid #15132a !important; background: #2a1f6e; }
 html.theme-toon .panel .go { border: 3px solid #15132a; box-shadow: 0 5px 0 #15132a; }
 html.theme-toon .proof { border: 2.5px solid #15132a; background: #2a1f6e !important; box-shadow: 0 5px 0 #15132a !important; }
-html.theme-toon .mbadge { box-shadow: 0 3px 0 #15132a !important; border: 2.5px solid #15132a; }
 html.theme-toon .moon:not(.open) i { width: 18px !important; height: 18px !important; }
 html.theme-toon .moon.open i { width: 28px !important; height: 28px !important; }
 html.theme-toon .tip.big { border: 3px solid #15132a !important; box-shadow: 0 6px 0 #15132a !important; background: #1f1757 !important; }
@@ -728,9 +805,22 @@ html.theme-toon .rolechip { border: 2px solid #15132a; background: #1f1757; }
   html.settled:not(.theme-toon) .toonwrap *,
   html.theme-toon.settled .planet *, html.theme-toon.settled .ringsvg *,
   html.theme-toon .mini .msurf { animation-play-state: paused !important; }
+  /* About role word: star-rise swap (replaces the glitch). */
+  .gword, .hatproof { transition: opacity .2s ease, transform .2s ease, filter .2s ease; }
+  .gword.out { opacity: 0; transform: translateY(-.18em); filter: blur(6px); }
+  .hatproof.out { opacity: 0; transform: translateY(-4px); }
+  .gword .gw { display: inline-block; white-space: nowrap; }
+  .gword .gl { display: inline-block; animation: glrise .6s cubic-bezier(.2,.8,.2,1) both; animation-delay: calc(var(--i) * 24ms); }
+  @keyframes glrise {
+    0% { opacity: 0; transform: translateY(.42em); filter: blur(8px); }
+    60% { opacity: 1; transform: translateY(-.03em); filter: blur(0); }
+    100% { opacity: 1; transform: none; filter: none; }
+  }
+  @media (prefers-reduced-motion: reduce) { .gword .gl { animation: none; opacity: 1; transform: none; filter: none; } }
 </style>
+<noscript><style>.proof { opacity: 1; animation: none; }</style></noscript>
 </head>
-<body class="arriving">
+<body>
 <nav aria-label="Main navigation">
   <a class="pmark" href="#" data-go="hero" aria-label="Home"><svg viewBox="0 0 33 31" aria-hidden="true"><rect y="1.09" width="7.68" height="28.36" rx="1.4" fill="currentColor"/><path fill="currentColor" d="M31.24.92c.77 0 1.4.63 1.4 1.4v25.52c0 .77-.63 1.4-1.4 1.4h-6.1c-.27 0-.52-.11-.7-.31L12.18 15.08 24.44 1.22c.18-.19.43-.3.7-.3z"/></svg></a>
   <span class="sep"></span>
@@ -747,6 +837,7 @@ html.theme-toon .rolechip { border: 2px solid #15132a; background: #1f1757; }
 <div class="journey" id="journey">
   <div class="stage" id="stage">
     <div class="camera" id="camera">
+      <div class="sky-art" aria-hidden="true">
       <div class="toonsky" aria-hidden="true"></div>
       <div class="layer aurora" id="aurora"><canvas id="auroraC"></canvas></div>
       <div class="layer far" id="far"><canvas id="farC"></canvas></div>
@@ -761,7 +852,33 @@ html.theme-toon .rolechip { border: 2px solid #15132a; background: #1f1757; }
       <div class="streaks"></div>
       <div class="grain"></div>
       <div class="vignette"></div>
-      <div id="scenes"></div>
+      </div>
+      <div id="scenes">
+        <section class="scene active" data-scene="hero">
+<div class="inner title">
+        <div class="name"><div class="object" id="object" aria-hidden="true">
+          <svg class="fallback" viewBox="-7.7 -8.9 48 48"><defs><linearGradient id="fb" x1="0" y1="0" x2=".35" y2="1"><stop offset="0" stop-color="#eef3ff"/><stop offset=".4" stop-color="#9fb4e8"/><stop offset=".52" stop-color="#2a3a6a"/><stop offset=".58" stop-color="#dce6ff"/><stop offset="1" stop-color="#e9eeff"/></linearGradient></defs>
+          <g fill="url(#fb)"><rect y="1.091" width="7.68" height="28.356" rx="1.4"/><path d="M31.24,0.92 C32.01,0.92 32.64,1.55 32.64,2.32 L32.64,27.84 C32.64,28.61 32.01,29.24 31.24,29.24 L25.14,29.24 C24.87,29.24 24.62,29.13 24.44,28.93 L12.18,15.08 L24.44,1.22 C24.62,1.03 24.87,0.92 25.14,0.92 Z"/></g></svg></div>
+          <span>KUNAL SATPAL</span></div>
+        <div class="rolechip"><i></i>Staff Product Designer at Hinge Health</div>
+        <h1>Crafting with strategy<br />&amp; technical fluency</h1>
+        <div class="cue" aria-label="Scroll to explore">
+          <svg class="cue-sky" viewBox="0 0 160 96" aria-hidden="true">
+            <!-- A scroll capsule; the "wheel" is a little planet that drops down it. Two tiny planets orbit it. -->
+            <ellipse cx="80" cy="44" rx="40" ry="11" fill="none" class="cue-orbit" transform="rotate(-14 80 44)"/>
+            <rect x="66" y="16" width="28" height="48" rx="14" class="cue-cap"/>
+            <circle cx="80" cy="30" r="5.2" fill="#5fe0a3" class="cue-wheel"/>
+            <circle r="5" fill="#3fe05a" class="cue-moon"><animateMotion dur="5s" repeatCount="indefinite" rotate="0" path="M40 44 A40 11 0 1 0 120 44 A40 11 0 1 0 40 44"/></circle>
+            <circle r="3.4" fill="#ff5a85" class="cue-moon"><animateMotion dur="5s" begin="-2.5s" repeatCount="indefinite" path="M40 44 A40 11 0 1 0 120 44 A40 11 0 1 0 40 44"/></circle>
+            <path d="M72 76 L80 84 L88 76" class="cue-chev"/><path d="M72 84 L80 92 L88 84" class="cue-chev two"/>
+          </svg><span>Scroll</span></div>
+      </div>
+      <a class="proof p1" style="--pg:#5fe0a3" data-depth="1.0" data-go="hinge"><picture><source media="(min-width: 901px)" srcset="./site/img/proof_carehub.png" /><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1' height='1'/%3E" width="566" height="420" loading="eager" decoding="async" fetchpriority="high" onload="this.decode().catch(() => {}).then(() => this.closest('.proof').classList.add('image-ready'))" alt="CareHub member record" /></picture><span class="plabel"><b>CareHub · Hinge Health</b>Redesign • 6% efficiency gains</span></a>
+      <a class="proof p2" style="--pg:#ee2737" data-depth="0.7" data-go="gojek"><picture><source media="(min-width: 901px)" srcset="./site/img/proof_promo.jpg" /><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1' height='1'/%3E" width="760" height="522" loading="eager" decoding="async" fetchpriority="high" onload="this.decode().catch(() => {}).then(() => this.closest('.proof').classList.add('image-ready'))" alt="GoFood promo screens" /></picture><span class="plabel"><b>Promo discovery · Gojek</b>4% conversions · 5× ad revenue</span></a>
+      <a class="proof p3" style="--pg:#7fd6ff" data-depth="0.85" data-go="life"><picture><source media="(min-width: 901px)" srcset="./site/img/proof_aurora.jpg" /><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1' height='1'/%3E" width="458" height="606" loading="eager" decoding="async" fetchpriority="high" onload="this.decode().catch(() => {}).then(() => this.closest('.proof').classList.add('image-ready'))" alt="Aurora illustration" /></picture><span class="plabel"><b>Visual craft</b>Motion illustration for Cult.fit</span></a>
+      <a class="proof p4" style="--pg:#ff5a85" data-depth="0.6" data-go="cult"><picture><source media="(min-width: 901px)" srcset="./site/img/proof_icons.png" /><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1' height='1'/%3E" width="466" height="344" loading="eager" decoding="async" fetchpriority="high" onload="this.decode().catch(() => {}).then(() => this.closest('.proof').classList.add('image-ready'))" alt="Cult.fit category icons" /></picture><span class="plabel"><b>Design systems</b>Contributor to aurora design system</span></a>
+        </section>
+      </div>
     </div>
   </div>
 </div>
@@ -796,6 +913,7 @@ html.theme-toon .rolechip { border: 2px solid #15132a; background: #1f1757; }
   performance.mark('universe:boot')
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches
   const $ = id => document.getElementById(id)
+  const yieldToBrowser = () => window.scheduler?.yield ? window.scheduler.yield() : new Promise(resolve => setTimeout(resolve, 0))
 
   // =====================================================================================
   // Content
@@ -804,11 +922,11 @@ html.theme-toon .rolechip { border: 2px solid #15132a; background: #1f1757; }
   // Colours approximate each brand. Figures come from Kunal's site and résumé — confirm before publishing.
   const HATS = [
     { role: 'product designer', proof: 'CareHub, GoFood promos, Fitclub: product design end to end.', shape: 'nib' },
-    { role: 'mentor', proof: 'I coach designers through crits and reviews, and helped many at IIT Roorkee into product roles.', shape: 'spiral' },
+    { role: 'mentor', proof: 'I am grateful to have mentored some great designers and helping them grow.', shape: 'spiral' },
     { role: 'team builder', proof: 'Led 12+ designers at IIT Roorkee; today I run design quality reviews with engineering.', shape: 'team' },
-    { role: 'strategist', proof: 'Set the strategy for multi-condition care in VP-level reviews, and reframed our AI assistant as a clinical tool.', shape: 'star' },
-    { role: 'systems builder', proof: 'Co-built Cult.fit\'s first app and web design system.', shape: 'grid' },
-    { role: 'prototyper who codes', proof: 'This site is hand-built: shaders, motion and all.', shape: 'code' },
+    { role: 'strategist', proof: 'Set the strategy for multi-condition care at Hinge and promos at GoFood.', shape: 'star' },
+    { role: 'systems builder', proof: "Created 10+ AI skills to improve designer's work process at Hinge Health.", shape: 'grid' },
+    { role: 'prototyper who codes', proof: 'This portfolio site is hand-built: shaders, motion and all.', shape: 'code' },
   ]
 
   // =====================================================================================
@@ -831,28 +949,6 @@ html.theme-toon .rolechip { border: 2px solid #15132a; background: #1f1757; }
   const scenesEl = $('scenes')
   const L = (k) => `<span class="kicker">${k}</span>`
   const HTML = {
-    hero: `<div class="inner title">
-        <div class="name"><div class="object" id="object" aria-hidden="true">
-          <svg class="fallback" viewBox="-7.7 -8.9 48 48"><defs><linearGradient id="fb" x1="0" y1="0" x2=".35" y2="1"><stop offset="0" stop-color="#eef3ff"/><stop offset=".4" stop-color="#9fb4e8"/><stop offset=".52" stop-color="#2a3a6a"/><stop offset=".58" stop-color="#dce6ff"/><stop offset="1" stop-color="#e9eeff"/></linearGradient></defs>
-          <g fill="url(#fb)"><rect y="1.091" width="7.68" height="28.356" rx="1.4"/><path d="M31.24,0.92 C32.01,0.92 32.64,1.55 32.64,2.32 L32.64,27.84 C32.64,28.61 32.01,29.24 31.24,29.24 L25.14,29.24 C24.87,29.24 24.62,29.13 24.44,28.93 L12.18,15.08 L24.44,1.22 C24.62,1.03 24.87,0.92 25.14,0.92 Z"/></g></svg></div>
-          <span>KUNAL SATPAL</span></div>
-        <div class="rolechip"><i></i>Staff Product Designer at Hinge Health</div>
-        <h1>Crafting with strategy<br />&amp; technical fluency</h1>
-        <div class="cue" aria-label="Scroll to explore">
-          <svg class="cue-sky" viewBox="0 0 160 96" aria-hidden="true">
-            <!-- A scroll capsule; the "wheel" is a little planet that drops down it. Two tiny planets orbit it. -->
-            <ellipse cx="80" cy="44" rx="40" ry="11" fill="none" class="cue-orbit" transform="rotate(-14 80 44)"/>
-            <rect x="66" y="16" width="28" height="48" rx="14" class="cue-cap"/>
-            <circle cx="80" cy="30" r="5.2" fill="${MAJOR[0].glow}" class="cue-wheel"/>
-            <circle r="5" fill="${MAJOR[1].glow}" class="cue-moon"><animateMotion dur="5s" repeatCount="indefinite" rotate="0" path="M40 44 A40 11 0 1 0 120 44 A40 11 0 1 0 40 44"/></circle>
-            <circle r="3.4" fill="${MAJOR[2].glow}" class="cue-moon"><animateMotion dur="5s" begin="-2.5s" repeatCount="indefinite" path="M40 44 A40 11 0 1 0 120 44 A40 11 0 1 0 40 44"/></circle>
-            <path d="M72 76 L80 84 L88 76" class="cue-chev"/><path d="M72 84 L80 92 L88 84" class="cue-chev two"/>
-          </svg><span>Scroll</span></div>
-      </div>
-      <a class="proof p1" style="--pg:#5fe0a3" data-depth="1.0" data-go="hinge"><img src="./site/img/proof_carehub.png" alt="CareHub member record" /><span class="plabel"><b>CareHub · Hinge Health</b>Used by every PT and coach</span></a>
-      <a class="proof p2" style="--pg:#ee2737" data-depth="0.7" data-go="gojek"><img src="./site/img/proof_promo.jpg" alt="GoFood promo screens" /><span class="plabel"><b>Promo discovery · Gojek</b>4% conversions · 5× ad revenue</span></a>
-      <a class="proof p3" style="--pg:#7fd6ff" data-depth="0.85" data-go="life"><img src="./site/img/proof_aurora.jpg" alt="Aurora illustration" /><span class="plabel"><b>Visual craft</b>Illustration, made for fun</span></a>
-      <a class="proof p4" style="--pg:#ff5a85" data-depth="0.6" data-go="cult"><img src="./site/img/proof_icons.png" alt="Cult.fit category icons" /><span class="plabel"><b>Icon system · Cult.fit</b>From the first design system</span></a>`,
     about: `<div class="inner about-hats">
         <div class="lead-copy"><span class="kicker">About</span>
           <h2 class="iam">I lead design teams.<br />I'm also a <span class="gword" id="gword">product designer</span>.</h2>
@@ -877,12 +973,15 @@ html.theme-toon .rolechip { border: 2px solid #15132a; background: #1f1757; }
       <div class="pl-copy"><span class="when">${p.years}</span><h2>${p.name}</h2><p class="role">${p.role}</p><p class="blurb">${p.blurb}</p>
 </div></div>`
   SCENES.forEach(s => {
+    if (s.key === 'hero') { s.el = scenesEl.querySelector('[data-scene="hero"]'); return }
     const el = document.createElement('section'); el.className = 'scene'; el.dataset.scene = s.key
+    el.style.visibility = 'hidden'
     el.innerHTML = s.kind === 'planet' ? planetHTML(s.planet) : HTML[s.key]
     if (s.kind === 'planet') el.style.setProperty('--glow', s.planet.glow)
     scenesEl.appendChild(el); s.el = el
   })
   $('journey').style.height = `${(U + 1) * (TOUCH ? 85 : 105)}vh`
+  await yieldToBrowser()
 
   // =====================================================================================
   // Sky
@@ -917,6 +1016,7 @@ html.theme-toon .rolechip { border: 2px solid #15132a; background: #1f1757; }
     return `url("data:image/svg+xml,${encodeURIComponent(`<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1600 900' preserveAspectRatio='xMidYMid slice'>${c}</svg>`)}")`
   }
   $('sparkfield').style.backgroundImage = sparkleTile(5, 60)
+  await yieldToBrowser()
 
   // =====================================================================================
   // The mark: retain its original Chrome material and full rendering quality.
@@ -927,8 +1027,8 @@ html.theme-toon .rolechip { border: 2px solid #15132a; background: #1f1757; }
     shapeSdfUrl: './mark.sdf.bin', scale: 1.28, tint: '#eef2ff', warmColor: '#b9c6ff', coolColor: '#5b7cd6', bevelWidth: 0.05, bevelShape: 0.72,
     curvature: 0.7, waviness: 0.03, environment: 1.25, envRotation: 30, softness: 0.2, spectral: 0.8, dispersion: 0.4, shadows: 0.75, speed: 0.25, edgeSoftness: 0.015,
   } }] }, ready => { markCanvas.classList.toggle('on', ready); obj.classList.toggle('live', ready) })
-  shaders.register('aurora', $('auroraC'), skyDefinitions.aurora)
-  shaders.register('far', $('farC'), skyDefinitions.far)
+  shaders.register('aurora', $('auroraC'), skyDefinitions.aurora, ready => $('aurora').classList.toggle('effect-ready', ready))
+  shaders.register('far', $('farC'), skyDefinitions.far, ready => $('far').classList.toggle('effect-ready', ready))
   const glitchEl = el => { el.classList.remove('glitch'); void el.offsetWidth; el.classList.add('glitch') }
 
   // =====================================================================================
@@ -939,9 +1039,26 @@ html.theme-toon .rolechip { border: 2px solid #15132a; background: #1f1757; }
   const sphere = document.createElementNS('http://www.w3.org/2000/svg', 'svg')
   sphere.setAttribute('width', '0'); sphere.setAttribute('height', '0'); sphere.style.position = 'absolute'
   sphere.innerHTML = `<filter id="sphere" primitiveUnits="objectBoundingBox" x="0" y="0" width="1" height="1" color-interpolation-filters="sRGB">
-    <feImage href="${textureURL('sphere.png')}" x="0" y="0" width="1" height="1" preserveAspectRatio="none" result="map"/>
+    <feImage data-src="${textureURL('sphere.png')}" x="0" y="0" width="1" height="1" preserveAspectRatio="none" result="map"/>
     <feDisplacementMap in="SourceGraphic" in2="map" scale="0.5" xChannelSelector="R" yChannelSelector="G"/></filter>`
   document.body.appendChild(sphere)
+
+  function loadSceneAssets(scene) {
+    if (scene.dataset.assetsLoaded) return
+    scene.dataset.assetsLoaded = 'true'
+    if (scene.querySelector('.system, .msurf')) {
+      const map = sphere.querySelector('feImage[data-src]')
+      if (map) { map.setAttribute('href', map.dataset.src); delete map.dataset.src }
+    }
+    scene.querySelectorAll('[data-background]').forEach(el => {
+      el.style.backgroundImage = `url("${el.dataset.background}")`
+      delete el.dataset.background
+    })
+    scene.querySelectorAll('img[data-src], image[data-src]').forEach(img => {
+      img.setAttribute(img.localName === 'image' ? 'href' : 'src', img.dataset.src)
+      delete img.dataset.src
+    })
+  }
 
   // Rings: banded ellipses; the back half sits behind the planet, the front half over it.
   function ringSVG(color, front) {
@@ -1114,31 +1231,56 @@ html.theme-toon .rolechip { border: 2px solid #15132a; background: #1f1757; }
         ${[[30, 40, 7], [172, 60, 5], [168, 160, 6]].map(([x, y, r]) => `<path d="M${x} ${y - r} L${x + r * .3} ${y - r * .3} L${x + r} ${y} L${x + r * .3} ${y + r * .3} L${x} ${y + r} L${x - r * .3} ${y + r * .3} L${x - r} ${y} L${x - r * .3} ${y - r * .3} Z" fill="#fff3c4" class="toon-spark"/>`).join('')}</svg>`,
   }
 
+  const activeMoonTips = new Set()
   function clampMoonTip(el) {
-    const tip = el.querySelector('.tip.big')
+    const tip = el.querySelector('.tip')
     if (!tip) return
     tip.style.translate = ''
     tip.style.removeProperty('width')
-    requestAnimationFrame(() => {
-      let r = tip.getBoundingClientRect()
-      const margin = 12, availableWidth = innerWidth - margin * 2
-      if (r.width > availableWidth) {
-        const visualScale = r.width / tip.offsetWidth
-        tip.style.width = `${availableWidth / visualScale}px`
-        r = tip.getBoundingClientRect()
+    tip.style.removeProperty('max-height')
+    let r = tip.getBoundingClientRect()
+    if (!r.width || !r.height) return
+    const viewport = window.visualViewport, margin = 12
+    const left = (viewport?.offsetLeft || 0) + margin
+    const top = (viewport?.offsetTop || 0) + margin
+    const width = Math.max(1, (viewport?.width || document.documentElement.clientWidth) - margin * 2)
+    const height = Math.max(1, (viewport?.height || document.documentElement.clientHeight) - margin * 2)
+    const scaleX = r.width / tip.offsetWidth || 1
+    const scaleY = r.height / tip.offsetHeight || 1
+    if (r.width > width) tip.style.width = `${width / scaleX}px`
+    tip.style.maxHeight = `${height / scaleY}px`
+    r = tip.getBoundingClientRect()
+    const dx = Math.max(left - r.left, Math.min(0, left + width - r.right))
+    const dy = Math.max(top - r.top, Math.min(0, top + height - r.bottom))
+    tip.style.translate = `${dx / scaleX}px ${dy / scaleY}px`
+  }
+
+  function trackMoonTip(el, onChange = () => {}) {
+    let pointed = false, focused = false
+    const update = () => {
+      const active = pointed || focused
+      onChange(active)
+      el.querySelector('.tip-float')?.classList.toggle('on', active)
+      if (active) {
+        activeMoonTips.add(el)
+        clampMoonTip(el)
+        requestFrame()
+      } else {
+        activeMoonTips.delete(el)
+        const tip = el.querySelector('.tip')
+        for (const property of ['translate', 'width', 'max-height']) tip.style.removeProperty(property)
       }
-      const dx = Math.max(margin - r.left, Math.min(0, innerWidth - margin - r.right))
-      const dy = Math.max(margin - r.top, Math.min(0, innerHeight - margin - r.bottom))
-      const scale = r.width / tip.offsetWidth || 1
-      tip.style.translate = `${dx / scale}px ${dy / scale}px`
-    })
+    }
+    el.addEventListener('pointerenter', () => { pointed = true; update() })
+    el.addEventListener('pointerleave', () => { pointed = false; update() })
+    el.addEventListener('focus', () => { focused = true; update() })
+    el.addEventListener('blur', () => { focused = false; update() })
   }
 
   const PHONES = ['promo', 'Fitclub', 'cart_abandonment']
-  addEventListener('load', () => setTimeout(() => PHONES.forEach(k => { new Image().src = `./site/cases/media/phone_${k}.png` }), 2000))
 
   const systems = []
-  SCENES.filter(s => s.kind === 'planet').forEach((s, si) => {
+  for (const s of SCENES.filter(s => s.kind === 'planet')) {
     const pl = s.planet, sys = s.el.querySelector('.system')
     sys.style.setProperty('--glow', pl.glow)
     sys.style.width = `calc(min(48vh, 40vw) * ${sizeFor(pl)})`
@@ -1146,9 +1288,9 @@ html.theme-toon .rolechip { border: 2px solid #15132a; background: #1f1757; }
       <div class="planet"><div class="surface"></div><div class="clouds"></div>${pl.lights ? '<div class="lights"></div>' : ''}<div class="shade"></div></div>
       <div class="atmo"></div><div class="toonwrap">${TOONS[pl.key]()}</div>`
     if (pl.sig) { const [back, front] = sigRing(pl.sig, pl.glow, pl.key, -12); sys.insertAdjacentHTML('afterbegin', back); sys.insertAdjacentHTML('beforeend', front) }
-    sys.querySelector('.surface').style.backgroundImage = `url(${textureURL(`${pl.key}-surface.jpg`)})`
-    sys.querySelector('.clouds').style.backgroundImage = `url(${textureURL(`${pl.key}-clouds.png`)})`
-    if (pl.lights) sys.querySelector('.lights').style.backgroundImage = `url(${textureURL(`${pl.key}-lights.png`)})`
+    sys.querySelector('.surface').dataset.background = textureURL(`${pl.key}-surface.jpg`)
+    sys.querySelector('.clouds').dataset.background = textureURL(`${pl.key}-clouds.png`)
+    if (pl.lights) sys.querySelector('.lights').dataset.background = textureURL(`${pl.key}-lights.png`)
     const moons = []
     const orbits = document.createElementNS('http://www.w3.org/2000/svg', 'svg')
     orbits.setAttribute('class', 'morbits'); orbits.setAttribute('viewBox', '0 0 100 100'); orbits.setAttribute('aria-hidden', 'true')
@@ -1164,31 +1306,28 @@ html.theme-toon .rolechip { border: 2px solid #15132a; background: #1f1757; }
       const b = document.createElement(m.open ? 'a' : 'div')
       b.className = 'moon' + (m.open ? ' open' : '')
       if (m.open) { b.href = m.href; b.setAttribute('aria-label', `${m.t}: land on the case study`) }
-      const thumb = m.open && m.img ? `<span class="tip-img"><img src="${m.img}" alt="" /></span>` : ''
+      const thumb = m.open && m.img ? `<span class="tip-img"><img data-src="${m.img}" decoding="async" alt="" /></span>` : ''
       const detail = m.open
         ? `<span class="tip-t">${m.t}</span><span class="tip-s">${m.s}</span>${m.stat ? `<span class="tip-result">${m.stat}</span>` : ''}`
         : `${m.stat ? `<b>${m.stat}</b>` : ''}${m.s}${m.soon ? '<small class="soon">Case study coming soon</small>' : ''}`
       b.innerHTML = `<i></i><em>${m.t}</em><span class="tip${m.open ? ' big tip-float' : ''}" role="tooltip">${thumb}<span class="tip-body">${detail}</span></span>`
       const floatTip = b.querySelector('.tip-float')
       if (floatTip) {
-        floatTip.style.setProperty('--glow', getComputedStyle(sys).getPropertyValue('--glow'))
+        floatTip.style.setProperty('--glow', pl.glow)
         const ti = floatTip.querySelector('.tip-img'), im = ti?.querySelector('img')
         if (ti && im) {
           ti.insertAdjacentHTML('afterbegin', '<span class="tp-planet"></span>')
           const key = new URL(m.href || location.href, location.href).searchParams.get('c')
-          if (PHONES.includes(key)) { im.src = `./site/cases/media/phone_${key}.png`; ti.classList.add('is-phone') }
+          if (PHONES.includes(key)) { im.dataset.src = `./site/cases/media/phone_${key}.png`; ti.classList.add('is-phone') }
           else {
             const fit = () => ti.classList.toggle('is-tall', im.naturalHeight > im.naturalWidth * 1.15)
-            im.complete ? fit() : im.addEventListener('load', fit, { once: true })
+            im.naturalWidth ? fit() : im.addEventListener('load', fit, { once: true })
           }
         }
       }
       sys.appendChild(b)
       const moon = { el: b, phase: (mi / pl.moons.length) * Math.PI * 2 + 0.6, rf: 1.2 + mi * 0.13, sp: 0.13 * (1 + mi * 0.05) * (mi % 2 ? -1 : 1), tilt: [-12, 14, -28, 24][mi % 4], ry: [0.3, 0.42, 0.26, 0.38][mi % 4], hovered: false }
-      b.addEventListener('pointerenter', () => { moon.hovered = true; b.querySelector('.tip-float')?.classList.add('on'); clampMoonTip(b) })
-      b.addEventListener('pointerleave', () => { moon.hovered = false; b.querySelector('.tip-float')?.classList.remove('on'); const tip = b.querySelector('.tip.big'); tip?.style.removeProperty('translate'); tip?.style.removeProperty('width') })
-      b.addEventListener('focus', () => { moon.hovered = true; b.querySelector('.tip-float')?.classList.add('on'); clampMoonTip(b) })
-      b.addEventListener('blur', () => { moon.hovered = false; b.querySelector('.tip-float')?.classList.remove('on'); const tip = b.querySelector('.tip.big'); tip?.style.removeProperty('translate'); tip?.style.removeProperty('width') })
+      trackMoonTip(b, active => { moon.hovered = active })
       // Each moon has its own orbit and speed; inner orbits are faster (roughly Kepler).
       // Separate planes: each orbit has its own size, tilt and flattening, so paths cross rarely.
       // Speeds differ only slightly and phases are spread evenly, so moons never bunch up.
@@ -1200,7 +1339,8 @@ html.theme-toon .rolechip { border: 2px solid #15132a; background: #1f1757; }
       moons.push(moon)
     })
     systems.push({ s, sys, pl, moons, surf: sys.querySelector('.surface'), cloud: sys.querySelector('.clouds'), lit: sys.querySelector('.lights') })
-  })
+    await yieldToBrowser()
+  }
 
   // =====================================================================================
   // Moon modal: dive in, read, return to orbit
@@ -1281,8 +1421,16 @@ html.theme-toon .rolechip { border: 2px solid #15132a; background: #1f1757; }
     hatIdx = i; hatChanged = performance.now()
     const tg = targets[HATS[i].shape]
     hstars.forEach((s, k) => { s.tx = tg[k].x; s.ty = tg[k].y; s.stroke = tg[k].stroke; s.delay = Math.random() * 260 })
-    const w = $('gword'); if (!reduce) glitchEl(w)
-    setTimeout(() => { w.textContent = HATS[i].role; $('hatproof').textContent = HATS[i].proof }, reduce ? 0 : 150)
+    // The role swaps like stars arriving: old word drifts up and dims, new letters rise in one by one.
+    const w = $('gword'), pr = $('hatproof'), role = HATS[i].role
+    const swap = () => {
+      w.setAttribute('aria-label', role)
+      w.innerHTML = reduce ? role : role.split(' ').map(word => `<span class="gw" aria-hidden="true">${[...word].map(ch => `<span class="gl" style="--i:${n++}">${ch}</span>`).join('')}</span>`).join(' ')
+      pr.textContent = HATS[i].proof; w.classList.remove('out'); pr.classList.remove('out')
+    }
+    let n = 0
+    if (reduce || !w.textContent) swap()
+    else { w.classList.add('out'); pr.classList.add('out'); setTimeout(swap, 200) }
     ;[...dots.children].forEach((d, j) => d.classList.toggle('on', j === i))
   }
   $('hatsky').addEventListener('click', () => setHat((hatIdx + 1) % HATS.length))
@@ -1328,7 +1476,7 @@ html.theme-toon .rolechip { border: 2px solid #15132a; background: #1f1757; }
   const logs = $('logs')
   POSTS.forEach(p => {
     const a = document.createElement('a'); a.className = 'log' + (p.fresh ? ' fresh' : ''); a.href = p.href; a.style.setProperty('--c', p.c)
-    a.innerHTML = `<div class="log-top"><span class="patch${p.logo ? ' brand' : ''}${p.pibit ? ' pibit' : ''}"><img src="${p.icon}" alt="" /></span>
+    a.innerHTML = `<div class="log-top"><span class="patch${p.logo ? ' brand' : ''}${p.pibit ? ' pibit' : ''}"><img data-src="${p.icon}" decoding="async" alt="" /></span>
       </div>${p.fresh ? '<span class="log-new">New</span>' : ''}<h3>${p.t}</h3><div class="log-foot"><span>${p.tag}</span><span class="read">Read ↗</span></div>`
     logs.appendChild(a)
   })
@@ -1351,7 +1499,7 @@ html.theme-toon .rolechip { border: 2px solid #15132a; background: #1f1757; }
   let hobPaused = false, hobClock = 0, hobPrev = 0
   const hobEls = HOBBIES.map((h, i) => {
     const el = document.createElement('button'); el.className = 'hob'; el.style.setProperty('--c', h.c)
-    const face = h.icon ? `<span class="f-icon">${DUMBBELL}</span>` : `<span class="f-${h.face}">${h.pics.map(src => `<img src="${src}" alt="" />`).join('')}</span>`
+    const face = h.icon ? `<span class="f-icon">${DUMBBELL}</span>` : `<span class="f-${h.face}">${h.pics.map(src => `<img data-src="${src}" decoding="async" alt="" />`).join('')}</span>`
     el.innerHTML = `<span class="hob-b">${face}<span class="hob-shade"></span></span><em>${h.t}</em>`
     el.setAttribute('aria-label', h.t)
     const show = () => { hobPaused = true; hobEls.forEach(o => o.el.classList.toggle('on', o.el === el))
@@ -1386,20 +1534,28 @@ html.theme-toon .rolechip { border: 2px solid #15132a; background: #1f1757; }
   // =====================================================================================
   // Earlier stops: a galaxy of small planets
   // =====================================================================================
+  // Isolate brand symbols where available; keep the supplied PNGs untouched.
+  const companyLogoBounds = {
+    img: '275 64 215 118', pibit: '172 86 138 138', stockroom: '122 109 87 88',
+    cult: '172 68 144 159', west: '171 71 82 161', mobily: '176 82 133 134',
+    pipeline: '152 121 86 77',
+  }
   const gal = $('galaxy'), glines = $('glines')
   STOPS.forEach((st, i) => {
     const pl = st.planet && PLANETS.find(p => p.key === st.planet), m = pl && pl.moons[st.moon]
     const href = m && m.href, el = document.createElement(href ? 'a' : 'div')
-    const markImg = st.mark === 'pibit' ? 'https://kunalsatpal.com/images/whatsapp/pibit-logo.png' : `./site/img/marks/${st.mark}.png`
+    const markImg = `./site/img/about-logos/${st.mark}.png`
+    const [logoX, logoY, logoW, logoH] = companyLogoBounds[st.mark].split(' ')
     if (href) el.href = href
     el.className = 'mini' + (href ? ' open' : ''); el.style.left = st.x + '%'; el.style.top = st.y + '%'
     el.style.setProperty('--c', st.c); el.style.setProperty('--s', st.size); el.style.animationDelay = `${-i * 1.3}s`
-    el.innerHTML = `<i><span class="msurf"></span><span class="mshade"></span><span class="mbadge mark-${st.mark}${st.mark === 'pipeline' ? ' wide' : ''}"><img src="${markImg}" alt="" /></span></i><b>${st.name}</b>${st.years ? `<small>${st.years}</small>` : ''}<span class="tip" role="tooltip">${st.note}</span>`
+    el.innerHTML = `<i><span class="msurf"></span><span class="mshade"></span><span class="mwatermark mark-${st.mark}"><svg class="company-logo" viewBox="${companyLogoBounds[st.mark]}" aria-hidden="true"><defs><clipPath id="logo-crop-${st.mark}"><rect x="${logoX}" y="${logoY}" width="${logoW}" height="${logoH}" /></clipPath></defs><image clip-path="url(#logo-crop-${st.mark})" data-src="${markImg}" width="750" height="300" /></svg></span></i><b>${st.name}</b>${st.years ? `<small>${st.years}</small>` : ''}<span class="tip" role="tooltip">${st.note}</span>`
     if (href) el.setAttribute('aria-label', `${st.name}: read the story`)
     // Same look as the big planets: a banded texture wrapped on a sphere, shaded from the upper left.
-    el.querySelector('.msurf').style.backgroundImage = `url(${textureURL(`mini-${st.mark}.jpg`)})`
+    el.querySelector('.msurf').dataset.background = textureURL(`mini-${st.mark}.jpg`)
     el.querySelector('.msurf').style.animationDuration = `${90 + i * 15}s`
     gal.appendChild(el)
+    trackMoonTip(el)
   })
   const GLINKS = [[6, 0], [0, 1], [1, 5], [1, 2], [0, 3], [3, 2], [0, 4], [4, 3]]
   glines.setAttribute('viewBox', '0 0 100 100'); glines.setAttribute('preserveAspectRatio', 'none')
@@ -1447,6 +1603,15 @@ html.theme-toon .rolechip { border: 2px solid #15132a; background: #1f1757; }
   const ease = x => x <= 0 ? 0 : x >= 1 ? 1 : x * x * (3 - 2 * x)
   const range = (v, a, b) => ease((v - a) / (b - a))
   const params = new URLSearchParams(location.search), pinned = params.get('at')   // ?at=0..1 for previews
+  // A browser can reload a history entry instead of restoring its cached document.
+  if (performance.getEntriesByType('navigation')[0]?.type === 'back_forward' && !params.has('scene') && !params.has('from') && history.state?.universeScene) {
+    params.set('scene', history.state.universeScene)
+  }
+  function rememberScene(key, parameter) {
+    const url = new URL(location.href)
+    if (parameter) url.searchParams.delete(parameter)
+    history.replaceState({ ...history.state, universeScene: key }, '', url)
+  }
   const LC = {
     journeyHeight: 0, innerWidth: 0, innerHeight: 0,
     cards: [], systems: [], hat: { width: 0, height: 0 }, hobbies: { width: 0, height: 0 },
@@ -1512,7 +1677,7 @@ html.theme-toon .rolechip { border: 2px solid #15132a; background: #1f1757; }
   }
   let frameId = 0, previousFrame = null, suspended = false, pageHidden = false, ticking = false, scrollClock = 0
   const mapDots = [...map.querySelectorAll('.stop .dot')]
-  let lastHudU = NaN, lastShaderState = ''
+  let lastHudU = NaN, lastShaderState = '', effectsReady = false
   function requestFrame() {
     if (suspended || frameId || ticking) return
     previousFrame = null
@@ -1524,10 +1689,10 @@ html.theme-toon .rolechip { border: 2px solid #15132a; background: #1f1757; }
   function syncRendering() {
     const toon = document.documentElement.classList.contains('theme-toon')
     const settled = document.documentElement.classList.contains('settled')
-    const state = `${suspended}:${toon}:${SCENES[0].el.style.visibility}`
+    const state = `${suspended}:${effectsReady}:${toon}:${SCENES[0].el.style.visibility}`
     if (state !== lastShaderState) {
       lastShaderState = state
-      shaders.setActive(suspended ? [] : [
+      shaders.setActive(suspended || !effectsReady ? [] : [
         ...(SCENES[0].el.style.visibility === 'hidden' ? [] : ['mark']),
         ...(toon ? [] : ['aurora', 'far']),
       ])
@@ -1587,10 +1752,9 @@ html.theme-toon .rolechip { border: 2px solid #15132a; background: #1f1757; }
 
     writeStyle(auroraEl, 'transform', `translate3d(${cx * -24}px, ${cy * -16 - p * 80}px, 0) scale(${1 + p * 0.25})`)
     writeStyle(farEl, 'transform', `translate3d(${cx * -38}px, ${cy * -26}px, 0) scale(${1 + p * 0.6})`)
-    // Arrival warp: stars rush toward you for the first ~1.2s, then ease to a stop.
-    const ia = reduce ? 1 : Math.min(1, (t - introStart) / 1200), warpBoost = (1 - Math.pow(1 - ia, 3)) * 3.2
-    const travel = reduce ? 0 : u * 1.3 + warpBoost
-    if (!stage.classList.contains('warping')) writeStyle(streaksEl, 'opacity', reduce ? '0' : ((1 - ia) * .55).toFixed(3))
+    const ia = reduce ? 1 : Math.min(1, Math.max(0, (t - introStart - 500) / 450))
+    const travel = reduce ? 0 : u * 1.3
+    if (!stage.classList.contains('warping')) writeStyle(streaksEl, 'opacity', '0')
     else writeStyle(streaksEl, 'opacity', '')
     warps.forEach((w, i) => { const f = (travel + i / warps.length) % 1
       writeStyle(w, 'transform', `translate3d(${cx * -60}px, ${cy * -40}px, 0) scale(${0.6 + f * f * 3.4})`); writeStyle(w, 'opacity', String(Math.sin(Math.PI * f) * 0.9)) })
@@ -1599,6 +1763,7 @@ html.theme-toon .rolechip { border: 2px solid #15132a; background: #1f1757; }
       sceneNodes.forEach((node, i) => {
         const { scene, floats } = node
         const distance = Math.abs(u - SCENES[i].u)
+        if (distance <= 1.5) loadSceneAssets(scene)
         if (distance > 1.2) {
           if (!node.hidden) {
             writeStyle(scene, 'opacity', '0')
@@ -1654,15 +1819,12 @@ html.theme-toon .rolechip { border: 2px solid #15132a; background: #1f1757; }
       cards.forEach((card, i) => {
         const c = card.el
         if (c === heldCard && out < 0.05) return   // hovered: hold still so the hover doesn't flicker
-        const d = card.depth, bob = Math.sin(t / 1000 * 0.6 + i * 1.7) * 8 * (1 - out), tilt = Math.sin(t / 1000 * 0.4 + i) * 1.2
+        const d = card.depth, motion = reduce ? 0 : ia
+        const bob = Math.sin(t / 1000 * 0.6 + i * 1.7) * 8 * (1 - out) * motion
+        const tilt = Math.sin(t / 1000 * 0.4 + i) * 1.2 * motion
         const { dx, dy } = card, k = out * (1.4 + d)
-        // Arrival: each card starts deep in space near the centre — tiny, blurred, dim — and drifts out to its place.
-        const a = reduce ? 1 : ease(Math.min(1, Math.max(0, (t - introStart - 250 - i * 180) / 1700)))
-        const far = 1 - a, spin = far * (i % 2 ? 14 : -14)
-        const ry = (dx < 0 ? 1 : -1) * 4, rxx = (dy < 0 ? -1 : 1) * 2   // a hint of depth, not a lot
-        writeStyle(c, 'transform', `perspective(900px) translate3d(${cx * 60 * d * a + dx * k - dx * far * .82}px, ${cy * 40 * d * a + bob + dy * k - dy * far * .82}px, 0) scale(${(1 + k * 1.3) * (0.16 + 0.84 * a)}) rotateY(${ry + cx * 3}deg) rotateX(${rxx - cy * 2}deg) rotate(${tilt + cx * 3 * d + spin}deg)`)
-        writeStyle(c, 'opacity', a < 1 ? String(Math.min(1, a * 1.6)) : '')
-        writeStyle(c, 'filter', a < 1 ? `blur(${(far * 10).toFixed(1)}px) brightness(${(0.5 + 0.5 * a).toFixed(2)})` : '')
+        const ry = (dx < 0 ? 1 : -1) * 4, rxx = (dy < 0 ? -1 : 1) * 2
+        writeStyle(c, 'transform', `perspective(900px) translate3d(${cx * 60 * d * motion + dx * k}px, ${cy * 40 * d * motion + bob + dy * k}px, 0) scale(${1 + k * 1.3}) rotateY(${ry + cx * 3 * motion}deg) rotateX(${rxx - cy * 2 * motion}deg) rotate(${tilt + cx * 3 * d * motion}deg)`)
       })
     }
 
@@ -1695,17 +1857,22 @@ html.theme-toon .rolechip { border: 2px solid #15132a; background: #1f1757; }
 
     if (hatsScene.el.style.visibility !== 'hidden') drawHats(t)
     if (lifeScene.el.style.visibility !== 'hidden') drawHobbies(t)
+    activeMoonTips.forEach(clampMoonTip)
     ticking = false
     const activeMotion = SCENES[0].el.style.visibility !== 'hidden' ||
       hatsScene.el.style.visibility !== 'hidden' || lifeScene.el.style.visibility !== 'hidden' ||
       systems.some(o => o.s.el.style.visibility !== 'hidden')
     const pointerMoving = cx !== mxp || cy !== myp
-    if (activeMotion || pointerMoving || ia < 1 || lenis?.isScrolling || measurePending) frameId = requestAnimationFrame(frame)
+    if (activeMoonTips.size || activeMotion || pointerMoving || ia < 1 || lenis?.isScrolling || measurePending) frameId = requestAnimationFrame(frame)
   }
   requestFrame()
-  // Release the arrival once the first frames are painted (skip it when coming back from a case study).
-  if (params.has('from')) document.body.classList.remove('arriving')
-  else setTimeout(() => document.body.classList.remove('arriving'), 700)
+
+  // Start optional GPU work after the short entrance, yielding to scrolling and input.
+  setTimeout(() => {
+    const startEffects = () => { effectsReady = true; syncRendering() }
+    if ('requestIdleCallback' in window) requestIdleCallback(startEffects, { timeout: 750 })
+    else requestAnimationFrame(startEffects)
+  }, reduce ? 0 : 450)
 
   // Auto-cycle hats while that scene is in focus.
   setInterval(() => { if (!suspended && !reduce && hatsScene.el.classList.contains('active') && !modal.classList.contains('open')) setHat((hatIdx + 1) % HATS.length) }, 3400)
@@ -1802,8 +1969,7 @@ html.theme-toon .rolechip { border: 2px solid #15132a; background: #1f1757; }
   addEventListener('pageshow', e => { if (e.persisted) document.body.classList.remove('swapping') })
   if (params.has('scene')) {
     const i = SCENES.findIndex(s => s.key === params.get('scene'))
-    document.body.classList.remove('arriving')
-    if (i >= 0) { history.replaceState(null, '', location.pathname); const go = () => { const y = yFor(i); lenis ? lenis.scrollTo(y, { immediate: true, force: true }) : scrollTo(0, y) }; go(); requestAnimationFrame(go) }
+    if (i >= 0) { rememberScene(SCENES[i].key, 'scene'); const go = () => { const y = yFor(i); lenis ? lenis.scrollTo(y, { immediate: true, force: true }) : scrollTo(0, y) }; go(); requestAnimationFrame(go) }
     if (!reduce) { document.body.style.opacity = 0; requestAnimationFrame(() => requestAnimationFrame(() => { document.body.style.transition = 'opacity .5s ease'; document.body.style.opacity = '' })) }
   }
 
@@ -1811,35 +1977,51 @@ html.theme-toon .rolechip { border: 2px solid #15132a; background: #1f1757; }
   // =====================================================================================
   // Case studies live on moon surfaces (case.html). Going there dives in; coming back zooms out here.
   // =====================================================================================
+  let navigationTimer = 0
   document.addEventListener('click', e => {
     const a = e.target.closest('a[href*="case.html"], a[href*="blog.html"]')
-    if (!a || e.metaKey || e.ctrlKey || e.shiftKey) return
+    if (!a || e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return
     e.preventDefault()
+    if (navigatingAway) return
     navigatingAway = true
+    rememberScene(SCENES[Math.round(progress() * U)].key)
     sceneSnap.cancel()
     if (reduce) { location.href = a.href; return }
-    const r = a.getBoundingClientRect()
-    camera.style.transformOrigin = `${r.left + r.width / 2}px ${r.top + r.height / 2}px`
     modal.classList.remove('open'); lenis?.stop()
-    camera.style.transition = 'transform .8s cubic-bezier(.6,.05,.25,1), filter .8s'
-    camera.style.transform = 'scale(6)'; camera.style.filter = 'blur(14px) brightness(1.6)'
-    document.body.style.transition = 'opacity .8s'; setTimeout(() => document.body.style.opacity = 0, 300)
-    setTimeout(() => location.href = a.href, 780)
+    // Keep scene geometry stable while handing off to the case study.
+    document.body.style.transition = 'opacity .22s ease'
+    document.body.style.opacity = '0'
+    navigationTimer = setTimeout(() => location.href = a.href, 240)
   })
-  addEventListener('pageshow', e => { if (e.persisted) { navigatingAway = false; sceneSnap?.resume(); document.body.style.opacity = ''; camera.classList.remove('diving'); camera.style.transform = ''; camera.style.transformOrigin = ''; camera.style.filter = ''; lenis?.start() } })
+  addEventListener('pagehide', () => clearTimeout(navigationTimer))
+  addEventListener('pageshow', e => {
+    if (!e.persisted) return
+    clearTimeout(navigationTimer)
+    navigatingAway = false
+    document.body.style.transition = 'none'
+    document.body.style.opacity = ''
+    camera.style.transition = 'none'
+    camera.classList.remove('diving')
+    for (const property of ['transform', 'transform-origin', 'filter', 'opacity']) camera.style.removeProperty(property)
+    lenis?.start(); sceneSnap?.resume(); requestFrame()
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      document.body.style.removeProperty('transition')
+      camera.style.removeProperty('transition')
+    }))
+  })
   const fromKey = params.get('from')
   if (fromKey) {
     const i = SCENES.findIndex(s => s.key === fromKey)
     if (i >= 0) {
-      history.replaceState(null, '', location.pathname)
+      rememberScene(SCENES[i].key, 'from')
       const go = () => { const y = yFor(i); lenis ? lenis.scrollTo(y, { immediate: true, force: true }) : scrollTo(0, y) }
       go(); requestAnimationFrame(go)
-      if (!reduce) {  // arrive from the surface: start close in, pull back out to orbit
-        camera.style.transition = 'none'; camera.style.transform = 'scale(.25)'; camera.style.filter = 'blur(10px)'; camera.style.opacity = '0'
+      if (!reduce) {  // Reveal the destination after its scene and scroll position are applied.
+        camera.style.transition = 'none'; camera.style.opacity = '0'
         requestAnimationFrame(() => requestAnimationFrame(() => {
-          camera.style.transition = 'transform 1.1s cubic-bezier(.2,.8,.2,1), filter 1.1s, opacity .6s'
-          camera.style.transform = ''; camera.style.filter = ''; camera.style.opacity = ''
-          setTimeout(() => camera.style.transition = '', 1200)
+          camera.style.transition = 'opacity .28s ease'
+          camera.style.opacity = ''
+          setTimeout(() => camera.style.transition = '', 300)
         }))
       }
     }
