@@ -456,11 +456,10 @@
   /* People: faces, not foreheads. */
   .f-photo img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 35%; transform: scale(1.15); }
   .f-training { background: radial-gradient(circle at 35% 30%, #e0fff4, #9fe8d2 55%, #4fb498); }
-  .f-training svg { width: 88%; height: 96%; overflow: visible; }
-  .goku-curl { transform-box: view-box; transform-origin: 34px 88px; animation: goku-curl 2.8s cubic-bezier(.45,0,.55,1) infinite; }
-  .goku-arm-right .goku-curl { animation-delay: -1.4s; }
-  @keyframes goku-curl { 0%, 12%, 100% { transform: rotate(0deg); } 45%, 60% { transform: rotate(62deg); } 88% { transform: rotate(0deg); } }
-  @media (prefers-reduced-motion: reduce) { .goku-curl { animation: none; transform: rotate(28deg); } }
+  .goku-flight { display: block; width: 88%; aspect-ratio: 192 / 200; overflow: hidden; }
+  .goku-flight img { display: block; width: 700%; max-width: none; height: 100%; image-rendering: pixelated; animation: goku-flight .42s steps(7, end) infinite; }
+  @keyframes goku-flight { to { transform: translateX(-100%); } }
+  @media (prefers-reduced-motion: reduce) { .goku-flight img { animation: none; transform: none; } }
   .hcard { position: absolute; left: 0; top: 0; z-index: 30; width: 440px; padding: 20px; border-radius: 20px; text-align: left; pointer-events: none;
     background: rgba(14,16,26,.92); border: 1px solid color-mix(in srgb, var(--c, #fff) 45%, transparent); box-shadow: 0 30px 80px -20px rgba(0,0,0,.8);
     opacity: 0; transform: scale(.94); transform-origin: left center; transition: opacity .25s, transform .3s cubic-bezier(.2,.8,.2,1); }
@@ -473,10 +472,8 @@
   .hc-img.games { grid-template-columns: 1fr 1fr; } .hc-img.games img { aspect-ratio: 1; border-radius: 14px; }
   .hc-img.photos { grid-template-columns: 2fr 1fr; grid-template-rows: 1fr 1fr; height: 220px; } .hc-img.photos img { height: 100%; }
   .hc-img.photos img:first-child { grid-row: span 2; }
-  .hc-img.workout { height: 172px; }
-  .hc-workout { display: grid; place-items: center; border-radius: 14px; background: radial-gradient(ellipse at 50% 30%, #e0fff4, var(--c)); height: 100%; }
-  .hc-workout svg { width: 136px; height: 158px; }
-  .hcard:not(.show) .goku-curl { animation-play-state: paused; }
+  .hc-img.workout { aspect-ratio: 498 / 298; }
+  .hc-workout { display: block; width: 100%; height: 100%; object-fit: contain; border-radius: 14px; background: #0b1828; }
   .hcard b { display: block; margin-top: 16px; font: 600 24px/1.2 "Inter Tight", sans-serif; }
   .hcard p { margin-top: 6px; color: var(--muted); font-size: 16px; line-height: 1.45; }
 
@@ -808,6 +805,10 @@ html.theme-toon .mini i { border: 3.5px solid #15132a; box-shadow: 0 0 34px -12p
 html.theme-toon .mini.open i { box-shadow: 0 0 0 3px #15132a, 0 0 0 6px color-mix(in srgb, var(--c) 85%, white), 0 0 34px -8px var(--c) !important; }
 html.theme-toon .hob-b { border: 3.5px solid #15132a; box-shadow: 0 5px 0 #15132a, 0 0 26px -8px var(--c); }
 html.theme-toon .hob:hover .hob-b, html.theme-toon .hob.on .hob-b { box-shadow: 0 5px 0 #15132a, 0 0 0 6px var(--c); }
+  .hob.hob-training .hob-b, html.theme-toon .hob.hob-training .hob-b { width: 104px; border: 0; background: none; box-shadow: none; overflow: visible; }
+  .hob-training .f-training { background: none; }
+  .hob-training .hob-shade { display: none; }
+  .hob-training .goku-flight { width: 100%; }
 html.theme-toon .hob-shade { box-shadow: inset -6px -8px 0 rgba(0,0,0,.18); background: radial-gradient(circle at 30% 24%, rgba(255,255,255,.4) 0 12%, transparent 13%); }
 html.theme-toon .hcard { background: #1f1757; border: 3px solid #15132a; box-shadow: 0 8px 0 #15132a; }
 html.theme-toon .horbits ellipse { stroke: #8f7bff; stroke-opacity: .35; stroke-width: 2; stroke-dasharray: 1 7; stroke-linecap: round; }
@@ -1619,64 +1620,52 @@ html.theme-toon .rolechip { border: 2px solid #15132a; background: #1f1757; }
     { t: 'Weekends are for books', d: 'Mostly non-fiction; fiction when I need to unwind.', img: './site/img/book_1.jpg', more: ['./site/img/book_1.jpg', './site/img/book_2.jpg', './site/img/book_3.jpg', './site/img/book_4.jpg', './site/img/book_5.jpg', './site/img/book_6.jpg', './site/img/book_7.jpg', './site/img/book_8.jpg', './site/img/book_9.jpg', './site/img/book_10.jpg', './site/img/book_11.jpg', './site/img/book_12.jpg'], grid: 'books', face: 'fan', pics: ['./site/img/book_9.jpg', './site/img/book_1.jpg', './site/img/book_10.jpg'], c: '#ffd36b', orbit: 0, ph: .2, sp: 1 },
     { t: 'Breaks mean a controller', d: 'To slay gods or kick goals. God of War forever; most hours in FIFA.', img: './site/img/gow.png', more: ['./site/img/gow.png', './site/img/fifa.png'], grid: 'games', face: 'split', pics: ['./site/img/gow.png', './site/img/fifa.png'], c: '#7fb4ff', orbit: 1, ph: 2.4, sp: .8 },
     { t: 'A designer who loves anime', d: 'Naruto, more times than I can count, and a minimal poster series of it.', img: './site/img/naruto_02.png', more: ['./site/img/naruto_01.png', './site/img/naruto_02.png', './site/img/naruto_03.png', './site/img/naruto_04.png', './site/img/naruto_05.png', './site/img/naruto_06.png', './site/img/naruto_07.png', './site/img/naruto_08.png', './site/img/naruto_09.png', './site/img/naruto_10.png', './site/img/naruto_11.png', './site/img/naruto_12.png'], grid: 'posters', face: 'strips', pics: ['./site/img/naruto_01.png', './site/img/naruto_02.png', './site/img/naruto_04.png', './site/img/naruto_06.png'], c: '#ff8fb0', orbit: 2, ph: 4.1, sp: .65 },
-    { t: 'I lift every day', d: 'Physically fit, and sane while shipping products.', face: 'training', grid: 'workout', c: '#9fe8d2', orbit: 1, ph: 5.6, sp: .8 },
+    { t: 'I lift every day', d: 'Physically fit, and sane while shipping products.', face: 'training', grid: 'workout', c: '#9fe8d2', orbit: 1, ph: 5.6, sp: 1.2 },
     { t: 'People matter the most', d: 'Family, friends, teammates, and the stories they carry.', img: './site/img/team_gofood.jpg', more: ['./site/img/team_gofood.jpg', './site/img/team_cult.jpg', './site/img/team_iit.jpg'], grid: 'photos', face: 'photo', pics: ['./site/img/team_gofood.jpg'], c: '#c9a0ff', orbit: 2, ph: 1.0, sp: .65 },
   ]
   const ORB = [[19, 22], [31, 34], [44, 46]]   // radii (% of width, % of height)
   const hob = $('hobbies'), hcard = $('hcard')
   hob.querySelector('.horbits').innerHTML = ORB.map(([rx, ry]) => `<ellipse cx="50" cy="50" rx="${rx}" ry="${ry}" vector-effect="non-scaling-stroke"/>`).join('')
-  const GOKU_ARM = `<path d="M44 68 Q35 70 34 88" fill="none" stroke="#192037" stroke-width="13" stroke-linecap="round"/><path d="M44 68 Q35 70 34 88" fill="none" stroke="#f4ae7b" stroke-width="9" stroke-linecap="round"/>
-    <g class="goku-curl"><path d="M34 88 Q25 86 23 73" fill="none" stroke="#192037" stroke-width="11" stroke-linecap="round"/><path d="M34 88 Q25 86 23 73" fill="none" stroke="#f4ae7b" stroke-width="7" stroke-linecap="round"/>
-      <path d="M27 80 L33 82" stroke="#245bb4" stroke-width="8"/>
-      <g fill="#293446" stroke="#141b2c" stroke-width="1.6"><rect x="10" y="69" width="26" height="4" rx="2" fill="#8c9fb5"/><rect x="10" y="64" width="6" height="14" rx="2"/><rect x="30" y="64" width="6" height="14" rx="2"/><path d="M13 66v8 M33 66v8" stroke="#7c93ab"/></g>
-      <path d="M21 71 Q23 67 26 71 L26 75 Q23 78 21 75Z" fill="#f4ae7b" stroke="#192037" stroke-width="1.5"/></g>`
-  const GOKU_WORKOUT = `<svg class="goku-workout" viewBox="0 0 128 144" role="img" aria-label="Goku doing alternating dumbbell curls">
-    <ellipse cx="64" cy="137" rx="35" ry="4" fill="#1d6959" opacity=".18"/>
-    <g stroke="#192037" stroke-width="2.2" stroke-linejoin="round">
-      <path d="M43 95 L42 123 L53 126 L64 106 L74 126 L86 123 L85 95Z" fill="#f18429"/>
-      <path d="M43 105 L49 118 M83 105 L77 118 M64 102v10" fill="none" stroke="#bb4c22"/>
-      <path d="M42 121 L54 124 L52 135 L35 135 L36 131Z M74 124 L86 121 L92 131 L93 135 L76 135Z" fill="#245bb4"/>
-      <path d="M39 128 L52 130 M77 130 L89 128" stroke="#e98b36"/>
-      <path d="M43 66 L53 61 L75 61 L85 66 L87 96 Q64 104 41 96Z" fill="#f18429"/>
-      <path d="M52 61 L64 77 L76 61 L72 59 L56 59Z" fill="#245bb4"/>
-      <path d="M57 54 L56 64 L64 70 L72 64 L71 54Z" fill="#f4ae7b"/>
-      <path d="M45 93 Q64 97 84 93 L84 101 Q64 105 43 100Z" fill="#245bb4"/>
-      <path d="M62 99 L58 114 L65 109 L69 115 L69 99" fill="#245bb4"/>
-      <circle cx="78" cy="80" r="7" fill="#fff5dd" stroke-width="1.5"/>
-      <path d="M75 77h6 M78 75v6 M75 81h6v3h-6Z" fill="none" stroke-width="1"/>
-    </g>
-    <g class="goku-arm-left">${GOKU_ARM}</g><g class="goku-arm-right" transform="translate(128 0) scale(-1 1)">${GOKU_ARM}</g>
-    <g stroke="#192037" stroke-width="2" stroke-linejoin="round">
-      <path d="M44 33 Q39 32 41 43 L47 47 M84 33 Q89 32 87 43 L81 47" fill="#f4ae7b"/>
-      <path d="M46 28 Q64 17 82 28 L80 48 Q75 58 64 60 Q53 58 48 48Z" fill="#f4ae7b"/>
-      <path d="M48 45 Q52 53 58 55" fill="none" stroke="#d58158" stroke-width="1.5"/>
-      <path d="M46 37 L36 27 L44 28 L33 17 L49 21 L45 7 L58 16 L64 2 L69 16 L85 6 L81 21 L97 17 L87 30 L95 31 L82 39 L77 27 L65 31 L59 24 L49 37Z" fill="#171d2a"/>
-      <path d="M49 21 L56 25 M68 17 L73 23 M80 22 L77 29" fill="none" stroke="#344158" stroke-width="1.5"/>
-      <path d="M51 39 L59 40 L57 46 L51 44Z M69 40 L77 39 L77 44 L71 46Z" fill="#fff" stroke-width="1.3"/>
-      <path d="M56 40v4 M72 40v4 M51 37l9 2 M68 39l9-2" fill="none" stroke-width="2"/>
-      <path d="M64 44l-2 5h3 M59 52q5 4 10-1" fill="none" stroke-width="1.3" stroke-linecap="round"/>
-    </g></svg>`
+  const GOKU_FLYING = `<span class="goku-flight" role="img" aria-label="Goku flying on Nimbus"><img data-src="./site/img/goku-nimbus-sprite.webp" width="1344" height="200" alt="" decoding="async" /></span>`
+  const GOKU_EXPANDED = `<video class="hc-workout" src="./site/img/goku-power-up.mp4" poster="./site/img/goku-power-up-poster.jpg" aria-label="Goku stretching and powering up" muted loop playsinline preload="none" disablepictureinpicture disableremoteplayback></video>`
+  const hobbyMotion = matchMedia('(prefers-reduced-motion: reduce)')
+  let hobbyMediaActive = false
+  function syncHobbyMedia() {
+    const video = hcard.querySelector('video')
+    if (!video) return
+    const playing = hobbyMediaActive && hcard.classList.contains('show') &&
+      !document.hidden && !hobbyMotion.matches && innerWidth > 900
+    if (video.dataset.playing === String(playing)) return
+    video.dataset.playing = String(playing)
+    if (playing) video.play().catch(() => {})
+    else video.pause()
+  }
+  hobbyMotion.addEventListener('change', syncHobbyMedia)
   let hobPaused = false, hobClock = 0, hobPrev = 0
   const hobEls = HOBBIES.map((h, i) => {
-    const el = document.createElement('button'); el.className = 'hob'; el.style.setProperty('--c', h.c)
-    const face = h.face === 'training' ? `<span class="f-training">${GOKU_WORKOUT}</span>` : `<span class="f-${h.face}">${h.pics.map(src => `<img data-src="${src}" decoding="async" alt="" />`).join('')}</span>`
+    const el = document.createElement('button'); el.className = 'hob' + (h.face === 'training' ? ' hob-training' : ''); el.style.setProperty('--c', h.c)
+    const face = h.face === 'training' ? `<span class="f-training">${GOKU_FLYING}</span>` : `<span class="f-${h.face}">${h.pics.map(src => `<img data-src="${src}" decoding="async" alt="" />`).join('')}</span>`
     el.innerHTML = `<span class="hob-b">${face}<span class="hob-shade"></span></span><em>${h.t}</em>`
     el.setAttribute('aria-label', h.t)
     const show = () => { hobPaused = true; hobEls.forEach(o => o.el.classList.toggle('on', o.el === el))
       hcard.style.setProperty('--c', h.c); hcard.querySelector('b').textContent = h.t; hcard.querySelector('p').textContent = h.d
       const g = hcard.querySelector('.hc-img'); g.className = 'hc-img ' + h.grid
-      g.innerHTML = h.face === 'training' ? `<span class="hc-workout">${GOKU_WORKOUT}</span>` : h.more.map(src => `<img src="${src}" alt="" loading="lazy" />`).join('')
+      if (hcard.dataset.hobby !== String(i)) {
+        g.querySelector('video')?.pause()
+        g.innerHTML = h.face === 'training' ? GOKU_EXPANDED : h.more.map(src => `<img src="${src}" alt="" loading="lazy" />`).join('')
+        hcard.dataset.hobby = String(i)
+      }
       // Place the card beside the hovered moon, on whichever side has room.
       const r = el.getBoundingClientRect(), box = hob.getBoundingClientRect(), cx = r.left + r.width / 2 - box.left, cy = r.top + r.height / 2 - box.top
       const right = cx < box.width * .55, cw = hcard.offsetWidth || 420, ch = hcard.offsetHeight || 300
       let x = right ? cx + 70 : cx - 70 - cw, y = Math.max(-40, Math.min(box.height - ch + 40, cy - ch / 2))
       x = Math.max(-60, Math.min(box.width - cw + 60, x))
       hcard.style.left = x + 'px'; hcard.style.top = y + 'px'; hcard.dataset.side = right ? 'right' : 'left'
-      hcard.classList.add('show') }
+      hcard.classList.add('show'); syncHobbyMedia() }
     el.addEventListener('pointerenter', show); el.addEventListener('focus', show); el.addEventListener('click', show)
-    hob.appendChild(el); return { el, ...h }
+    hob.appendChild(el); return { el, flight: el.querySelector('.f-training'), ...h }
   })
-  hob.addEventListener('pointerleave', () => { hobPaused = false; hcard.classList.remove('show'); hobEls.forEach(o => o.el.classList.remove('on')) })
+  hob.addEventListener('pointerleave', () => { hobPaused = false; hcard.classList.remove('show'); hobEls.forEach(o => o.el.classList.remove('on')); syncHobbyMedia() })
   function drawHobbies(t) {
     const dt = hobPrev ? Math.min(50, t - hobPrev) : 16; hobPrev = t
     if (!hobPaused && !reduce) hobClock += dt
@@ -1686,6 +1675,11 @@ html.theme-toon .rolechip { border: 2px solid #15132a; background: #1f1757; }
       const x = W * (.5 + Math.cos(a) * rx / 100), y = H * (.5 + Math.sin(a) * ry / 100), depth = (Math.sin(a) + 1) / 2
       o.el.style.transform = `translate(${x}px, ${y}px) translate(-50%, -50%) scale(${.86 + depth * .22})`
       o.el.style.zIndex = Math.round(10 + depth * 10)
+      // Nimbus's trail stays behind Goku as he rounds either end of the orbit.
+      if (o.flight) {
+        const facing = `scaleX(${Math.sin(a) < 0 ? -1 : 1})`
+        if (o.flight.style.transform !== facing) o.flight.style.transform = facing
+      }
     })
   }
 
@@ -1936,6 +1930,8 @@ html.theme-toon .rolechip { border: 2px solid #15132a; background: #1f1757; }
         }
       })
     })
+    hobbyMediaActive = !suspended && sceneMotion.isPainted(hob.closest('.scene'))
+    syncHobbyMedia()
   }
   function syncSuspension() {
     const next = pageHidden || document.hidden || $('overview').classList.contains('open')
