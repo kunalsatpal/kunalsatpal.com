@@ -1,6 +1,6 @@
 // Full-quality shaders, initialized only when needed and paused by scene visibility.
 // Keep the vendor renderer's resolution, timing and quality defaults unchanged.
-export function createUniverseShaders(loadLibrary = () => import('../../vendor/shaders.bundle.js')) {
+export function createUniverseShaders(loadLibrary = () => import('../../vendor/shaders.bundle.js'), culling = null) {
   const entries = new Map()
   let library, gpu, loading, draining = false, unavailable = false, generation = 0, recoveries = 0
 
@@ -11,6 +11,7 @@ export function createUniverseShaders(loadLibrary = () => import('../../vendor/s
       if (!support.supported) { unavailable = true; return }
       gpu = await library.createSharedDevice()
       if (gpu) {
+        culling?.attach(gpu.device)
         const deviceGeneration = generation
         gpu.device.lost.then(() => {
           if (deviceGeneration !== generation) return
@@ -86,6 +87,7 @@ export function createUniverseShaders(loadLibrary = () => import('../../vendor/s
 
   return {
     register(name, canvas, definition, onReady) {
+      culling?.register(name, canvas)
       entries.set(name, { name, canvas, definition, onReady, wanted: false, handle: null, running: false, ready: false })
     },
     setActive(activeNames) {

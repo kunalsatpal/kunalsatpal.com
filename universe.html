@@ -980,7 +980,8 @@ html.theme-toon .rolechip { border: 2px solid #15132a; background: #1f1757; }
 <script type="module">
   import Lenis from './vendor/lenis.mjs'
   import { NOW, PLANETS, MAJOR, STOPS } from './site/js/universe-data.js'
-  import { createUniverseShaders } from './site/js/universe-shaders.js'
+  import { createUniverseShaders } from './site/js/universe-shaders.js?v=2'
+  import { createSkyCulling } from './site/js/universe-sky-culling.js?v=1'
   import { createSceneSnap } from './site/js/universe-scroll.js?v=4'
   import { createSceneMotion } from './site/js/universe-motion.js?v=2'
   performance.mark('universe:boot')
@@ -1059,7 +1060,16 @@ html.theme-toon .rolechip { border: 2px solid #15132a; background: #1f1757; }
   // =====================================================================================
   // Sky
   // =====================================================================================
-  const shaders = createUniverseShaders()
+  // During camera/entrance transitions the parent also scales and may blur.
+  // Keep a full source for those transitions; normal paginated flights change
+  // only the layer transforms, whose visible source bounds are known exactly.
+  let skyCameraSafeAt = performance.now() + 2100
+  const skyCamera = $('camera')
+  new MutationObserver(() => { skyCameraSafeAt = performance.now() + 900 }).observe(skyCamera, { attributes: true, attributeFilter: ['class', 'style'] })
+  const skyCulling = createSkyCulling(() => performance.now() >= skyCameraSafeAt &&
+    !document.documentElement.classList.contains('first-flight') && !skyCamera.classList.contains('diving'))
+  addEventListener('resize', () => skyCulling.invalidate(), { passive: true })
+  const shaders = createUniverseShaders(undefined, skyCulling)
   const skyDefinitions = {
     aurora: { components: [{ type: 'Aurora', id: 'sky', props: {
       colorA: '#5a6bc4', colorB: '#8fdcc4', colorC: '#6f9fd6', balance: 50, intensity: 70, curtainCount: 4,
@@ -1705,6 +1715,7 @@ html.theme-toon .rolechip { border: 2px solid #15132a; background: #1f1757; }
   }
   const LC = {
     journeyHeight: 0, innerWidth: 0, innerHeight: 0,
+    skyWidth: 0, skyHeight: 0,
     cards: [], systems: [], hat: { width: 0, height: 0 }, hobbies: { width: 0, height: 0 },
   }
   // Native scrollY rounds small Lenis steps to whole pixels. Drive the artwork
@@ -1778,6 +1789,8 @@ html.theme-toon .rolechip { border: 2px solid #15132a; background: #1f1757; }
     LC.journeyHeight = journey.offsetHeight
     LC.innerWidth = innerWidth
     LC.innerHeight = innerHeight
+    LC.skyWidth = stage.clientWidth
+    LC.skyHeight = stage.clientHeight
     LC.cards = cards.map(card => ({
       x: card.el.offsetLeft + card.el.offsetWidth / 2,
       y: card.el.offsetTop + card.el.offsetHeight / 2,
@@ -1916,6 +1929,10 @@ html.theme-toon .rolechip { border: 2px solid #15132a; background: #1f1757; }
 
     writeStyle(auroraEl, 'transform', `translate3d(${cx * -24}px, ${cy * -16 - p * 80}px, 0) scale(${1 + p * 0.25})`)
     writeStyle(farEl, 'transform', `translate3d(${cx * -38}px, ${cy * -26}px, 0) scale(${1 + p * 0.6})`)
+    skyCulling.setBounds('aurora', { width: LC.skyWidth, height: LC.skyHeight,
+      scale: 1 + p * .25, x: cx * -24, y: cy * -16 - p * 80 })
+    skyCulling.setBounds('far', { width: LC.skyWidth, height: LC.skyHeight,
+      scale: 1 + p * .6, x: cx * -38, y: cy * -26 })
     const ia = reduce ? 1 : Math.min(1, Math.max(0, (t - introStart - 500) / 450))
     const arriving = root.classList.contains('first-flight')
     const arrivalProgress = arriving ? Math.min(1, Math.max(0, (t - introStart - 800) / 1200)) : 1
@@ -2349,6 +2366,7 @@ html.theme-toon .rolechip { border: 2px solid #15132a; background: #1f1757; }
     route: lastSceneU, animatedScroll: lenis?.animatedScroll ?? null,
     compositor: sceneMotion.status(),
     viewport: { width: LC.innerWidth, height: LC.innerHeight },
+    skyCulling: skyCulling.status(),
     visibleScenes: sceneNodes.filter(n => sceneMotion.isPainted(n.scene)).map(n => n.scene.dataset.scene),
   })
   performance.mark('universe:ready')
