@@ -132,7 +132,7 @@
   @keyframes rush-forward { from { transform: scale(.72); } to { transform: scale(1.72); } }
   @keyframes rush-backward { from { transform: scale(1.72); } to { transform: scale(.72); } }
   html.first-flight .camera { animation: first-flight-scene 1.1s cubic-bezier(.16,1,.3,1) .65s both; }
-  html.first-flight nav, html.first-flight .readout, html.first-flight .starmap {
+  html.first-flight nav, html.first-flight .starmap {
     animation: first-flight-ui .55s ease-out 1.2s both;
   }
   @keyframes first-flight-scene {
@@ -324,10 +324,7 @@
   .socials a:hover { color: #fff; }
   .foot { margin-top: 60px; color: var(--faint); font-size: 14px; }
 
-  /* ---------- HUD: readout (bottom-left) + star map (bottom-centre) ---------- */
-  .readout { position: fixed; left: 26px; bottom: 24px; z-index: 40; font: 500 13px/1.5 "JetBrains Mono", monospace; letter-spacing: .06em; color: rgba(255,255,255,.75); }
-  .readout b { color: #fff; font-weight: 500; } .readout i { font-style: normal; color: var(--faint); }
-  .readout .y { color: var(--mint); }
+  /* ---------- HUD: star map (bottom-centre) ---------- */
   .starmap { position: fixed; left: 50%; bottom: 18px; transform: translateX(-50%); z-index: 40; width: min(520px, 60vw); height: 44px;
     padding: 0 18px; border-radius: 16px; background: rgba(14,16,24,.5); border: 1px solid rgba(255,255,255,.08); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); }
   .starmap svg { width: 100%; height: 100%; overflow: visible; }
@@ -902,7 +899,6 @@ html.theme-toon .rolechip { border: 2px solid #15132a; background: #1f1757; }
   <a href="https://kunalsatpal.com/kunalsatpal_resume.pdf">Resume</a><a class="contact" href="#" data-go="hello">Contact</a>
 </nav>
 
-<div class="readout" id="readout" aria-live="polite"></div>
 <div class="starmap" id="starmap" role="group" aria-label="Route map"><svg id="mapsvg" role="group" aria-label="Journey stops"></svg></div>
 
 <div class="journey" id="journey">
@@ -1666,7 +1662,7 @@ html.theme-toon .rolechip { border: 2px solid #15132a; background: #1f1757; }
   glines.innerHTML = GLINKS.map(([a, b]) => `<line x1="${STOPS[a].x}" y1="${STOPS[a].y}" x2="${STOPS[b].x}" y2="${STOPS[b].y}" vector-effect="non-scaling-stroke"/>`).join('')
 
   // =====================================================================================
-  // HUD: star map + readout
+  // HUD: star map
   // =====================================================================================
   const map = $('mapsvg'), MW = 480, MH = 44, mx0 = 8, mx1 = MW - 8, my = 26
   map.setAttribute('viewBox', `0 0 ${MW} ${MH}`)
@@ -1685,22 +1681,7 @@ html.theme-toon .rolechip { border: 2px solid #15132a; background: #1f1757; }
     })
   })
 
-  const PS = SCENES.filter(x => x.kind === 'planet')
-  const readoutEl = $('readout')
-  let lastReadoutMarkup = ''
   function nearest(u) { let i = 0; for (let k = 0; k < SCENES.length; k++) if (Math.abs(SCENES[k].u - u) < Math.abs(SCENES[i].u - u)) i = k; return i }
-  function readout(u) {
-    // Nearest scene for the label; the year counts smoothly between planets.
-    const i = nearest(u), s = SCENES[i]
-    let year = Math.floor(NOW)
-    if (u >= PS[PS.length - 1].u) year = PS[PS.length - 1].planet.start
-    else for (let k = 0; k < PS.length - 1; k++) if (u >= PS[k].u && u < PS[k + 1].u) { const f = (u - PS[k].u) / (PS[k + 1].u - PS[k].u); year = PS[k].planet.start + f * (PS[k + 1].planet.start - PS[k].planet.start) }
-    const pi = s.kind === 'planet' ? MAJOR.indexOf(s.planet) + 1 : 0
-    // Years only mean something on the planets; elsewhere just name the stop.
-    const markup = pi ? `<span class="y">${Math.floor(year)}</span> · <b>${s.label}</b> <i>· ${pi} of ${MAJOR.length}</i>` : s.kind === 'galaxy' ? `<span class="y">2016 – 2020</span> · <b>${s.label}</b>` : `<b>${s.label}</b>`
-    if (markup !== lastReadoutMarkup) { lastReadoutMarkup = markup; readoutEl.innerHTML = markup }
-    return i
-  }
 
   // =====================================================================================
   // Frame loop: scenes along the route, warp stars, cursor drift, planets, hats
@@ -1990,7 +1971,7 @@ html.theme-toon .rolechip { border: 2px solid #15132a; background: #1f1757; }
     // HUD changes only with the route position.
     if (u !== lastHudU) {
       lastHudU = u
-      const idx = readout(u)
+      const idx = nearest(u)
       const shipX = String(ux(u))
       if (shipEl.getAttribute('cx') !== shipX) shipEl.setAttribute('cx', shipX)
       if (doneEl.getAttribute('x2') !== shipX) doneEl.setAttribute('x2', shipX)
