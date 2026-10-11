@@ -982,8 +982,8 @@ html.theme-toon .rolechip { border: 2px solid #15132a; background: #1f1757; }
   import { NOW, PLANETS, MAJOR, STOPS } from './site/js/universe-data.js'
   import { createUniverseShaders } from './site/js/universe-shaders.js?v=2'
   import { createSkyCulling } from './site/js/universe-sky-culling.js?v=1'
-  import { createSceneSnap } from './site/js/universe-scroll.js?v=4'
-  import { createSceneMotion } from './site/js/universe-motion.js?v=2'
+  import { createSceneSnap } from './site/js/universe-scroll.js?v=5'
+  import { createSceneMotion } from './site/js/universe-motion.js?v=3'
   performance.mark('universe:boot')
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches
   const $ = id => document.getElementById(id)
@@ -2083,6 +2083,10 @@ html.theme-toon .rolechip { border: 2px solid #15132a; background: #1f1757; }
       sceneMotion.isPainted(hatsScene.el) || sceneMotion.isPainted(lifeScene.el) ||
       systems.some(o => sceneMotion.isPainted(o.s.el))
     const pointerMoving = cx !== mxp || cy !== myp
+    if (sceneSnap?.state().phase === 'idle' && !jumpArrival && !lenis?.isScrolling) {
+      const index = nearest(u)
+      if (Math.abs(u - SCENES[index].u) < .001) prepareNeighborFlights(index)
+    }
     if (jumpArrival || activeMoonTips.size || activeMotion || pointerMoving || ia < 1 || cardsArriving || lenis?.isScrolling || measurePending || Number.isNaN(lastSceneU)) frameId = requestAnimationFrame(frame)
   }
   requestFrame()
@@ -2110,6 +2114,27 @@ html.theme-toon .rolechip { border: 2px solid #15132a; background: #1f1757; }
   }
   let jumpTimer = 0, jumpFrame = 0, pendingJump = null, scrollMotion = null
   const scrollEase = x => 1 - Math.pow(1 - x, 4)
+  let preparedAt = -1, flightPrepTask = 0
+  function prepareNeighborFlights(index) {
+    if (reduce || pinned !== null || preparedAt === index) return
+    preparedAt = index
+    if (flightPrepTask) {
+      if ('cancelIdleCallback' in window) cancelIdleCallback(flightPrepTask)
+      else clearTimeout(flightPrepTask)
+    }
+    const prepare = () => {
+      flightPrepTask = 0
+      if (suspended || sceneMotion.status().active || sceneSnap.state().phase !== 'idle') { preparedAt = -1; return }
+      for (const destination of [index - 1, index + 1]) {
+        if (!SCENES[destination]) continue
+        const from = SCENES[index].u, to = SCENES[destination].u
+        sceneMotion.prepare({ indices: [index, destination], duration: 1050, easing: scrollEase,
+          offsetAt: (i, eased) => from + (to - from) * eased - SCENES[i].u })
+      }
+    }
+    if ('requestIdleCallback' in window) flightPrepTask = requestIdleCallback(prepare, { timeout: 600 })
+    else flightPrepTask = setTimeout(prepare, 50)
+  }
   const resetTravelLines = () => {
     firstFlightLines.style.removeProperty('opacity')
     firstFlightLines.style.removeProperty('transition-duration')

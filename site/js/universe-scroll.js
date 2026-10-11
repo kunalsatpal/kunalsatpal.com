@@ -3,13 +3,14 @@ export function nearestStop(stops, position) {
   return stops.reduce((best, value, index) => Math.abs(value - position) < Math.abs(stops[best] - position) ? index : best, 0)
 }
 
-export function createSceneSnap({ getStops, getPosition, animateTo, resizeAnimation, stopAnimation, enabled, ignoreInput }) {
+export function createSceneSnap({ getStops, getPosition, animateTo, resizeAnimation, stopAnimation, enabled, ignoreInput, eventTarget = window }) {
   let phase = 'idle', targetIndex = null, settledIndex = nearestStop(getStops(), getPosition())
   let token = 0, unlockAt = 0, settleTimer = 0, touch = null
+  let lastWheelAt = -Infinity, wheelOwned = false, wheelDirection = 0, reversal = 0
   const listeners = []
   const listen = (name, fn, options) => {
-    window.addEventListener(name, fn, options)
-    listeners.push(() => window.removeEventListener(name, fn, options))
+    eventTarget.addEventListener(name, fn, options)
+    listeners.push(() => eventTarget.removeEventListener(name, fn, options))
   }
   const clearSettle = () => { clearTimeout(settleTimer); settleTimer = 0 }
   const allowed = event => enabled() && !ignoreInput(event)
@@ -19,6 +20,7 @@ export function createSceneSnap({ getStops, getPosition, animateTo, resizeAnimat
     token++
     const owned = phase === 'snapping' || phase === 'navigating'
     phase = 'idle'; targetIndex = null; touch = null; unlockAt = 0
+    wheelOwned = false; lastWheelAt = -Infinity; reversal = 0
     if (owned) stopAnimation()
     settledIndex = nearestStop(getStops(), getPosition())
   }
@@ -44,10 +46,11 @@ export function createSceneSnap({ getStops, getPosition, animateTo, resizeAnimat
     } })
   }
 
-  function page(direction) {
-    if (!direction || phase !== 'idle' || performance.now() < unlockAt) return
+  function page(direction, fresh = false) {
+    if (!direction || phase !== 'idle' || (!fresh && performance.now() < unlockAt)) return false
     const current = nearestStop(getStops(), getPosition())
     move(current + Math.sign(direction))
+    return true
   }
 
   // Consume wheel momentum so one gesture cannot cross additional scenes.
@@ -55,7 +58,21 @@ export function createSceneSnap({ getStops, getPosition, animateTo, resizeAnimat
     if (!allowed(event) || event.ctrlKey || Math.abs(event.deltaX) > Math.abs(event.deltaY) || !event.deltaY) return
     event.preventDefault()
     event.stopImmediatePropagation()
-    page(event.deltaY)
+    const now = event.timeStamp > 0 ? event.timeStamp : performance.now(), direction = Math.sign(event.deltaY)
+    const newBurst = now - lastWheelAt >= 160
+    lastWheelAt = now
+    const pixels = Math.abs(event.deltaY) * (event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? innerHeight : 1)
+    reversal = !newBurst && wheelOwned && direction !== wheelDirection ? reversal + pixels : 0
+    // A quiet gap or deliberate reversal marks new finger input. Small reverse
+    // noise stays part of the old momentum tail. Never retarget an active flight.
+    const reverseGesture = phase === 'idle' && reversal >= 12
+    if (newBurst || reverseGesture) wheelOwned = false
+    if (wheelOwned) return
+    if (page(direction, newBurst || reverseGesture) || phase !== 'idle') {
+      wheelOwned = true
+      wheelDirection = direction
+      reversal = 0
+    }
   }, { passive: false, capture: true })
 
   // Consume vertical touch movement; only an idle, unlocked swipe advances a scene.
@@ -69,7 +86,8 @@ export function createSceneSnap({ getStops, getPosition, animateTo, resizeAnimat
       x: point.clientX,
       y: point.clientY,
       dy: 0,
-      canPage: phase === 'idle' && performance.now() >= unlockAt,
+      canPage: phase === 'idle',
+      started: false,
     }
   }, { passive: true, capture: true })
   listen('touchmove', event => {
@@ -80,12 +98,15 @@ export function createSceneSnap({ getStops, getPosition, animateTo, resizeAnimat
     touch.dy = dy
     event.preventDefault()
     event.stopImmediatePropagation()
+    // Respond when vertical intent crosses the existing 36px threshold, rather
+    // than waiting for the finger to lift. This touch can commit only one page.
+    if (touch.canPage && !touch.started && Math.abs(dy) >= 36) touch.started = page(-dy, true)
   }, { passive: false, capture: true })
   const endTouch = () => {
     if (!touch) return
-    const { dy, canPage } = touch
+    const { dy, canPage, started } = touch
     touch = null
-    if (canPage && Math.abs(dy) >= 36) page(-dy)
+    if (canPage && !started && Math.abs(dy) >= 36) page(-dy, true)
   }
   listen('touchend', endTouch, { passive: true, capture: true })
   listen('touchcancel', () => { touch = null }, { passive: true, capture: true })
