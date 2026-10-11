@@ -7,7 +7,10 @@
   (() => {
     const entry = new URLSearchParams(location.search)
     const queryTheme = entry.get('theme')
-    if (entry.has('from') || (entry.has('scene') && entry.get('scene') !== 'hero') || +entry.get('at') > 0 || (history.state?.universeScene && history.state.universeScene !== 'hero')) {
+    // Saved destinations belong to Back/Forward restoration. A reload at the
+    // landing URL starts its entrance even if this history entry once held a moon.
+    const restoring = performance.getEntriesByType('navigation')[0]?.type === 'back_forward'
+    if (entry.has('from') || (entry.has('scene') && entry.get('scene') !== 'hero') || +entry.get('at') > 0 || (restoring && history.state?.universeScene && history.state.universeScene !== 'hero')) {
       document.documentElement.classList.add('scene-entry')
     } else if (!matchMedia('(prefers-reduced-motion: reduce)').matches) {
       document.documentElement.classList.add('first-flight')
@@ -143,8 +146,9 @@
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
 
   .scene { position: absolute; inset: 0; z-index: 5; display: grid; place-items: center; text-align: center; padding: 110px 6vw 110px;
-    opacity: 0; pointer-events: none; will-change: transform, opacity, filter; }
+    opacity: 0; pointer-events: none; }
   .scene.active { pointer-events: auto; }
+  .scene.active, .scene.motion-layer { will-change: transform, opacity, filter; }
   .scene[data-scene="hero"] { opacity: 1; }
   html.scene-entry .scene[data-scene="hero"] { opacity: 0; }
   .scene .inner { max-width: 980px; width: 100%; }
@@ -554,7 +558,10 @@
     from { opacity: 0; transform: perspective(900px) translate3d(0, 28px, -240px) scale(.86); }
     to { opacity: 1; transform: perspective(900px) translate3d(0, 0, 0) scale(1); }
   }
-  @keyframes hero-mark-in { from { opacity: 0; filter: blur(10px) brightness(2); } to { opacity: 1; filter: none; } }
+  @keyframes hero-mark-in {
+    from { opacity: 0; transform: perspective(900px) translate3d(0, 12px, -240px) scale(.86); filter: blur(6px) brightness(1.5); }
+    to { opacity: 1; transform: none; filter: none; }
+  }
   html.scene-entry .title .object { animation: none; }
   @media (prefers-reduced-motion: reduce) { .title .object { animation: none; } }
   .sky-art { position: absolute; inset: 0; pointer-events: none; animation: hero-art-in .45s ease-out .2s backwards; }
@@ -975,6 +982,7 @@ html.theme-toon .rolechip { border: 2px solid #15132a; background: #1f1757; }
   import { NOW, PLANETS, MAJOR, STOPS } from './site/js/universe-data.js'
   import { createUniverseShaders } from './site/js/universe-shaders.js'
   import { createSceneSnap } from './site/js/universe-scroll.js?v=4'
+  import { createSceneMotion } from './site/js/universe-motion.js?v=1'
   performance.mark('universe:boot')
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches
   const $ = id => document.getElementById(id)
@@ -1292,6 +1300,7 @@ html.theme-toon .rolechip { border: 2px solid #15132a; background: #1f1757; }
 
   const activeMoonTips = new Set()
   const moonTipState = new WeakMap()
+  let sceneMotion = null
   let moonTipLayout = 0
   const invalidateMoonTips = () => { moonTipLayout++ }
   addEventListener('resize', invalidateMoonTips, { passive: true })
@@ -1316,7 +1325,7 @@ html.theme-toon .rolechip { border: 2px solid #15132a; background: #1f1757; }
     if (!state.width || !state.height) { moonTipState.delete(el); return }
     const signature = `${el.style.transform}:${el.style.transformOrigin}:${el.className}:${scene?.style.transform}:${camera?.className}:${camera?.style.transform}`
     // A held moon is stationary. Mini planets still drift through CSS animations.
-    if (state.signature === signature && performance.now() >= state.until && !el.classList.contains('mini') && !camera?.classList.contains('diving')) return
+    if (state.signature === signature && performance.now() >= state.until && !el.classList.contains('mini') && !camera?.classList.contains('diving') && !sceneMotion?.isMoving(scene)) return
     state.signature = signature
     let r = tip.getBoundingClientRect()
     if (!r.width || !r.height) return
@@ -1731,6 +1740,29 @@ html.theme-toon .rolechip { border: 2px solid #15132a; background: #1f1757; }
 
   let introStart = null
   let jumpArrival = null
+  sceneMotion = createSceneMotion({ nodes: sceneNodes, scenes: SCENES, range,
+    loadAssets: loadSceneAssets, disabled: reduce || pinned !== null })
+  let compositorStartClock = 0
+  function clearSceneMotion(freeze = false) {
+    sceneMotion.clear(freeze)
+    lastSceneU = NaN
+  }
+  function beginSceneFlight(motion) {
+    const fromU = motion.from * U, toU = SCENES[motion.index].u
+    // Include either side of a partially completed departure on quick retargets.
+    // Only layers that can appear on this short route need preparation.
+    const indices = SCENES.flatMap((scene, i) =>
+      scene.u >= Math.min(fromU, toU) - .8 && scene.u <= Math.max(fromU, toU) + .8 ? [i] : [])
+    compositorStartClock = motion.startClock
+    sceneMotion.start({ indices, duration: motion.duration, easing: scrollEase,
+      offsetAt: (i, eased) => fromU + (toU - fromU) * eased - SCENES[i].u })
+    syncRendering()
+  }
+  function beginJumpFlight(arrival) {
+    sceneMotion.start({ indices: [arrival.index], duration: arrival.duration, easing: scrollEase,
+      offsetAt: (_, eased) => arrival.from * (1 - eased), startTime: arrival.start })
+    syncRendering()
+  }
   const root = document.documentElement
   const firstVisit = root.classList.contains('first-flight')
   const firstFlightLines = document.querySelector('.streaks')
@@ -1825,7 +1857,9 @@ html.theme-toon .rolechip { border: 2px solid #15132a; background: #1f1757; }
       ])
     }
     sceneNodes.forEach(node => {
-      const paused = suspended || node.scene.style.visibility === 'hidden'
+      // Prepared flight layers can appear between JS callbacks. Their child
+      // animations must already be running when the compositor reveals them.
+      const paused = suspended || (!sceneMotion.owns(node) && !sceneMotion.isPainted(node.scene))
       if (paused !== node.paused) {
         node.paused = paused
         node.scene.classList.toggle('render-paused', paused)
@@ -1872,6 +1906,9 @@ html.theme-toon .rolechip { border: 2px solid #15132a; background: #1f1757; }
     // requestFrame resets the timestamp on idle wake, excluding the idle gap.
     scrollClock += elapsed
     lenis?.raf(scrollClock)
+    if (sceneMotion.needsAlignment()) {
+      sceneMotion.align((document.timeline.currentTime ?? t) - Math.max(0, scrollClock - compositorStartClock))
+    }
     if (measurePending) { measurePending = false; measure() }
     if (introStart === null) introStart = t
     const smoothing = 1 - Math.pow(0.95, dt / (1000 / 60))
@@ -1923,14 +1960,18 @@ html.theme-toon .rolechip { border: 2px solid #15132a; background: #1f1757; }
         if (i === 0 && z < 0) z = 0; if (i === SCENES.length - 1 && z > 0) z = 0
         const approach = z < 0 ? range(-z, 0.12, 0.8) : 0, pass = z > 0 ? range(z, 0.12, 0.8) : 0
         const opacity = (1 - approach) * (1 - pass)
-        writeStyle(scene, 'opacity', String(opacity))
-        writeStyle(scene, 'transform', `scale(${1 - approach * 0.55 + pass * 0.9})`)
-        writeStyle(scene, 'filter', opacity > 0.98 ? 'none' : `blur(${(approach * 10 + pass * 14).toFixed(1)}px)`)
+        const compositorOwned = sceneMotion.owns(node)
+        sceneMotion.updateOpacity(node, opacity)
+        if (!compositorOwned) {
+          writeStyle(scene, 'opacity', String(opacity))
+          writeStyle(scene, 'transform', `scale(${1 - approach * 0.55 + pass * 0.9})`)
+          writeStyle(scene, 'filter', opacity > 0.98 ? 'none' : `blur(${(approach * 10 + pass * 14).toFixed(1)}px)`)
+        }
         const active = opacity > 0.6
         if (scene.classList.contains('active') !== active) scene.classList.toggle('active', active)
-        const visible = opacity >= 0.01
+        const visible = compositorOwned || opacity >= 0.01
         if ((scene.style.visibility !== 'hidden') !== visible) scene.style.visibility = visible ? 'visible' : 'hidden'
-        floats.forEach(({ el, depth }) => {
+        if (!compositorOwned) floats.forEach(({ el, depth }) => {
           const a = z < 0 ? range(-z + depth, 0.12, 0.8) : 0
           writeStyle(el, 'translate', `0 ${a * 40}px`)
           writeStyle(el, 'opacity', String(1 - a))
@@ -1961,7 +2002,7 @@ html.theme-toon .rolechip { border: 2px solid #15132a; background: #1f1757; }
     // Hero cards fly past the camera as you leave the first scene.
     const out = range(jumpArrival?.index === 0 ? jumpArrival.offset : u, 0, 0.8)
     let cardsArriving = false
-    if (SCENES[0].el.style.visibility !== 'hidden') {
+    if (sceneMotion.isPainted(SCENES[0].el)) {
       cards.forEach((card, i) => {
         const c = card.el
         // Arrival: once its image is ready, each card starts deep in space near the centre (small, dim, turned)
@@ -1988,7 +2029,7 @@ html.theme-toon .rolechip { border: 2px solid #15132a; background: #1f1757; }
     // Planets turn, moons orbit (only while visible).
     const themeSettled = document.documentElement.classList.contains('theme-toon') && document.documentElement.classList.contains('settled')
     systems.forEach(o => {
-      if (o.s.el.style.visibility === 'hidden') return
+      if (!sceneMotion.isPainted(o.s.el)) return
       if (!themeSettled) {
         const W2 = o.textureWidth, sp = (t / 1000 * o.pl.spin) % W2
         writeStyle(o.surf, 'backgroundPositionX', `${-sp}px`)
@@ -2012,19 +2053,20 @@ html.theme-toon .rolechip { border: 2px solid #15132a; background: #1f1757; }
       })
     })
 
-    if (hatsScene.el.style.visibility !== 'hidden') drawHats(t)
-    if (lifeScene.el.style.visibility !== 'hidden') drawHobbies(t)
+    if (sceneMotion.isPainted(hatsScene.el)) drawHats(t)
+    if (sceneMotion.isPainted(lifeScene.el)) drawHobbies(t)
     activeMoonTips.forEach(clampMoonTip)
     ticking = false
     if (jumpArrival?.start != null && t - jumpArrival.start >= jumpArrival.duration) {
       const finish = jumpArrival.complete
+      clearSceneMotion()
       jumpArrival = null
       lastSceneU = NaN
       finish()
     }
-    const activeMotion = SCENES[0].el.style.visibility !== 'hidden' ||
-      hatsScene.el.style.visibility !== 'hidden' || lifeScene.el.style.visibility !== 'hidden' ||
-      systems.some(o => o.s.el.style.visibility !== 'hidden')
+    const activeMotion = sceneMotion.isPainted(SCENES[0].el) ||
+      sceneMotion.isPainted(hatsScene.el) || sceneMotion.isPainted(lifeScene.el) ||
+      systems.some(o => sceneMotion.isPainted(o.s.el))
     const pointerMoving = cx !== mxp || cy !== myp
     if (jumpArrival || activeMoonTips.size || activeMotion || pointerMoving || ia < 1 || cardsArriving || lenis?.isScrolling || measurePending || Number.isNaN(lastSceneU)) frameId = requestAnimationFrame(frame)
   }
@@ -2045,12 +2087,16 @@ html.theme-toon .rolechip { border: 2px solid #15132a; background: #1f1757; }
   // =====================================================================================
   const yFor = i => (SCENES[i].u / U) * (LC.journeyHeight - LC.innerHeight)
   if (!reduce) {
-    lenis = new Lenis({ lerp: 0.12, smoothWheel: true, wheelMultiplier: 1, syncTouch: false })
+    // sceneSnap consumes each gesture and selects one destination. Lenis only
+    // drives that programmatic flight; a second raw wheel tween must never start.
+    lenis = new Lenis({ lerp: 0.12, smoothWheel: true, wheelMultiplier: 1, syncTouch: false,
+      virtualScroll: () => false })
     lenis.on('scroll', requestFrame)
   }
   let jumpTimer = 0, jumpFrame = 0, pendingJump = null, scrollMotion = null
   const scrollEase = x => 1 - Math.pow(1 - x, 4)
   const clearJump = () => {
+    clearSceneMotion(true)
     pendingJump = null
     scrollMotion = null
     clearTimeout(jumpTimer); jumpTimer = 0
@@ -2066,6 +2112,11 @@ html.theme-toon .rolechip { border: 2px solid #15132a; background: #1f1757; }
     isMoving: () => !!lenis && lenis.isScrolling === 'smooth' && Math.abs(lenis.velocity) > .25,
     ignoreInput: event => !!event.target.closest?.('.modal, .overview, input, textarea, select, [contenteditable="true"], [data-lenis-prevent]'),
     stopAnimation: () => {
+      // WAAPI can advance during a busy JS frame. Catch Lenis up to that same
+      // presentation before cancellation so a quick return cannot rewind.
+      // A held first pose has not been presented yet. Cancelling it in the same
+      // input task must leave the current page exactly where it was.
+      if (sceneMotion.status().aligned) beginScrollClock()
       clearJump()
       stage.classList.remove('warping')
       // scrollTo can return early when this is already targetScroll, leaving
@@ -2092,6 +2143,7 @@ html.theme-toon .rolechip { border: 2px solid #15132a; background: #1f1757; }
       }
       const motion = scrollMotion
       if (!lenis || !motion || motion.index !== index) return false
+      clearSceneMotion(true)
       const elapsed = Math.max(0, scrollClock - motion.startClock)
       const fraction = Math.min(1, elapsed / motion.duration)
       const destination = SCENES[index].u / U
@@ -2106,6 +2158,7 @@ html.theme-toon .rolechip { border: 2px solid #15132a; background: #1f1757; }
         // restarted from the current progress with only the remaining duration.
         scrollMotion = { ...motion, from, startClock: scrollClock, duration: remaining }
         lenis.scrollTo(yFor(index), { duration: remaining / 1000, easing: scrollEase, onComplete: motion.complete })
+        beginSceneFlight(scrollMotion)
       }
       requestFrame()
       return true
@@ -2115,7 +2168,7 @@ html.theme-toon .rolechip { border: 2px solid #15132a; background: #1f1757; }
       clearJump()
       requestFrame()
       const dist = Math.abs(target - scrollY) / LC.innerHeight
-      const complete = () => { scrollMotion = null; pendingJump = null; stage.classList.remove('warping'); onComplete() }
+      const complete = () => { clearSceneMotion(); scrollMotion = null; pendingJump = null; stage.classList.remove('warping'); onComplete() }
       if (kind === 'navigate' && dist > 2 && !reduce) {
         // A long smooth scroll wakes and loads every scene along the route.
         // Replay the same one-scene arrival while rendering only the selected destination.
@@ -2149,6 +2202,7 @@ html.theme-toon .rolechip { border: 2px solid #15132a; background: #1f1757; }
             jumpFrame = requestAnimationFrame(() => {
               jumpFrame = 0
               jumpArrival.start = performance.now()
+              beginJumpFlight(jumpArrival)
               stage.classList.remove('jumping')
               requestFrame()
             })
@@ -2167,6 +2221,7 @@ html.theme-toon .rolechip { border: 2px solid #15132a; background: #1f1757; }
           from: lenis.animatedScroll / (LC.journeyHeight - LC.innerHeight), startClock: scrollClock,
           duration: seconds * 1000, complete }
         lenis.scrollTo(target, { duration: seconds, easing: scrollEase, onComplete: complete })
+        if (scrollMotion) beginSceneFlight(scrollMotion)
       }
     },
   })
@@ -2202,7 +2257,7 @@ html.theme-toon .rolechip { border: 2px solid #15132a; background: #1f1757; }
     <p style="margin-top:22px;color:var(--muted)">Also: ${STOPS.slice(2).map(s => s.name).join(', ')}.</p>
     <div class="end"><a class="primary" href="mailto:kunalsatpal1@gmail.com">kunalsatpal1@gmail.com</a><a href="https://kunalsatpal.com/kunalsatpal_resume.pdf">Resume</a><a href="https://www.linkedin.com/in/kunalsatpal1/">LinkedIn</a><button id="backToFlight">Back to the flight</button></div>`
   const overview = $('overview')
-  function openOverview() { overview.classList.add('open'); overview.setAttribute('aria-hidden', 'false'); lenis?.stop(); document.body.style.overflow = 'hidden'; overview.scrollTop = 0; $('backToFlight').focus({ preventScroll: true }); $('skipBtn').textContent = 'Back to the flight'; syncSuspension() }
+  function openOverview() { sceneSnap?.cancel(); overview.classList.add('open'); overview.setAttribute('aria-hidden', 'false'); lenis?.stop(); document.body.style.overflow = 'hidden'; overview.scrollTop = 0; $('backToFlight').focus({ preventScroll: true }); $('skipBtn').textContent = 'Back to the flight'; syncSuspension() }
   function closeOverview() { if (!overview.classList.contains('open')) return; overview.classList.remove('open'); overview.setAttribute('aria-hidden', 'true'); lenis?.start(); document.body.style.overflow = ''; $('skipBtn').textContent = 'Skip the flight'; syncSuspension() }
   $('skipBtn').addEventListener('click', () => overview.classList.contains('open') ? closeOverview() : openOverview())
   $('backToFlight').addEventListener('click', closeOverview)
@@ -2288,8 +2343,9 @@ html.theme-toon .rolechip { border: 2px solid #15132a; background: #1f1757; }
   if (params.has('perf')) window.universePerformance = () => ({
     shaders: shaders.status(), suspended, framePending: !!frameId, snap: sceneSnap.state(),
     route: lastSceneU, animatedScroll: lenis?.animatedScroll ?? null,
+    compositor: sceneMotion.status(),
     viewport: { width: LC.innerWidth, height: LC.innerHeight },
-    visibleScenes: sceneNodes.filter(n => n.scene.style.visibility !== 'hidden').map(n => n.scene.dataset.scene),
+    visibleScenes: sceneNodes.filter(n => sceneMotion.isPainted(n.scene)).map(n => n.scene.dataset.scene),
   })
   performance.mark('universe:ready')
   performance.measure('universe:setup', 'universe:boot', 'universe:ready')
