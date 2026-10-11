@@ -60,6 +60,15 @@ try:
         wheel(-1)
         wait("universePerformance().compositor.aligned")
         check("universePerformance().compositor.scenes.sort().join(',')==='gojek,hinge'", 'Backward wheel owns only the departure and destination')
+        check("""(()=>{
+          const scene=document.querySelector('[data-scene=hinge]'),inner=scene.querySelector('.inner');
+          const props=a=>Object.keys(a.effect.getKeyframes()[0]);
+          const movement=scene.getAnimations().find(a=>props(a).includes('transform'));
+          const blur=inner.getAnimations().find(a=>props(a).includes('filter'));
+          return !!movement && !props(movement).includes('filter') && !!blur &&
+            !props(blur).includes('transform') && inner.offsetWidth<scene.offsetWidth &&
+            getComputedStyle(scene).filter==='none';
+        })()""", 'Scene movement is independent of blur on the smaller content layer')
         poses = b.js("""new Promise(resolve=>{
           const scene=document.querySelector('[data-scene=hinge]');
           const read=()=>({computed:getComputedStyle(scene).transform,inline:scene.style.transform});
@@ -69,7 +78,7 @@ try:
         checks.append('Chrome advances the flight without per-frame inline transform writes')
         print(checks[-1], flush=True)
         settled(2)
-        check("getComputedStyle(document.querySelector('[data-scene=hinge]')).opacity==='1' && getComputedStyle(document.querySelector('[data-scene=hinge]')).filter==='none'", 'Completion retains the opaque landing pose')
+        check("getComputedStyle(document.querySelector('[data-scene=hinge]')).opacity==='1' && getComputedStyle(document.querySelector('[data-scene=hinge] > .inner')).filter==='none'", 'Completion retains the opaque, unblurred landing pose')
         time.sleep(.4)
 
         wheel(1)
@@ -92,7 +101,7 @@ try:
     time.sleep(.9)
     go(8)
     wait("universePerformance().compositor.active && universePerformance().compositor.scenes.join(',')==='hello'")
-    check("getComputedStyle(document.querySelector('[data-scene=hello]')).filter==='none'", 'Toon multi-page arrival keeps crisp styling')
+    check("getComputedStyle(document.querySelector('[data-scene=hello]')).filter==='none' && getComputedStyle(document.querySelector('[data-scene=hello] > .inner')).filter==='none'", 'Toon multi-page arrival keeps crisp styling')
     b.js("document.querySelector('#styleToggle').click()")
     check("universePerformance().compositor.active && !document.documentElement.classList.contains('theme-toon')", 'Theme switching keeps the current flight alive')
     settled(8)

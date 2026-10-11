@@ -58,7 +58,7 @@ export function createSceneMotion({ nodes, scenes, range, loadAssets, disabled }
     try {
       for (const index of new Set(indices)) {
         const node = nodes[index]
-        const frames = [], floatFrames = node.floats.map(() => [])
+        const frames = [], blurFrames = [], floatFrames = node.floats.map(() => [])
         let initialOpacity = 0
         for (let sample = 0; sample <= samples; sample++) {
           const offset = sample / samples
@@ -71,12 +71,14 @@ export function createSceneMotion({ nodes, scenes, range, loadAssets, disabled }
           if (sample === 0) initialOpacity = alpha
           const frame = { offset, opacity: alpha,
             transform: `scale(${1 - approach * .55 + pass * .9})` }
-          // Keep the existing opaque pose and backdrop-filter boundary. The
-          // browser interpolates none using the neutral blur value as needed.
+          // Keep filter in its own effect. A costly filter must not make the
+          // scene's transform/opacity animation depend on main-thread updates.
+          // Non-hero filters use content bounds instead of the entire viewport.
+          // The browser interpolates none using the neutral blur as needed.
           // The existing !important Toon travel rule still suppresses this blur,
           // including when the visitor changes theme halfway through a flight.
-          frame.filter = alpha > .98 ? 'none' : `blur(${(approach * 10 + pass * 14).toFixed(1)}px)`
           frames.push(frame)
+          blurFrames.push({ offset, filter: alpha > .98 ? 'none' : `blur(${(approach * 10 + pass * 14).toFixed(1)}px)` })
           node.floats.forEach(({ depth }, i) => {
             const a = z < 0 ? range(-z + depth, .12, .8) : 0
             floatFrames[i].push({ offset, translate: `0 ${a * 40}px`, opacity: 1 - a })
@@ -87,6 +89,7 @@ export function createSceneMotion({ nodes, scenes, range, loadAssets, disabled }
         demotions.delete(node)
         node.scene.classList.add('motion-layer')
         add(node.scene, frames)
+        add(node.blur, blurFrames)
         node.floats.forEach(({ el }, i) => add(el, floatFrames[i]))
         owned.add(node)
         opacity.set(node.scene, initialOpacity)

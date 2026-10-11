@@ -148,7 +148,10 @@
   .scene { position: absolute; inset: 0; z-index: 5; display: grid; place-items: center; text-align: center; padding: 110px 6vw 110px;
     opacity: 0; pointer-events: none; }
   .scene.active { pointer-events: auto; }
-  .scene.active, .scene.motion-layer { will-change: transform, opacity, filter; }
+  .scene.active, .scene.motion-layer { will-change: transform, opacity; }
+  .scene:not([data-scene="hero"]).active > .inner,
+  .scene:not([data-scene="hero"]).motion-layer > .inner { will-change: filter; }
+  .scene[data-scene="hero"].active, .scene[data-scene="hero"].motion-layer { will-change: transform, opacity, filter; }
   .scene[data-scene="hero"] { opacity: 1; }
   html.scene-entry .scene[data-scene="hero"] { opacity: 0; }
   .scene .inner { max-width: 980px; width: 100%; }
@@ -758,7 +761,8 @@ html.theme-toon .stage.traveling .streaks {
   mask-image: radial-gradient(circle at 50% 50%, transparent 22%, #000 22.5%);
 }
 html.theme-toon .stage.traveling.warping .streaks { opacity: .55; }
-html.theme-toon .stage.traveling .scene { filter: none !important; }
+html.theme-toon .stage.traveling .scene,
+html.theme-toon .stage.traveling .scene > .inner { filter: none !important; }
 html.theme-toon .cue-cap { stroke: #fff; stroke-width: 3; fill: #1f1757; }
 html.theme-toon .cue-moon { stroke: #15132a; stroke-width: 1.5; }
 html.theme-toon .cue-pl circle:first-child { stroke: #15132a; stroke-width: 2; }
@@ -978,7 +982,7 @@ html.theme-toon .rolechip { border: 2px solid #15132a; background: #1f1757; }
   import { NOW, PLANETS, MAJOR, STOPS } from './site/js/universe-data.js'
   import { createUniverseShaders } from './site/js/universe-shaders.js'
   import { createSceneSnap } from './site/js/universe-scroll.js?v=4'
-  import { createSceneMotion } from './site/js/universe-motion.js?v=1'
+  import { createSceneMotion } from './site/js/universe-motion.js?v=2'
   performance.mark('universe:boot')
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches
   const $ = id => document.getElementById(id)
@@ -1709,6 +1713,9 @@ html.theme-toon .rolechip { border: 2px solid #15132a; background: #1f1757; }
   const cards = [...document.querySelectorAll('.proof')].map(el => ({ el, depth: +el.dataset.depth, dx: 0, dy: 0, readyAt: null }))
   const sceneNodes = SCENES.map(s => ({
     scene: s.el, hidden: false, paused: null,
+    // Hero cards live outside its inner content. Other scenes can blur their
+    // content bounds, avoiding a viewport-sized filtered surface during scale.
+    blur: s.kind === 'hero' ? s.el : s.el.querySelector('.inner'),
     svgs: [...s.el.querySelectorAll('svg')].filter(svg => svg.querySelector('animate, animateMotion, animateTransform')),
     smilPaused: new Map(),
     floats: [...s.el.querySelectorAll('[data-z]')].map(el => ({ el, depth: +el.dataset.z * 0.12 })),
@@ -1846,6 +1853,11 @@ html.theme-toon .rolechip { border: 2px solid #15132a; background: #1f1757; }
       // Prepared flight layers can appear between JS callbacks. Their child
       // animations must already be running when the compositor reveals them.
       const paused = suspended || (!sceneMotion.owns(node) && !sceneMotion.isPainted(node.scene))
+      // Visibility and theme usually stay unchanged throughout a flight. Avoid
+      // walking every SVG and checking its ancestors again on every frame.
+      if (paused === node.paused && toon === node.playbackToon && settled === node.playbackSettled) return
+      node.playbackToon = toon
+      node.playbackSettled = settled
       if (paused !== node.paused) {
         node.paused = paused
         node.scene.classList.toggle('render-paused', paused)
@@ -1951,7 +1963,7 @@ html.theme-toon .rolechip { border: 2px solid #15132a; background: #1f1757; }
         if (!compositorOwned) {
           writeStyle(scene, 'opacity', String(opacity))
           writeStyle(scene, 'transform', `scale(${1 - approach * 0.55 + pass * 0.9})`)
-          writeStyle(scene, 'filter', opacity > 0.98 ? 'none' : `blur(${(approach * 10 + pass * 14).toFixed(1)}px)`)
+          writeStyle(node.blur, 'filter', opacity > 0.98 ? 'none' : `blur(${(approach * 10 + pass * 14).toFixed(1)}px)`)
         }
         const active = opacity > 0.6
         if (scene.classList.contains('active') !== active) scene.classList.toggle('active', active)
