@@ -21,12 +21,13 @@ from browser_tools import Browser
 SCENES = ['hero', 'about', 'hinge', 'gojek', 'cult', 'galaxy', 'writing', 'life', 'hello']
 DEVICES = {
     'desktop': {'width': 1440, 'height': 900, 'deviceScaleFactor': 1, 'mobile': False},
+    'desktop-retina': {'width': 1440, 'height': 900, 'deviceScaleFactor': 2, 'mobile': False},
     'mobile': {'width': 390, 'height': 844, 'deviceScaleFactor': 3, 'mobile': True},
 }
 CASES = ['wheel-forward', 'wheel-backward', 'trackpad-burst', 'touch-forward',
          'touch-backward', 'adjacent-nav', 'distant-forward', 'distant-backward',
          'rapid-retarget', 'planet-idle', 'preview-idle', 'resize-scroll',
-         'unchanged-resize-scroll', 'stall-scroll', 'cold-wheel']
+         'unchanged-resize-scroll', 'stall-scroll', 'cold-wheel', 'quick-hero-return']
 
 # Read only inline scene styles and existing diagnostics while sampling. No layout
 # or computed-style reads are introduced into the site's render loop by this probe.
@@ -34,6 +35,13 @@ PROBE = r"""
 (() => {
   const tasks = [], loaf = [], inputs = [], errors = [], supported =
     PerformanceObserver.supportedEntryTypes || [];
+  // Geometry getters can flush the application's pending style writes. Measure
+  // only at document initialization and the corresponding browser events.
+  let viewport={width:innerWidth,height:innerHeight}, scrollPosition=scrollY;
+  addEventListener('resize', () => {
+    viewport={width:innerWidth,height:innerHeight};
+  }, {passive:true});
+  addEventListener('scroll', () => { scrollPosition=scrollY; }, {passive:true});
   const keep = (list, entry) => { list.push(entry); if (list.length > 2000) list.shift(); };
   if (supported.includes('longtask')) new PerformanceObserver(list => {
     for (const e of list.getEntries()) keep(tasks, {
@@ -61,8 +69,10 @@ PROBE = r"""
         '.modal, .overview, input, textarea, select, [contenteditable="true"], [data-lenis-prevent]');
       const describe=node => node ? {tag:node.tagName || node.nodeName, id:node.id || '',
         class:node.getAttribute?.('class') || ''} : null;
+      const stop=target.closest?.('.stop');
       keep(inputs, {type, at:performance.now(), timestamp:e.timeStamp,
         deltaY:e.deltaY ?? null, trusted:e.isTrusted, target:describe(target),
+        stopIndex:stop ? Number(stop.dataset.i) : null,
         ignoredAncestor:describe(ignored), page:{hidden:document.hidden,
           cameraClass:document.getElementById('camera')?.className || '',
           modalClass:document.getElementById('modal')?.className || '',
@@ -84,9 +94,10 @@ PROBE = r"""
     }
     stageElement ??= document.getElementById('stage');
     cameraElement ??= document.getElementById('camera');
-    return {scrollY, viewport:{width:innerWidth,height:innerHeight},
+    return {scrollY:scrollPosition, viewport,
       stageClass:stageElement?.className || '', cameraOpacity:cameraElement?.style.opacity || '',
       transforms:(sceneElements || []).map(e => e.style.transform),
+      route:p?.route ?? null, animatedScroll:p?.animatedScroll ?? null,
       snap:p?.snap || null, shaders:p?.shaders || null, visibleScenes:p?.visibleScenes || [],
       firstFlight:document.documentElement.classList.contains('first-flight')};
   }
@@ -121,7 +132,10 @@ PROBE = r"""
         inputToFirstObservedMotionMs:trigger && c.firstMotionAt !== null && c.firstMotionAt>=trigger.at
           ? c.firstMotionAt-trigger.at : null,
         inputLatencyNote:'Event capture and DOM-motion observation use performance.now(), not the earlier '
-          +'rAF frame timestamp. This is callback-observed motion, not input-to-presented-pixel latency.'};
+          +'rAF frame timestamp. This is callback-observed motion, not input-to-presented-pixel latency.',
+        geometrySamplingNote:'Viewport updates only on resize; scroll position updates only on scroll events. '
+          +'No geometry getters run in the frame probe. Event-driven scroll samples can trail a '
+          +'same-frame Lenis write by one callback; scene transforms also detect motion.'};
     }
   };
   function sample(t) {
@@ -137,9 +151,11 @@ PROBE = r"""
     if (c.firstMotionAt !== null) {
       if (c.lastFrame !== null) c.intervals.push(t-c.lastFrame);
       c.lastFrame=t;
-      c.frames.push({at:t, observedAt, scrollY:s.scrollY, target:s.snap?.targetIndex,
+      c.frames.push({at:t, observedAt, scrollY:s.scrollY, route:s.route,
+        animatedScroll:s.animatedScroll, target:s.snap?.targetIndex,
         settled:s.snap?.settledIndex, phase:s.snap?.phase,
-        visibleScenes:s.visibleScenes, viewport:s.viewport});
+        visibleScenes:s.visibleScenes, viewport:s.viewport,
+        stageClass:s.stageClass, cameraOpacity:s.cameraOpacity});
     }
     const state=JSON.stringify([s.snap,s.viewport,s.stageClass]);
     if (state !== c.lastState) { c.states.push({at:observedAt,...s}); c.lastState=state; }
@@ -206,8 +222,8 @@ def wait_for(browser, expression, timeout=25):
     raise TimeoutError('Timed out: ' + expression)
 
 
-def click(browser, selector):
-    point = browser.js(f"""(() => {{
+def click_point(browser, selector):
+    return browser.js(f"""(() => {{
       const e=document.querySelector({json.dumps(selector)});
       if (!e) throw new Error('Missing input target');
       // The SVG stop group also contains its text label, so the group bounds'
@@ -220,6 +236,11 @@ def click(browser, selector):
       }}
       return {{x,y}};
     }})()""")
+
+
+def click(browser, selector, point=None):
+    if point is None:
+        point = click_point(browser, selector)
     browser.call('Input.dispatchMouseEvent', {'type': 'mouseMoved', **point})
     for kind in ['mousePressed', 'mouseReleased']:
         browser.call('Input.dispatchMouseEvent', {
@@ -291,6 +312,38 @@ def stop_trace(browser, path):
                     'Inspect frame tracks and event attribution in DevTools.'}
 
 
+def hero_return_summary(sample):
+    reasons = []
+    forward = next((event for event in sample['inputEvents']
+                    if event['type'] == 'wheel' and event['trusted'] and event['deltaY'] > 0), None)
+    returned = next((event for event in sample['inputEvents']
+                     if event['type'] == 'click' and event['trusted'] and event['stopIndex'] == 0), None)
+    if forward is None or returned is None:
+        reasons.append('Missing trusted forward wheel or Hero map click')
+    delay = returned['at'] - forward['at'] if forward and returned else None
+    if delay is not None and not 60 <= delay <= 300:
+        reasons.append('Hero click missed the quick-retarget window (60–300 ms)')
+    departing = returned['page']['snap'] if returned else None
+    if not departing or departing['phase'] != 'snapping' or departing['targetIndex'] != 4:
+        reasons.append('Hero click did not interrupt the wheel transition toward Cult')
+    # Departure may remain staged under the hidden camera during preparation.
+    # Once arrival is shown, no intermediate scene may enter the viewport.
+    arrival = [frame for frame in sample['frames'] if returned and frame['observedAt'] >= returned['at']
+               and 'traveling' in frame['stageClass'].split()
+               and 'jumping' not in frame['stageClass'].split()]
+    if not arrival or any(scene != 'hero' for frame in arrival for scene in frame['visibleScenes']):
+        reasons.append('Hero arrival displayed an intermediate route scene')
+    hero = next((frame for frame in arrival if 'hero' in frame['visibleScenes']), None)
+    if hero is None or sample['final']['visibleScenes'] != ['hero']:
+        reasons.append('Hero did not become the sole visible destination')
+    return {
+        'requestedClickDelayMs': 120, 'actualClickDelayMs': round(delay, 3) if delay is not None else None,
+        'clickToFirstVisibleHeroMs': round(hero['observedAt'] - returned['at'], 3) if hero and returned else None,
+        'clickToSettledMs': round(sample['endAt'] - returned['at'], 3) if returned else None,
+        'arrivalFrames': len(arrival), 'invalidReasons': reasons,
+    }
+
+
 def case_route(name):
     routes = {
         'wheel-forward': (2, 3), 'wheel-backward': (3, 2),
@@ -299,6 +352,7 @@ def case_route(name):
         'rapid-retarget': (2, 3), 'planet-idle': (3, 3), 'preview-idle': (3, 3),
         'resize-scroll': (2, 3), 'unchanged-resize-scroll': (2, 3),
         'stall-scroll': (2, 3), 'cold-wheel': (0, 1),
+        'quick-hero-return': (3, 0),
     }
     return routes[name]
 
@@ -315,10 +369,17 @@ def run_case(browser, args, name, device_name, theme, cpu, repetition):
         browser.call('Network.clearBrowserCache')
         # Repeated cold trials must not restore the previous trial's About stop.
         browser.js("history.replaceState(null,'',location.href)")
-    # Prevent a ready probe in the departing document from satisfying this wait
-    # before the new navigation commits (including reloads of the same URL).
-    browser.js('window.__scrollBenchmark = null')
-    browser.call('Page.navigate', {'url': page_url(args.url, theme, None if cold else start)})
+    page_key = (args.url, device_name, theme, cpu)
+    reuse = args.reuse_page and not cold and getattr(browser, 'benchmark_page', None) == page_key
+    if reuse:
+        # Reproduce repeated navigation in the same document/GPU device. Setup
+        # movement is excluded from the timed, trusted-input sample below.
+        browser.js(f"document.querySelector('.stop[data-i=\"{start}\"]').dispatchEvent(new MouseEvent('click',{{bubbles:true}}))")
+    else:
+        # Do not let a departing document's ready probe satisfy this wait.
+        browser.js('window.__scrollBenchmark = null')
+        browser.call('Page.navigate', {'url': page_url(args.url, theme, None if cold else start)})
+        browser.benchmark_page = page_key
     wait_for(browser, '!!window.universePerformance && !!window.__scrollBenchmark', args.timeout)
     gpu_supported = browser.js('navigator.gpu?.requestAdapter().then(a=>!!a).catch(()=>false) ?? false')
     if not cold:
@@ -328,7 +389,9 @@ def run_case(browser, args, name, device_name, theme, cpu, repetition):
         time.sleep(args.warmup)
         wait_for(browser, "!document.documentElement.classList.contains('first-flight')", args.timeout)
         if gpu_supported:
-            expected = (['aurora', 'far'] if theme == 'real' else []) + (['mark'] if start == 0 else [])
+            registered = browser.js('universePerformance().shaders')
+            expected = (['aurora', 'far'] if theme == 'real' else []) + (
+                ['mark'] if start == 0 and 'mark' in registered else [])
             condition = json.dumps(expected) + ".every(name=>{const s=universePerformance().shaders[name];return s?.wanted&&s.ready&&s.running})"
             wait_for(browser, condition, args.timeout)
     shader_check = browser.js('universePerformance().shaders')
@@ -369,6 +432,9 @@ def run_case(browser, args, name, device_name, theme, cpu, repetition):
         })()""")
         if setup['preview']['opacity'] < .9:
             raise RuntimeError('Invalid preview trial: preview is not visibly open')
+    # The map stays fixed during this route. Measure its hit target before the
+    # timed sample rather than flushing layout while the wheel motion is active.
+    hero_point = click_point(browser, '.stop[data-i="0"]') if name == 'quick-hero-return' else None
     browser.events.clear()
     tracing = bool(args.trace_dir)
     trace_path = Path(args.trace_dir) / f'{device_name}-{theme}-cpu{cpu:g}-{name}-{repetition}.json' if tracing else None
@@ -380,10 +446,11 @@ def run_case(browser, args, name, device_name, theme, cpu, repetition):
     cpu_window_start = time.monotonic()
     arm = {'target': target, 'steadyMs': args.steady * 1000 if name.endswith('-idle') else 0,
            'timeoutMs': args.timeout * 1000}
-    browser.js('__scrollBenchmark.arm(' + json.dumps(arm) + ')')
+    armed_at = browser.js('__scrollBenchmark.arm(' + json.dumps(arm) + ')')
     trace_result = None
     active_error = None
     try:
+        intervention = None
         if name in ['wheel-forward', 'trackpad-burst', 'cold-wheel', 'resize-scroll',
                     'unchanged-resize-scroll', 'stall-scroll']:
             wheel(browser, device, burst=name == 'trackpad-burst')
@@ -397,6 +464,16 @@ def run_case(browser, args, name, device_name, theme, cpu, repetition):
             click(browser, '.stop[data-i="8"]')
             time.sleep(.35)
             click(browser, '.stop[data-i="3"]')
+        elif name == 'quick-hero-return':
+            wheel(browser, device)
+            elapsed = wait_for(browser, """(() => {
+              const e=__scrollBenchmark.inputs.find(e=>e.type==='wheel'&&e.trusted&&e.at>=%s);
+              return e ? {at:e.at,elapsed:performance.now()-e.at} : null;
+            })()""" % armed_at, args.timeout)
+            time.sleep(max(0, (120 - elapsed['elapsed']) / 1000))
+            click(browser, '.stop[data-i="0"]', hero_point)
+            intervention = {'kind': 'trusted wheel toward Cult, then trusted map click to Hero',
+                            'requestedDelayMs': 120, 'wheelAt': elapsed['at']}
         if name == 'resize-scroll':
             time.sleep(.32)
             device['height'] -= 100
@@ -404,7 +481,6 @@ def run_case(browser, args, name, device_name, theme, cpu, repetition):
             time.sleep(.18)
             device['height'] += 35
             browser.call('Emulation.setDeviceMetricsOverride', device)
-        intervention = None
         if name in ['unchanged-resize-scroll', 'stall-scroll']:
             time.sleep(.32)
             intervention = browser.js("({at:performance.now(),before:__scrollBenchmark.snapshot()})")
@@ -457,7 +533,8 @@ def run_case(browser, args, name, device_name, theme, cpu, repetition):
         'case': name, 'device': device_name, 'theme': theme, 'cpuRate': cpu,
         'repetition': repetition, 'viewport': DEVICES[device_name],
         'cache': 'cold (disabled and cleared)' if cold else 'enabled; warm animation sample',
-        'warmupSeconds': 0 if cold else args.warmup, 'previewWarmupSeconds': .65 if name == 'preview-idle' else None,
+        'warmupSeconds': 0 if cold else args.warmup, 'reusedDocument': reuse,
+        'previewWarmupSeconds': .65 if name == 'preview-idle' else None,
         'steadySeconds': args.steady if name.endswith('-idle') else None,
         'setup': setup, 'shaderProbeBeforeInput': shader_check, 'sample': sample,
         'performanceMetrics': {'before': before, 'after': after, 'delta': metric_delta(before, after),
@@ -468,6 +545,9 @@ def run_case(browser, args, name, device_name, theme, cpu, repetition):
     }
     result['valid'] = not sample.get('timedOut') and not sample['errors'] and (
         sample['final']['snap']['settledIndex'] == target)
+    if name == 'quick-hero-return':
+        sample['quickHeroReturn'] = hero_return_summary(sample)
+        result['valid'] = result['valid'] and not sample['quickHeroReturn']['invalidReasons']
     return result
 
 
@@ -476,12 +556,13 @@ def main():
     parser.add_argument('--url', default='http://127.0.0.1:8765/universe.html')
     parser.add_argument('--output', default='/private/tmp/universe-checks/scroll-benchmark.json')
     parser.add_argument('--quick', action='store_true', help='One repetition at CPU 1; omit trackpad/reversal/cold cases')
-    parser.add_argument('--devices', default='desktop,mobile', help='Comma-separated desktop,mobile')
+    parser.add_argument('--devices', default='desktop,mobile', help='Comma-separated desktop,desktop-retina,mobile')
     parser.add_argument('--themes', default='real,toon', help='Comma-separated real,toon')
     parser.add_argument('--cpu', help='Comma-separated CPU slowdown factors; default 1,4 (quick: 1)')
     parser.add_argument('--cases', help='Comma-separated cases: ' + ','.join(CASES))
     parser.add_argument('--repeats', type=int, help='Default 3; quick: 1')
     parser.add_argument('--warmup', type=float, default=3.5, help='Warmup before each interaction in seconds')
+    parser.add_argument('--reuse-page', action='store_true', help='Reuse the document and GPU device between matching warm trials')
     parser.add_argument('--steady', type=float, default=2, help='Steady planet/preview sample duration in seconds')
     parser.add_argument('--timeout', type=float, default=25)
     parser.add_argument('--stall-ms', type=float, default=200, help='Controlled blocking duration for stall-scroll')

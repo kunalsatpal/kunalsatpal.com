@@ -2,6 +2,8 @@
 
 Prepared 10 October 2026 against commit `ff6079f`. This is a proposal; no website implementation changes are part of this review.
 
+Execution update, 11 October: preview caching, clock/resize stability, the PNG hero logo, and browser-managed scene flights are now implemented. See [universe-scroll-update.md](./universe-scroll-update.md). The latest user instruction replaces further repeated benchmarking with a focused functional check followed by manual desktop Chrome verification.
+
 The goal is smoother scrolling while retaining the current artwork, textures, sphere projection, lighting, shaders, blur, depth, card entrances, moon orbits, realistic/cartoon themes, and navigation transitions. Preserve existing single-page movement during the first optimization stages. Treat any change to gesture behavior or easing as a separate decision.
 
 ## What comparable experiences do

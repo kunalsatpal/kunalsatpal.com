@@ -5,6 +5,7 @@ from browser_tools import Browser
 from PIL import Image,ImageChops,ImageStat
 parser = argparse.ArgumentParser()
 parser.add_argument('--baseline', required=True, help='Original universe HTML URL, served alongside its relative assets')
+parser.add_argument('--current', default='http://127.0.0.1:8765/universe.html')
 parser.add_argument('--output', default='/private/tmp/universe-checks')
 args = parser.parse_args()
 output = Path(args.output)
@@ -23,7 +24,7 @@ report=[]
 for theme in ['real','toon']:
  for scene,at in [('hero',0),('hinge',.25),('transition',.30),('galaxy',.625)]:
   shots=[]
-  for page,name in [(args.baseline,'before'),('http://127.0.0.1:8765/universe.html','after')]:
+  for page,name in [(args.baseline,'before'),(args.current,'after')]:
    b.navigate(page+f'?at={at}&theme={theme}')
    b.js("localStorage.removeItem('universeTheme')")
    b.js('document.fonts.ready')

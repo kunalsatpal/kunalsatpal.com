@@ -22,6 +22,17 @@ b = Browser()
 b.call('Storage.clearDataForOrigin', {'origin':'http://127.0.0.1:8765', 'storageTypes':'local_storage'})
 base = 'http://127.0.0.1:8765/universe.html'
 checks = []
+PNG_LOGO_VISIBLE = """(()=>{
+  const mark=document.querySelector('#object'), image=mark?.querySelector('img.logo'), fallback=mark?.querySelector('.fallback');
+  const visible=el=>{const s=getComputedStyle(el);return s.display!=='none'&&s.visibility!=='hidden'&&Number(s.opacity)>.99};
+  return !!image&&image.complete&&image.naturalWidth>0&&image.currentSrc.endsWith('/site/img/kunal-mark.png')&&
+    visible(image)&&!!fallback&&!visible(fallback)&&!mark.querySelector('canvas');
+})()"""
+PNG_LOGO_SIZE = """(()=>{
+  const mark=document.querySelector('#object'), image=mark.querySelector('img.logo');
+  return Math.abs(mark.getBoundingClientRect().width-46)<.2&&Math.abs(mark.getBoundingClientRect().height-46)<.2&&
+    Math.abs(image.getBoundingClientRect().width-46)<.2&&Math.abs(image.getBoundingClientRect().height-46)<.2;
+})()"""
 
 def check(condition, message):
     assert condition, message
@@ -60,10 +71,13 @@ for width, height, mobile in [(390, 844, True), (768, 1024, False), (1440, 900, 
     b.js("localStorage.removeItem('universeTheme')")
     b.navigate(base + '?perf')
     time.sleep(3)
+    wait_for(PNG_LOGO_VISIBLE)
+    check(b.js(PNG_LOGO_SIZE), f'{width}: decoded static hero logo stays at 46px')
+    check(b.js("Object.keys(universePerformance().shaders).sort().join(',')==='aurora,far' && !performance.getEntriesByType('resource').some(r=>r.name.includes('/mark.sdf.bin'))"), f'{width}: hero logo needs no WebGPU renderer or SDF asset')
     supported = b.js('navigator.gpu?.requestAdapter().then(a=>!!a) ?? false')
     if supported:
         wait_for("Object.values(universePerformance().shaders).every(s=>s.ready)")
-        check(b.js('universePerformance().shaders.mark.running'), f'{width}: hero shader renders at full quality')
+        check(b.js('universePerformance().shaders.aurora.running && universePerformance().shaders.far.running'), f'{width}: realistic sky shaders render at full quality')
     b.screenshot(str(output / f'{width}-hero.png'))
     for index, key in enumerate(['hero','about','hinge','gojek','cult','galaxy','writing','life','hello']):
         b.js(f"scrollTo(0,({index}/8)*(document.getElementById('journey').offsetHeight-innerHeight))")
@@ -71,8 +85,6 @@ for width, height, mobile in [(390, 844, True), (768, 1024, False), (1440, 900, 
         check(b.js("[...document.querySelectorAll('.scene')].filter(e=>e.style.visibility==='hidden').every(e=>e.classList.contains('render-paused'))"), f'{width}: hidden animations pause at {key}')
         if key in ['hinge', 'galaxy']:
             b.screenshot(str(output / f'{width}-{key}.png'))
-    if supported:
-        check(b.js('!universePerformance().shaders.mark.running'), f'{width}: hero shader pauses after leaving hero')
     wait_for('!universePerformance().framePending')
     check(True, f'{width}: stationary contact scene releases the page animation loop')
     # An arbitrary resting position must resolve to a scene's exact presentation point.
@@ -134,13 +146,14 @@ for width, height, mobile in [(390, 844, True), (768, 1024, False), (1440, 900, 
         const stage = document.querySelector('#stage');
         resolve({...departure, backward:stage.classList.contains('travel-backward'),
           lineScale:new DOMMatrix(getComputedStyle(document.querySelector('.streaks')).transform).a,
-          sceneScale:new DOMMatrix(document.querySelector('[data-scene="hero"]').style.transform).a})
+          sceneScale:new DOMMatrix(getComputedStyle(document.querySelector('[data-scene="hero"]')).transform).a})
       }, 280)
     })""")
     check(jump_midpoint['outsideCamera'] and jump_midpoint['lines'] > .5 and jump_midpoint['camera'] < .35, f'{width}: speed lines remain visible while the camera switches scenes: {jump_midpoint}')
     check(jump_midpoint['backward'] and jump_midpoint['lineScale'] < 1 and jump_midpoint['sceneScale'] > 1, f'{width}: backward jump uses the single-page scene arrival')
     wait_for("universePerformance().snap.phase === 'idle' && universePerformance().snap.settledIndex === 0")
     check(b.js("(()=>{jumpObserver.disconnect();return [...jumpSeen].every(key=>['life','hero'].includes(key)) && getComputedStyle(document.querySelector('#camera')).opacity==='1'})()"), f'{width}: far route jump skips intermediate scenes and restores the camera')
+    check(b.js(PNG_LOGO_VISIBLE) and b.js(PNG_LOGO_SIZE), f'{width}: returning from a far scene preserves the decoded 46px hero logo')
     if width == 1440:
         forward_midpoint = b.js("""new Promise(resolve => {
           document.querySelector('.stop[data-i="8"]').dispatchEvent(new MouseEvent('click',{bubbles:true}));
@@ -148,7 +161,7 @@ for width, height, mobile in [(390, 844, True), (768, 1024, False), (1440, 900, 
             const stage = document.querySelector('#stage');
             resolve({forward:stage.classList.contains('travel-forward'),
               lineScale:new DOMMatrix(getComputedStyle(document.querySelector('.streaks')).transform).a,
-              sceneScale:new DOMMatrix(document.querySelector('[data-scene="hello"]').style.transform).a})
+              sceneScale:new DOMMatrix(getComputedStyle(document.querySelector('[data-scene="hello"]')).transform).a})
           }, 280)
         })""")
         check(forward_midpoint['forward'] and forward_midpoint['lineScale'] > 1 and forward_midpoint['sceneScale'] < 1, 'Forward jump uses the single-page scene arrival')
@@ -184,7 +197,7 @@ for width, height, mobile in [(390, 844, True), (768, 1024, False), (1440, 900, 
     time.sleep(1)
     if supported:
         check(b.js('universePerformance().shaders.aurora.running && universePerformance().shaders.far.running'), f'{width}: realistic sky resumes after theme switch')
-    b.js("document.querySelector('nav [data-go=\"about\"]').click()")
+    b.js("document.querySelector('.stop[data-i=\"1\"]').dispatchEvent(new MouseEvent('click',{bubbles:true}))")
     wait_for("universePerformance().visibleScenes.includes('about')")
     time.sleep(3)
     b.call('Emulation.setDeviceMetricsOverride', {'width':width, 'height':height-100, 'deviceScaleFactor':3 if mobile else 1, 'mobile':mobile})
@@ -260,11 +273,12 @@ check(preview['redundantTags'] == 0, 'Hover preview omits redundant company and 
 b.call('Page.navigate', {'url':'http://127.0.0.1:8765/case.html?c=promo'})
 wait_for("document.querySelectorAll('.nextmoon').length === 2")
 cards = b.js("""[...document.querySelectorAll('.nextmoon')].map(card => {
-  const image = card.querySelector('.nm-cover')
-  return { imageWidth: image.offsetWidth, cardWidth: card.clientWidth, src: image.getAttribute('src'),
-    redundantTags: card.querySelectorAll('.nm-k,.nm-go,.nm-planet').length }
+  const image = card.querySelector('.nm-cover'), sky = card.querySelector('.nm-sky')
+  return { imageWidth: image.offsetWidth, skyWidth: sky.clientWidth, src: image.getAttribute('src'),
+    phone: image.classList.contains('phone'), planet: !!sky.querySelector('.nm-planet'),
+    redundantTags: card.querySelectorAll('.nm-k,.nm-go').length }
 })""")
-check(all(abs(card['imageWidth'] - card['cardWidth']) < 1 for card in cards), 'Case-study footer images span the full card width')
+check(all(card['phone'] and card['planet'] and abs(card['imageWidth'] / card['skyWidth'] - .84) < .01 for card in cards), 'Case-study footer keeps phone cut-outs inside the sky artwork')
 check(all(card['redundantTags'] == 0 for card in cards), 'Case-study footer cards omit decorative tags')
 
 b.call('Emulation.setDeviceMetricsOverride', {'width':390, 'height':844, 'deviceScaleFactor':3, 'mobile':True})

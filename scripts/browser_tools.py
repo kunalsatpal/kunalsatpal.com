@@ -12,7 +12,10 @@ class Browser:
             tabs = json.load(urllib.request.urlopen('http://127.0.0.1:9222/json/list'))
             tab = next(t for t in tabs if t['type'] == 'page')
         self.target_id = tab['id'] if new_tab else None
-        self.ws = websocket.create_connection(tab['webSocketDebuggerUrl'], origin='http://localhost:9222', timeout=60)
+        # CDP already supplies trusted UTF-8. Avoid rescanning multi-MB traces in
+        # pure Python and delaying the local browser's measurement commands.
+        self.ws = websocket.create_connection(tab['webSocketDebuggerUrl'], origin='http://localhost:9222', timeout=60,
+                                              skip_utf8_validation=True)
         self.seq = 0
         self.events = []
         self.call('Runtime.enable')
