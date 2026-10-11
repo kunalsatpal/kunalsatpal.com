@@ -14,6 +14,23 @@ output.mkdir(parents=True, exist_ok=True)
 b = Browser(new_tab=True)
 base = 'http://127.0.0.1:8765/universe.html?perf'
 checks = []
+PNG_LOGO_VISIBLE = """(()=>{
+  const mark=document.querySelector('#object'), image=mark?.querySelector('img.logo'), fallback=mark?.querySelector('.fallback');
+  const visible=(el,minimum=.01)=>{const s=getComputedStyle(el);return s.display!=='none'&&s.visibility!=='hidden'&&Number(s.opacity)>minimum};
+  return !!image&&image.complete&&image.naturalWidth>0&&image.currentSrc.endsWith('/site/img/kunal-mark.png')&&
+    visible(image,.99)&&!!fallback&&!visible(fallback)&&!mark.querySelector('canvas');
+})()"""
+SVG_LOGO_VISIBLE = """(()=>{
+  const mark=document.querySelector('#object'), fallback=mark?.querySelector('svg.fallback');
+  if(!fallback) return false;
+  const s=getComputedStyle(fallback);
+  return s.display!=='none'&&s.visibility!=='hidden'&&Number(s.opacity)>.99&&!mark.querySelector('canvas');
+})()"""
+PNG_LOGO_SIZE = """(()=>{
+  const mark=document.querySelector('#object'), image=mark.querySelector('img.logo');
+  return Math.abs(mark.getBoundingClientRect().width-46)<.2&&Math.abs(mark.getBoundingClientRect().height-46)<.2&&
+    Math.abs(image.getBoundingClientRect().width-46)<.2&&Math.abs(image.getBoundingClientRect().height-46)<.2;
+})()"""
 
 def check(value, label):
     assert value, label
@@ -114,12 +131,15 @@ check(not after['errors'], 'Cold mobile load: no JavaScript or asset errors')
 check(not any('/textures/universe/' in r['name'] or '/cases/media/phone_' in r['name'] for r in after['resources']), 'Cold mobile load: distant textures and moon previews are not requested')
 check(after['shiftsTotal'] < .05, 'Cold mobile load: no material layout or font jumps')
 check(b.js("document.querySelectorAll('[data-scene=hero]').length===1 && document.querySelectorAll('#object').length===1"), 'Static hero is reused without duplicate markup')
+check(b.js(PNG_LOGO_VISIBLE) and b.js(PNG_LOGO_SIZE), 'Cold mobile load: decoded static PNG logo is visible at 46px')
+check(set(after['shaders']) == {'aurora', 'far'} and not any('/mark.sdf.bin' in r['name'] for r in after['resources']), 'Cold mobile load: logo creates no WebGPU renderer or SDF request')
 
 # Static markup must remain readable if the application module cannot start.
 b.call('Network.setBlockedURLs', {'urls':['*universe-data.js*']})
 b.call('Page.navigate', {'url':base})
 wait("!!document.querySelector('h1') && getComputedStyle(document.querySelector('h1')).opacity==='1'")
-check(b.js("document.querySelector('h1').textContent.includes('Crafting') && getComputedStyle(document.querySelector('[data-scene=hero]')).opacity==='1' && getComputedStyle(document.querySelector('.fallback')).opacity==='1'"), 'Blocked application module: hero and logo remain visible')
+check(b.js("document.querySelector('h1').textContent.includes('Crafting') && getComputedStyle(document.querySelector('[data-scene=hero]')).opacity==='1'") and
+      (b.js(PNG_LOGO_VISIBLE) or b.js(SVG_LOGO_VISIBLE)), 'Blocked application module: hero and static logo remain visible')
 b.screenshot(str(output / 'static-hero.png'))
 b.js('scrollTo(0,200)')
 check(b.js('scrollY>0'), 'Before application startup: native scrolling remains available')
@@ -145,14 +165,21 @@ wait("universePerformance().snap.settledIndex===3 && universePerformance().snap.
 wait("[...document.querySelectorAll('[data-scene=gojek] .tip img')].every(i=>i.complete&&i.naturalWidth>0)")
 check(b.js("!!document.querySelector('[data-planet=gojek] .surface').style.backgroundImage && document.querySelector('.msurf').style.backgroundImage===''") ,'Approaching a planet loads its textures and preview, leaving distant galaxy assets deferred')
 
-# A GPU failure must leave the original logo intact.
+# The static logo must not depend on optional sky shaders or GPU availability.
 b.call('Emulation.setCPUThrottlingRate', {'rate':1})
 b.call('Network.emulateNetworkConditions', {'offline':False,'latency':0,'downloadThroughput':-1,'uploadThroughput':-1})
 b.call('Network.setBlockedURLs', {'urls':['*shaders.bundle.js*']})
 b.call('Page.navigate', {'url':base})
 wait('!!window.universePerformance')
 time.sleep(1.5)
-check(b.js("getComputedStyle(document.querySelector('.fallback')).opacity==='1' && !document.querySelector('#object').classList.contains('live')"), 'Unavailable shader: fallback logo stays visible')
+wait(PNG_LOGO_VISIBLE)
+check(b.js("Object.keys(universePerformance().shaders).sort().join(',')==='aurora,far' && Object.values(universePerformance().shaders).every(s=>!s.running)"), 'Unavailable sky shader: static PNG logo stays visible without a logo renderer')
+b.call('Network.setBlockedURLs', {'urls':['*kunal-mark.png*']})
+b.call('Page.navigate', {'url':base})
+wait('!!window.universePerformance')
+wait("document.querySelector('#object img.logo').complete && document.querySelector('#object img.logo').naturalWidth===0")
+wait(SVG_LOGO_VISIBLE)
+check(b.js("(()=>{const image=document.querySelector('#object img.logo'),s=getComputedStyle(image);return s.visibility==='hidden'||s.display==='none'||Number(s.opacity)<.01})()"), 'Unavailable PNG: original SVG logo remains visible and failed image stays hidden')
 b.call('Network.setBlockedURLs', {'urls':[]})
 # Also check a direct scene entry and both themes.
 for query in ['scene=cult', 'scene=gojek&theme=toon']:
@@ -165,7 +192,7 @@ b.call('Page.navigate', {'url':base})
 wait('!!window.universePerformance')
 check(b.js("getComputedStyle(document.querySelector('h1')).animationName==='none' && getComputedStyle(document.querySelector('.proof')).animationName==='none'"), 'Reduced motion skips the entrance animations')
 b.call('Emulation.setEmulatedMedia', {'features':[]})
-# Desktop artwork is eager, and the real renderer takes over only after readiness.
+# Desktop artwork remains eager, with a static logo and full-quality sky effects.
 b.call('Emulation.setDeviceMetricsOverride', {'width':1440,'height':900,'deviceScaleFactor':1,'mobile':False})
 b.call('Emulation.setTouchEmulationEnabled', {'enabled':False})
 b.call('Page.navigate', {'url':base})
@@ -183,18 +210,45 @@ check(b.js("""(()=>{
 })()"""), 'Desktop first visit: text and cards reveal continuously without flashing away')
 check(b.js("[...document.querySelectorAll('.proof img')].every(i=>i.currentSrc.includes('/site/img/proof_'))"), 'Desktop hero: all four original artwork images load')
 supported = b.js('navigator.gpu?.requestAdapter().then(a=>!!a) ?? false')
+wait(PNG_LOGO_VISIBLE)
+check(b.js(PNG_LOGO_SIZE) and b.js("Object.keys(universePerformance().shaders).sort().join(',')==='aurora,far'"), 'Desktop hero: decoded 46px PNG replaces logo GPU work')
 if supported:
-    wait('universePerformance().shaders.mark.ready', 30)
-    wait("getComputedStyle(document.querySelector('#object canvas')).opacity==='1' && getComputedStyle(document.querySelector('.fallback')).opacity==='0'")
-    check(b.js("getComputedStyle(document.querySelector('.fallback')).opacity==='0'"), 'Rendered shader crossfades in and replaces the fallback logo')
+    wait('universePerformance().shaders.aurora.ready && universePerformance().shaders.far.ready', 30)
+    check(b.js('universePerformance().shaders.aurora.running && universePerformance().shaders.far.running'), 'Realistic sky shaders retain full-quality rendering')
 b.screenshot(str(output / 'desktop-hero.png'))
-# The renderer may measure the mark while the hero scene is zoomed during travel.
-# Repeated returns must keep the painted canvas at its 46px layout size.
+# Repeated returns must keep the same decoded image at its original layout size.
 for cycle in range(3):
     for stop in (1, 0):
         b.js(f"document.querySelector('.stop[data-i=\"{stop}\"]').dispatchEvent(new MouseEvent('click',{{bubbles:true}}))")
         wait(f"universePerformance().snap.settledIndex==={stop} && universePerformance().snap.phase==='idle'")
-    check(b.js("(()=>{const mark=document.querySelector('#object'), canvas=mark.querySelector('canvas'); return Math.abs(mark.getBoundingClientRect().width-46)<.2 && Math.abs(canvas.getBoundingClientRect().width-46)<.2})()"), f'Hero logo keeps its size after return {cycle + 1}')
+    check(b.js(PNG_LOGO_VISIBLE) and b.js(PNG_LOGO_SIZE), f'Static hero logo keeps its size after return {cycle + 1}')
+
+# Cancellation must also work before Lenis has advanced its first frame.
+# Both inputs deliberately share one task; a delayed click misses this race.
+time.sleep(.4)
+same_frame = b.js("""(async () => {
+  dispatchEvent(new WheelEvent('wheel',{deltaY:1200,bubbles:true,cancelable:true}));
+  const forward=universePerformance().snap.targetIndex===1;
+  document.querySelector('.stop[data-i="0"]').dispatchEvent(new MouseEvent('click',{bubbles:true}));
+  await new Promise(resolve=>setTimeout(resolve,1400));
+  const state=universePerformance();
+  return forward&&state.snap.phase==='idle'&&state.snap.settledIndex===0&&
+    state.visibleScenes.join(',')==='hero'&&Math.abs(scrollY)<1&&Math.abs(state.animatedScroll)<1;
+})()""")
+check(same_frame, 'Same-frame wheel then Hero click cancels forward motion completely')
+
+# An early wheel gesture followed by an immediate return must not leave the
+# logo hidden, rescale it, or strand the landing scene partway through arrival.
+b.call('Page.navigate', {'url':base})
+wait('!!window.universePerformance')
+b.call('Input.dispatchMouseEvent', {'type':'mouseWheel','x':720,'y':450,'deltaX':0,'deltaY':1200})
+wait("universePerformance().snap.targetIndex===1 && universePerformance().snap.phase==='snapping'")
+time.sleep(.08)
+b.js("document.querySelector('.stop[data-i=\"0\"]').dispatchEvent(new MouseEvent('click',{bubbles:true}))")
+wait("universePerformance().snap.settledIndex===0 && universePerformance().snap.phase==='idle'")
+wait("getComputedStyle(document.querySelector('.title .name')).opacity==='1' && getComputedStyle(document.querySelector('#object')).opacity==='1'")
+wait(PNG_LOGO_VISIBLE)
+check(b.js(PNG_LOGO_SIZE) and b.js("getComputedStyle(document.querySelector('#camera')).opacity==='1' && document.querySelector('[data-scene=hero]').classList.contains('active')"), 'Immediate wheel then return restores a visible 46px static logo and fully presented hero')
 print(b.js("import('/scripts/test-universe-shaders.mjs').then(m=>m.testShaderLifecycle())"), flush=True)
 (output / 'results.json').write_text(json.dumps({'checks':checks,'samples':results}, indent=2))
 print('Passed '+str(len(checks))+' startup checks', flush=True)
