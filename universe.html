@@ -1761,6 +1761,11 @@ html.theme-toon .rolechip { border: 2px solid #15132a; background: #1f1757; }
   function beginJumpFlight(arrival) {
     sceneMotion.start({ indices: [arrival.index], duration: arrival.duration, easing: scrollEase,
       offsetAt: (_, eased) => arrival.from * (1 - eased), startTime: arrival.start })
+    // Decelerate the rush while the destination arrives. Holding the full-speed
+    // lines until the entire easing/tail finishes looks like continued travel.
+    stage.classList.add('arriving')
+    firstFlightLines.style.transitionDuration = `${Math.round(arrival.duration * .5)}ms`
+    firstFlightLines.style.opacity = '0'
     syncRendering()
   }
   const root = document.documentElement
@@ -2095,6 +2100,10 @@ html.theme-toon .rolechip { border: 2px solid #15132a; background: #1f1757; }
   }
   let jumpTimer = 0, jumpFrame = 0, pendingJump = null, scrollMotion = null
   const scrollEase = x => 1 - Math.pow(1 - x, 4)
+  const resetTravelLines = () => {
+    firstFlightLines.style.removeProperty('opacity')
+    firstFlightLines.style.removeProperty('transition-duration')
+  }
   const clearJump = () => {
     clearSceneMotion(true)
     pendingJump = null
@@ -2103,6 +2112,7 @@ html.theme-toon .rolechip { border: 2px solid #15132a; background: #1f1757; }
     cancelAnimationFrame(jumpFrame); jumpFrame = 0
     if (jumpArrival) { jumpArrival = null; lastSceneU = NaN }
     stage.classList.remove('jumping', 'arriving', 'traveling', 'travel-forward', 'travel-backward')
+    resetTravelLines()
   }
   sceneSnap = createSceneSnap({
     getStops: () => SCENES.map((_, i) => yFor(i)),
@@ -2191,7 +2201,8 @@ html.theme-toon .rolechip { border: 2px solid #15132a; background: #1f1757; }
               complete()
               jumpTimer = setTimeout(() => {
                 jumpTimer = 0
-                stage.classList.remove('traveling', direction)
+                stage.classList.remove('arriving', 'traveling', direction)
+                resetTravelLines()
               }, 320)
             },
           }
