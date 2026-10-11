@@ -456,12 +456,18 @@
   /* People: faces, not foreheads. */
   .f-photo img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 35%; transform: scale(1.15); }
   .f-training { background: radial-gradient(circle at 35% 30%, #e0fff4, #9fe8d2 55%, #4fb498); }
-  .goku-flight { display: block; width: 100%; aspect-ratio: 1; overflow: visible; animation: nimbus-float 3.6s ease-in-out infinite; }
-  .goku-flight img { display: block; width: 100%; height: 100%; object-fit: contain; }
+  .goku-flight { position: relative; display: block; width: 100%; aspect-ratio: 1; overflow: visible; animation: nimbus-float 3.6s ease-in-out infinite; }
+  .goku-flight img { position: absolute; inset: 0; display: block; width: 100%; height: 100%; object-fit: contain; transition: opacity .3s ease; }
+  .goku-flight .goku-real { opacity: 1; }
+  .goku-flight .goku-toon { opacity: 0; }
+  html.theme-toon .goku-flight.toon-ready .goku-real { opacity: 0; }
+  html.theme-toon .goku-flight.toon-ready .goku-toon { opacity: 1; }
   @keyframes nimbus-float { 0%, 100% { transform: translateY(-24%) rotate(-1deg); } 50% { transform: translateY(calc(-24% - 2px)) rotate(1deg); } }
   .nimbus-trail { fill: none; stroke: url(#nimbus-trail-color); stroke-width: 3; stroke-linecap: round; }
   .nimbus-trail-halo { fill: none; stroke: url(#nimbus-trail-color); stroke-width: 8; stroke-linecap: round; opacity: .16; }
-  @media (prefers-reduced-motion: reduce) { .goku-flight { animation: none; transform: translateY(-24%); } }
+  html.theme-toon .nimbus-trail { stroke-width: 3.5; }
+  html.theme-toon .nimbus-trail-halo { opacity: .08; }
+  @media (prefers-reduced-motion: reduce) { .goku-flight { animation: none; transform: translateY(-24%); } .goku-flight img { transition: none; } }
   .hcard { position: absolute; left: 0; top: 0; z-index: 30; width: 440px; padding: 20px; border-radius: 20px; text-align: left; pointer-events: none;
     background: rgba(14,16,26,.92); border: 1px solid color-mix(in srgb, var(--c, #fff) 45%, transparent); box-shadow: 0 30px 80px -20px rgba(0,0,0,.8);
     opacity: 0; transform: scale(.94); transform-origin: left center; transition: opacity .25s, transform .3s cubic-bezier(.2,.8,.2,1); }
@@ -1633,7 +1639,7 @@ html.theme-toon .rolechip { border: 2px solid #15132a; background: #1f1757; }
     `<defs><linearGradient id="nimbus-trail-color" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#f4b947" stop-opacity="0"/><stop offset=".45" stop-color="#ffc95d" stop-opacity=".28"/><stop offset="1" stop-color="#ffe9a1" stop-opacity=".85"/></linearGradient></defs><path class="nimbus-trail-halo" vector-effect="non-scaling-stroke"/><path class="nimbus-trail" vector-effect="non-scaling-stroke"/>`
   const nimbusTrail = hob.querySelector('.nimbus-trail'), nimbusHalo = hob.querySelector('.nimbus-trail-halo')
   const nimbusColor = hob.querySelector('#nimbus-trail-color')
-  const GOKU_FLYING = `<span class="goku-flight" role="img" aria-label="Goku flying on Nimbus"><img data-src="./site/img/goku-nimbus-3d.webp" width="256" height="256" alt="" decoding="async" /></span>`
+  const GOKU_FLYING = `<span class="goku-flight" role="img" aria-label="Goku flying on Nimbus"><img class="goku-real" data-src="./site/img/goku-nimbus-3d.webp" width="384" height="256" alt="" decoding="async" /><img class="goku-toon" data-src="./site/img/goku-nimbus-toon.webp" width="384" height="256" alt="" decoding="async" /></span>`
   const GOKU_EXPANDED = `<video class="hc-workout" src="./site/img/goku-power-up.mp4" poster="./site/img/goku-power-up-poster.jpg" aria-label="Goku stretching and powering up" muted loop playsinline preload="none" disablepictureinpicture disableremoteplayback></video>`
   const hobbyMotion = matchMedia('(prefers-reduced-motion: reduce)')
   let hobbyMediaActive = false
@@ -1653,6 +1659,13 @@ html.theme-toon .rolechip { border: 2px solid #15132a; background: #1f1757; }
     const el = document.createElement('button'); el.className = 'hob' + (h.face === 'training' ? ' hob-training' : ''); el.style.setProperty('--c', h.c)
     const face = h.face === 'training' ? `<span class="f-training">${GOKU_FLYING}</span>` : `<span class="f-${h.face}">${h.pics.map(src => `<img data-src="${src}" decoding="async" alt="" />`).join('')}</span>`
     el.innerHTML = `<span class="hob-b">${face}<span class="hob-shade"></span></span><em>${h.t}</em>`
+    const toonArt = el.querySelector('.goku-toon')
+    toonArt?.addEventListener('load', () => {
+      toonArt.decode().then(() => {
+        el.querySelector('.goku-flight').classList.add('toon-ready')
+        requestFrame()
+      }).catch(() => {})
+    }, { once: true })
     el.setAttribute('aria-label', h.t)
     const show = () => { hobPaused = true; hobEls.forEach(o => o.el.classList.toggle('on', o.el === el))
       hcard.style.setProperty('--c', h.c); hcard.querySelector('b').textContent = h.t; hcard.querySelector('p').textContent = h.d
