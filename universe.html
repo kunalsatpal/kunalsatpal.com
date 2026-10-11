@@ -209,6 +209,9 @@
   /* Surface, clouds and lights are wrapped onto the sphere by the #sphere displacement filter. */
   .planet .surface, .planet .clouds, .planet .lights { position: absolute; inset: 0; background-size: 200% 100%; background-repeat: repeat-x; filter: url(#sphere); }
   .planet .clouds { mix-blend-mode: screen; opacity: .55; }
+  .planet-surface { position: absolute; inset: 0; width: 100%; height: 100%; display: none; pointer-events: none; }
+  .planet.gpu-ready > .planet-surface { display: block; }
+  .planet.gpu-ready > .surface, .planet.gpu-ready > .clouds, .planet.gpu-ready > .lights { visibility: hidden; filter: none; }
   .planet .lights { mix-blend-mode: screen; opacity: .95;
     -webkit-mask-image: radial-gradient(circle at 28% 24%, transparent 46%, #000 74%); mask-image: radial-gradient(circle at 28% 24%, transparent 46%, #000 74%); }
   /* Terminator: lit from the upper left, deep night side, a hint of the glow colour in the twilight band. */
@@ -984,6 +987,7 @@ html.theme-toon .rolechip { border: 2px solid #15132a; background: #1f1757; }
   import { createSkyCulling } from './site/js/universe-sky-culling.js?v=1'
   import { createSceneSnap } from './site/js/universe-scroll.js?v=5'
   import { createSceneMotion } from './site/js/universe-motion.js?v=3'
+  import { createPlanetSurfaces } from './site/js/universe-planets.js?v=1'
   performance.mark('universe:boot')
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches
   const $ = id => document.getElementById(id)
@@ -1113,6 +1117,8 @@ html.theme-toon .rolechip { border: 2px solid #15132a; background: #1f1757; }
   // =====================================================================================
   // The original procedural textures are generated offline with the same Canvas algorithms.
   const textureURL = name => `./site/textures/universe/${name}`
+  const planetSurfaces = createPlanetSurfaces({ sphereURL: textureURL('sphere.png'), wake: () => requestFrame() })
+  const surfaceByScene = new WeakMap()
   const sphere = document.createElementNS('http://www.w3.org/2000/svg', 'svg')
   sphere.setAttribute('width', '0'); sphere.setAttribute('height', '0'); sphere.style.position = 'absolute'
   sphere.innerHTML = `<filter id="sphere" primitiveUnits="objectBoundingBox" x="0" y="0" width="1" height="1" color-interpolation-filters="sRGB">
@@ -1123,6 +1129,7 @@ html.theme-toon .rolechip { border: 2px solid #15132a; background: #1f1757; }
   function loadSceneAssets(scene) {
     if (scene.dataset.assetsLoaded) return
     scene.dataset.assetsLoaded = 'true'
+    surfaceByScene.get(scene)?.load()
     if (scene.querySelector('.system, .msurf')) {
       const map = sphere.querySelector('feImage[data-src]')
       if (map) { map.setAttribute('href', map.dataset.src); delete map.dataset.src }
@@ -1452,7 +1459,11 @@ html.theme-toon .rolechip { border: 2px solid #15132a; background: #1f1757; }
       orbitsFront.insertAdjacentHTML('beforeend', `<g transform="rotate(${tilt} 50 50)"><g clip-path="url(#of-${pl.key})">${el}</g></g>`)
       moons.push(moon)
     })
-    systems.push({ s, sys, pl, moons, surf: sys.querySelector('.surface'), cloud: sys.querySelector('.clouds'), lit: sys.querySelector('.lights') })
+    const gpu = planetSurfaces.register({ planet: sys.querySelector('.planet'), spin: pl.spin,
+      surfaceURL: textureURL(`${pl.key}-surface.jpg`), cloudURL: textureURL(`${pl.key}-clouds.png`),
+      lightURL: pl.lights ? textureURL(`${pl.key}-lights.png`) : null })
+    surfaceByScene.set(s.el, gpu)
+    systems.push({ s, sys, pl, moons, gpu, surf: sys.querySelector('.surface'), cloud: sys.querySelector('.clouds'), lit: sys.querySelector('.lights') })
     await yieldToBrowser()
   }
 
@@ -1811,6 +1822,7 @@ html.theme-toon .rolechip { border: 2px solid #15132a; background: #1f1757; }
     systems.forEach((o, i) => {
       o.radius = LC.systems[i].radius
       o.textureWidth = LC.systems[i].textureWidth
+      o.gpu.resize(o.textureWidth / 2)
       o.moons.forEach((m, mi) => { m.leftOrigin = LC.systems[i].moonWidths[mi] - 11 })
     })
     layoutVersion++
@@ -2045,7 +2057,7 @@ html.theme-toon .rolechip { border: 2px solid #15132a; background: #1f1757; }
     const themeSettled = document.documentElement.classList.contains('theme-toon') && document.documentElement.classList.contains('settled')
     systems.forEach(o => {
       if (!sceneMotion.isPainted(o.s.el)) return
-      if (!themeSettled) {
+      if (!themeSettled && !o.gpu.render(t)) {
         const W2 = o.textureWidth, sp = (t / 1000 * o.pl.spin) % W2
         writeStyle(o.surf, 'backgroundPositionX', `${-sp}px`)
         if (o.lit) writeStyle(o.lit, 'backgroundPositionX', `${-sp}px`)
@@ -2392,6 +2404,7 @@ html.theme-toon .rolechip { border: 2px solid #15132a; background: #1f1757; }
     compositor: sceneMotion.status(),
     viewport: { width: LC.innerWidth, height: LC.innerHeight },
     skyCulling: skyCulling.status(),
+    planets: planetSurfaces.status(),
     visibleScenes: sceneNodes.filter(n => sceneMotion.isPainted(n.scene)).map(n => n.scene.dataset.scene),
   })
   performance.mark('universe:ready')
