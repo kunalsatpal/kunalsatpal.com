@@ -431,9 +431,8 @@
   .hobbies { position: relative; width: min(1060px, 88vw); height: min(54vh, 470px); margin: 18px auto 0; }
   .horbits { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; }
   .horbits ellipse { fill: none; stroke: rgba(200,220,255,.44); stroke-width: 1.35; stroke-dasharray: 3 6; stroke-linecap: round; }
-  .hcore { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 74px; aspect-ratio: 1; border-radius: 50%; display: grid; place-items: center;
-    background: radial-gradient(circle at 34% 30%, #fffbe6, #ffd36b 45%, #e08a1c 100%); box-shadow: 0 0 60px 10px rgba(255,200,100,.35), 0 0 160px 40px rgba(255,180,90,.12); }
-  .hcore span { font: 700 26px/1 "Inter Tight", sans-serif; color: #4a2a00; }
+  .hcore { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 44px; aspect-ratio: 1; display: grid; place-items: center; }
+  .hcore img { display: block; width: 100%; height: 100%; object-fit: contain; }
   .hob { position: absolute; left: 0; top: 0; display: grid; justify-items: center; gap: 8px; padding: 0; will-change: transform; }
   .hob-b { width: 78px; aspect-ratio: 1; border-radius: 50%; overflow: hidden; display: grid; place-items: center; background: var(--c);
     box-shadow: 0 0 0 2px color-mix(in srgb, var(--c) 80%, white), 0 0 30px -4px var(--c); transition: transform .3s, box-shadow .3s; }
@@ -810,7 +809,6 @@ html.theme-toon .mini.open i { box-shadow: 0 0 0 3px #15132a, 0 0 0 6px color-mi
 html.theme-toon .hob-b { border: 3.5px solid #15132a; box-shadow: 0 5px 0 #15132a, 0 0 26px -8px var(--c); }
 html.theme-toon .hob:hover .hob-b, html.theme-toon .hob.on .hob-b { box-shadow: 0 5px 0 #15132a, 0 0 0 6px var(--c); }
 html.theme-toon .hob-shade { box-shadow: inset -6px -8px 0 rgba(0,0,0,.18); background: radial-gradient(circle at 30% 24%, rgba(255,255,255,.4) 0 12%, transparent 13%); }
-html.theme-toon .hcore { border: 4px solid #15132a; background: #ffd36b; box-shadow: 0 0 0 8px rgba(255,211,107,.18), 0 0 70px 10px rgba(255,200,100,.25); }
 html.theme-toon .hcard { background: #1f1757; border: 3px solid #15132a; box-shadow: 0 8px 0 #15132a; }
 html.theme-toon .horbits ellipse { stroke: #8f7bff; stroke-opacity: .35; stroke-width: 2; stroke-dasharray: 1 7; stroke-linecap: round; }
 html.theme-toon .porthole { background: #8f99b8; border: 5px solid #15132a; box-shadow: 0 10px 0 #15132a, 0 0 70px -20px #8f7bff; }
@@ -1046,7 +1044,7 @@ html.theme-toon .rolechip { border: 2px solid #15132a; background: #1f1757; }
           <path d="M2 30 C 25 6, 75 6, 98 30" fill="none" class="lp-base"/><path d="M2 30 C 25 6, 75 6, 98 30" pathLength="100" fill="none" class="lp-light"/></svg></div></div>`,
     life: `<div class="inner" style="max-width:1180px">${L('Off duty')}<h2>Life is more than work</h2>
         <div class="hobbies" id="hobbies"><svg class="horbits" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"></svg>
-          <div class="hcore"><span>K</span></div><div class="hcard" id="hcard"><div class="hc-img"></div><b></b><p></p></div></div></div>`,
+          <div class="hcore"><img data-src="./site/img/kunal-mark.png" width="44" height="44" alt="Kunal Satpal" decoding="async" /></div><div class="hcard" id="hcard"><div class="hc-img"></div><b></b><p></p></div></div></div>`,
     hello: `<div class="inner">${L('Say hello')}
         <p class="lead">Available for conversations about design, AI products and remote work.</p>
         <a class="email" href="mailto:kunalsatpal1@gmail.com">kunalsatpal1@gmail.com</a>
@@ -1615,7 +1613,7 @@ html.theme-toon .rolechip { border: 2px solid #15132a; background: #1f1757; }
 
 
   // =====================================================================================
-  // Off duty: hobbies orbiting a small home star. Hover one to stop the system and read it.
+  // Off duty: hobbies orbiting the personal mark. Hover one to stop the system and read it.
   // =====================================================================================
   const HOBBIES = [
     { t: 'Weekends are for books', d: 'Mostly non-fiction; fiction when I need to unwind.', img: './site/img/book_1.jpg', more: ['./site/img/book_1.jpg', './site/img/book_2.jpg', './site/img/book_3.jpg', './site/img/book_4.jpg', './site/img/book_5.jpg', './site/img/book_6.jpg', './site/img/book_7.jpg', './site/img/book_8.jpg', './site/img/book_9.jpg', './site/img/book_10.jpg', './site/img/book_11.jpg', './site/img/book_12.jpg'], grid: 'books', face: 'fan', pics: ['./site/img/book_9.jpg', './site/img/book_1.jpg', './site/img/book_10.jpg'], c: '#ffd36b', orbit: 0, ph: .2, sp: 1 },
