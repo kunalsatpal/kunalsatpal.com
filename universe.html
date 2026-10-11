@@ -456,10 +456,12 @@
   /* People: faces, not foreheads. */
   .f-photo img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 35%; transform: scale(1.15); }
   .f-training { background: radial-gradient(circle at 35% 30%, #e0fff4, #9fe8d2 55%, #4fb498); }
-  .goku-flight { display: block; width: 88%; aspect-ratio: 192 / 200; overflow: hidden; }
-  .goku-flight img { display: block; width: 700%; max-width: none; height: 100%; image-rendering: pixelated; animation: goku-flight .42s steps(7, end) infinite; }
-  @keyframes goku-flight { to { transform: translateX(-100%); } }
-  @media (prefers-reduced-motion: reduce) { .goku-flight img { animation: none; transform: none; } }
+  .goku-flight { display: block; width: 100%; aspect-ratio: 1; overflow: visible; animation: nimbus-float 3.6s ease-in-out infinite; }
+  .goku-flight img { display: block; width: 100%; height: 100%; object-fit: contain; }
+  @keyframes nimbus-float { 0%, 100% { transform: translateY(-24%) rotate(-1deg); } 50% { transform: translateY(calc(-24% - 2px)) rotate(1deg); } }
+  .nimbus-trail { fill: none; stroke: url(#nimbus-trail-color); stroke-width: 3; stroke-linecap: round; }
+  .nimbus-trail-halo { fill: none; stroke: url(#nimbus-trail-color); stroke-width: 8; stroke-linecap: round; opacity: .16; }
+  @media (prefers-reduced-motion: reduce) { .goku-flight { animation: none; transform: translateY(-24%); } }
   .hcard { position: absolute; left: 0; top: 0; z-index: 30; width: 440px; padding: 20px; border-radius: 20px; text-align: left; pointer-events: none;
     background: rgba(14,16,26,.92); border: 1px solid color-mix(in srgb, var(--c, #fff) 45%, transparent); box-shadow: 0 30px 80px -20px rgba(0,0,0,.8);
     opacity: 0; transform: scale(.94); transform-origin: left center; transition: opacity .25s, transform .3s cubic-bezier(.2,.8,.2,1); }
@@ -805,7 +807,9 @@ html.theme-toon .mini i { border: 3.5px solid #15132a; box-shadow: 0 0 34px -12p
 html.theme-toon .mini.open i { box-shadow: 0 0 0 3px #15132a, 0 0 0 6px color-mix(in srgb, var(--c) 85%, white), 0 0 34px -8px var(--c) !important; }
 html.theme-toon .hob-b { border: 3.5px solid #15132a; box-shadow: 0 5px 0 #15132a, 0 0 26px -8px var(--c); }
 html.theme-toon .hob:hover .hob-b, html.theme-toon .hob.on .hob-b { box-shadow: 0 5px 0 #15132a, 0 0 0 6px var(--c); }
-  .hob.hob-training .hob-b, html.theme-toon .hob.hob-training .hob-b { width: 104px; border: 0; background: none; box-shadow: none; overflow: visible; }
+  .hob.hob-training .hob-b, html.theme-toon .hob.hob-training .hob-b { width: 72px; border: 0; background: none; box-shadow: none; overflow: visible; }
+  .hob-training { display: block; width: 72px; height: 72px; }
+  .hob-training em { position: absolute; left: 50%; top: 72%; transform: translateX(-50%); }
   .hob-training .f-training { background: none; }
   .hob-training .hob-shade { display: none; }
   .hob-training .goku-flight { width: 100%; }
@@ -1625,8 +1629,11 @@ html.theme-toon .rolechip { border: 2px solid #15132a; background: #1f1757; }
   ]
   const ORB = [[19, 22], [31, 34], [44, 46]]   // radii (% of width, % of height)
   const hob = $('hobbies'), hcard = $('hcard')
-  hob.querySelector('.horbits').innerHTML = ORB.map(([rx, ry]) => `<ellipse cx="50" cy="50" rx="${rx}" ry="${ry}" vector-effect="non-scaling-stroke"/>`).join('')
-  const GOKU_FLYING = `<span class="goku-flight" role="img" aria-label="Goku flying on Nimbus"><img data-src="./site/img/goku-nimbus-sprite.webp" width="1344" height="200" alt="" decoding="async" /></span>`
+  hob.querySelector('.horbits').innerHTML = ORB.map(([rx, ry]) => `<ellipse cx="50" cy="50" rx="${rx}" ry="${ry}" vector-effect="non-scaling-stroke"/>`).join('') +
+    `<defs><linearGradient id="nimbus-trail-color" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#f4b947" stop-opacity="0"/><stop offset=".45" stop-color="#ffc95d" stop-opacity=".28"/><stop offset="1" stop-color="#ffe9a1" stop-opacity=".85"/></linearGradient></defs><path class="nimbus-trail-halo" vector-effect="non-scaling-stroke"/><path class="nimbus-trail" vector-effect="non-scaling-stroke"/>`
+  const nimbusTrail = hob.querySelector('.nimbus-trail'), nimbusHalo = hob.querySelector('.nimbus-trail-halo')
+  const nimbusColor = hob.querySelector('#nimbus-trail-color')
+  const GOKU_FLYING = `<span class="goku-flight" role="img" aria-label="Goku flying on Nimbus"><img data-src="./site/img/goku-nimbus-3d.webp" width="256" height="256" alt="" decoding="async" /></span>`
   const GOKU_EXPANDED = `<video class="hc-workout" src="./site/img/goku-power-up.mp4" poster="./site/img/goku-power-up-poster.jpg" aria-label="Goku stretching and powering up" muted loop playsinline preload="none" disablepictureinpicture disableremoteplayback></video>`
   const hobbyMotion = matchMedia('(prefers-reduced-motion: reduce)')
   let hobbyMediaActive = false
@@ -1677,8 +1684,20 @@ html.theme-toon .rolechip { border: 2px solid #15132a; background: #1f1757; }
       o.el.style.zIndex = Math.round(10 + depth * 10)
       // Nimbus's trail stays behind Goku as he rounds either end of the orbit.
       if (o.flight) {
-        const facing = `scaleX(${Math.sin(a) < 0 ? -1 : 1})`
+        const facing = `scaleX(${Math.sin(a) < 0 ? 1 : -1})`
         if (o.flight.style.transform !== facing) o.flight.style.transform = facing
+        // A short section of the existing ellipse trails the cloud. Two simple
+        // strokes give it depth without blur, particles, or another render loop.
+        const points = Array.from({ length: 19 }, (_, i) => {
+          const angle = a - .58 + i * .58 / 18
+          return [50 + Math.cos(angle) * rx, 50 + Math.sin(angle) * ry]
+        })
+        const d = points.map(([px, py], i) => `${i ? 'L' : 'M'}${px.toFixed(3)},${py.toFixed(3)}`).join(' ')
+        if (nimbusTrail.getAttribute('d') !== d) {
+          nimbusTrail.setAttribute('d', d); nimbusHalo.setAttribute('d', d)
+          const first = points[0], last = points.at(-1)
+          for (const [key, value] of [['x1', first[0]], ['y1', first[1]], ['x2', last[0]], ['y2', last[1]]]) nimbusColor.setAttribute(key, value)
+        }
       }
     })
   }
