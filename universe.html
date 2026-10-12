@@ -438,24 +438,44 @@
     box-shadow: 0 0 0 2px color-mix(in srgb, var(--c) 80%, white), 0 0 30px -4px var(--c); transition: transform .3s, box-shadow .3s; }
   .hob em { font-style: normal; font: 600 14px/1.2 "Inter Tight", sans-serif; white-space: nowrap; padding: 4px 10px; border-radius: 999px; background: rgba(10,12,20,.6); border: 1px solid rgba(255,255,255,.1); }
   .hob:hover .hob-b, .hob.on .hob-b { transform: scale(1.15); box-shadow: 0 0 0 3px #fff, 0 0 40px 0 var(--c); }
-  /* Hobby faces: composed, not cropped. A soft sphere shade on top makes each read as a small world. */
+  /* Small hobby worlds travel along the orbits around the personal mark. */
   .hob-b { position: relative; width: 92px; background: radial-gradient(circle at 35% 30%, color-mix(in srgb, var(--c) 55%, white), var(--c) 55%, color-mix(in srgb, var(--c) 55%, #05060c)); }
   .hob-b > span:first-child { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; }
   .hob-shade { position: absolute; inset: 0; border-radius: 50%; pointer-events: none;
     background: radial-gradient(circle at 30% 24%, rgba(255,255,255,.35), transparent 30%), radial-gradient(circle at 72% 78%, rgba(0,0,0,.45), transparent 58%);
     box-shadow: inset 0 0 0 1px rgba(255,255,255,.18), inset -8px -10px 18px rgba(0,0,0,.35); }
-  /* Books: three covers fanned like a hand of cards. */
-  .f-fan img { position: absolute; width: 34%; aspect-ratio: 2/3; object-fit: cover; border-radius: 3px; box-shadow: 0 4px 10px rgba(0,0,0,.45); top: 26%; }
-  .f-fan img:nth-child(1) { left: 16%; transform: rotate(-16deg); } .f-fan img:nth-child(2) { left: 33%; top: 21%; z-index: 2; } .f-fan img:nth-child(3) { left: 50%; transform: rotate(16deg); }
-  /* Games: God of War and FIFA split on a diagonal. */
-  .f-split img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
-  .f-split img:nth-child(2) { clip-path: polygon(62% 0, 100% 0, 100% 100%, 38% 100%); }
-  .f-split::after { content: ""; position: absolute; inset: 0; background: linear-gradient(112deg, transparent 49.4%, #fff 49.6% 50.4%, transparent 50.6%); opacity: .8; }
-  /* Anime: four minimal posters side by side, like a strip of film. */
-  .f-strips { gap: 3px; background: #0b0b0c; } .f-strips img { width: 21%; height: 82%; object-fit: cover; border-radius: 3px; }
-  /* People: faces, not foreheads. */
-  .f-photo img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 35%; transform: scale(1.15); }
-  .f-training { background: radial-gradient(circle at 35% 30%, #e0fff4, #9fe8d2 55%, #4fb498); }
+  .hobby-world, .hobby-constellation { position: relative; width: 100%; height: 100%; }
+  .hobby-art { position: absolute; inset: 0; }
+  .hobby-art img { position: absolute; inset: 0; display: block; width: 100%; height: 100%; object-fit: contain; transition: opacity .3s ease; }
+  .hobby-art .art-real { opacity: 1; }
+  .hobby-art .art-toon { opacity: 0; }
+  .world-books .hobby-art { inset: 8%; }
+  .world-games .hobby-art { inset: 10%; }
+  .hob-people .hob-b > .hobby-constellation { inset: 8%; width: 84%; height: 84%; }
+  html.theme-toon .hobby-art.toon-ready .art-real { opacity: 0; }
+  html.theme-toon .hobby-art.toon-ready .art-toon { opacity: 1; }
+  .world-detail { position: absolute; visibility: hidden; pointer-events: none; }
+  .hobby-world.art-ready .world-detail { visibility: visible; }
+  .book-wing { transform-origin: 52% 60%; animation: book-wing-left 2.8s ease-in-out infinite; }
+  .book-wing-left { clip-path: polygon(0 0, 46% 0, 56% 100%, 0 100%); }
+  .book-wing-right { clip-path: polygon(46% 0, 100% 0, 100% 100%, 56% 100%); animation-name: book-wing-right; }
+  @keyframes book-wing-left { 0%, 100% { transform: perspective(240px) rotate3d(.1,1,0,-8deg); } 50% { transform: perspective(240px) rotate3d(.1,1,0,30deg); } }
+  @keyframes book-wing-right { 0%, 100% { transform: perspective(240px) rotate3d(.1,1,0,8deg); } 50% { transform: perspective(240px) rotate3d(.1,1,0,-30deg); } }
+  .controller-exhaust { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; visibility: hidden; opacity: .8; pointer-events: none; }
+  .world-games.art-ready .controller-exhaust { visibility: visible; }
+  .world-anime .hobby-art { z-index: 1; }
+  .world-ribbons { left: 20%; top: 11%; width: 30%; height: 11%; overflow: visible; transform-origin: 95% 25%; animation: headband-ribbons 3.4s ease-in-out infinite; }
+  @keyframes headband-ribbons { 0%, 100% { transform: rotate(-3deg); } 50% { transform: rotate(5deg); } }
+  .stage.traveling .world-detail, .stage.traveling .book-wing { animation-play-state: paused; }
+  .hobby-constellation > svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+  .photo-frame { position: absolute; width: 48%; aspect-ratio: 4/3; padding: 3px 3px 8px; border-radius: 4px; background: #f4f1eb; box-shadow: 0 3px 8px rgba(0,0,0,.3); transition: transform .3s ease; }
+  .photo-frame img { display: block; width: 100%; height: 100%; object-fit: contain; background: #d9d8d6; }
+  .photo-frame:nth-of-type(1) { left: 0; top: 16%; transform: rotate(-12deg); }
+  .photo-frame:nth-of-type(2) { left: 53%; top: 6%; transform: rotate(9deg); }
+  .photo-frame:nth-of-type(3) { left: 27%; top: 55%; transform: rotate(-3deg); }
+  .hob-people:is(:hover, :focus-visible, .on) .photo-frame:nth-of-type(1) { transform: translate(-5%, -8%) rotate(-16deg); }
+  .hob-people:is(:hover, :focus-visible, .on) .photo-frame:nth-of-type(2) { transform: translate(6%, -8%) rotate(13deg); }
+  .hob-people:is(:hover, :focus-visible, .on) .photo-frame:nth-of-type(3) { transform: translate(0, 8%) rotate(3deg); }
   .goku-flight { position: relative; display: block; width: 100%; aspect-ratio: 1; overflow: visible; animation: nimbus-float 3.6s ease-in-out infinite; }
   .goku-flight img { position: absolute; inset: 0; display: block; width: 100%; height: 100%; object-fit: contain; transition: opacity .3s ease; }
   .goku-flight .goku-real { opacity: 1; }
@@ -467,7 +487,11 @@
   .nimbus-trail-halo { fill: none; stroke: url(#nimbus-trail-color); stroke-width: 8; stroke-linecap: round; opacity: .16; }
   html.theme-toon .nimbus-trail { stroke-width: 3.5; }
   html.theme-toon .nimbus-trail-halo { opacity: .08; }
-  @media (prefers-reduced-motion: reduce) { .goku-flight { animation: none; transform: translateY(-24%); } .goku-flight img { transition: none; } }
+  @media (prefers-reduced-motion: reduce) {
+    .goku-flight { animation: none; transform: translateY(-24%); }
+    .world-detail, .book-wing { animation: none; }
+    .goku-flight img, .hobby-art img, .photo-frame { transition: none; }
+  }
   .hcard { position: absolute; left: 0; top: 0; z-index: 30; width: 440px; padding: 20px; border-radius: 20px; text-align: left; pointer-events: none;
     background: rgba(14,16,26,.92); border: 1px solid color-mix(in srgb, var(--c, #fff) 45%, transparent); box-shadow: 0 30px 80px -20px rgba(0,0,0,.8);
     opacity: 0; transform: scale(.94); transform-origin: left center; transition: opacity .25s, transform .3s cubic-bezier(.2,.8,.2,1); }
@@ -813,6 +837,13 @@ html.theme-toon .mini i { border: 3.5px solid #15132a; box-shadow: 0 0 34px -12p
 html.theme-toon .mini.open i { box-shadow: 0 0 0 3px #15132a, 0 0 0 6px color-mix(in srgb, var(--c) 85%, white), 0 0 34px -8px var(--c) !important; }
 html.theme-toon .hob-b { border: 3.5px solid #15132a; box-shadow: 0 5px 0 #15132a, 0 0 26px -8px var(--c); }
 html.theme-toon .hob:hover .hob-b, html.theme-toon .hob.on .hob-b { box-shadow: 0 5px 0 #15132a, 0 0 0 6px var(--c); }
+  .hob-world { --world-size: 72px; display: block; width: var(--world-size); height: var(--world-size); }
+  .scene.render-paused .hob-world, .stage.render-suspended .hob-world { will-change: auto; }
+  .hob.hob-world .hob-b, html.theme-toon .hob.hob-world .hob-b { width: 100%; border: 0; border-radius: 0; background: none; box-shadow: none; overflow: visible; transition: transform .3s ease; }
+  .hob-world:is(:hover, :focus-visible, .on) .hob-b { transform: scale(1.04); }
+  .hob-world:focus-visible { outline: 2px solid var(--c); outline-offset: 7px; border-radius: 16px; }
+  .hob-world em { position: absolute; left: 50%; top: calc(100% + 4px); transform: translateX(-50%); }
+  html.theme-toon .photo-frame { border: 2px solid #15132a; background: #fff4c7; box-shadow: 2px 3px 0 #15132a; }
   .hob.hob-training .hob-b, html.theme-toon .hob.hob-training .hob-b { width: 72px; border: 0; background: none; box-shadow: none; overflow: visible; }
   .hob-training { display: block; width: 72px; height: 72px; }
   .hob-training em { position: absolute; left: 50%; top: 72%; transform: translateX(-50%); }
@@ -843,6 +874,7 @@ html.theme-toon .rolechip { border: 2px solid #15132a; background: #1f1757; }
 @media (prefers-reduced-motion: reduce) {
   html.theme-toon .toon, html.theme-toon .toon-pin, html.theme-toon .toon-coin, html.theme-toon .toon-tassel, html.theme-toon .toon-pulse, html.theme-toon .toon-spark { animation: none; }
   html.theme-toon .mini { animation: none; }
+  .hob.hob-world .hob-b, .hob-world .photo-frame { transition: none; }
 }
 
   .toonsky { position: absolute; inset: 0; z-index: 0; pointer-events: none;
@@ -1624,22 +1656,28 @@ html.theme-toon .rolechip { border: 2px solid #15132a; background: #1f1757; }
 
 
   // =====================================================================================
-  // Off duty: hobbies orbiting the personal mark. Hover one to stop the system and read it.
+  // Off duty: small hobby worlds and Goku orbiting the personal mark.
   // =====================================================================================
   const HOBBIES = [
-    { t: 'Weekends are for books', d: 'Mostly non-fiction; fiction when I need to unwind.', img: './site/img/book_1.jpg', more: ['./site/img/book_1.jpg', './site/img/book_2.jpg', './site/img/book_3.jpg', './site/img/book_4.jpg', './site/img/book_5.jpg', './site/img/book_6.jpg', './site/img/book_7.jpg', './site/img/book_8.jpg', './site/img/book_9.jpg', './site/img/book_10.jpg', './site/img/book_11.jpg', './site/img/book_12.jpg'], grid: 'books', face: 'fan', pics: ['./site/img/book_9.jpg', './site/img/book_1.jpg', './site/img/book_10.jpg'], c: '#ffd36b', orbit: 0, ph: .2, sp: 1 },
-    { t: 'Breaks mean a controller', d: 'To slay gods or kick goals. God of War forever; most hours in FIFA.', img: './site/img/gow.png', more: ['./site/img/gow.png', './site/img/fifa.png'], grid: 'games', face: 'split', pics: ['./site/img/gow.png', './site/img/fifa.png'], c: '#7fb4ff', orbit: 1, ph: 2.4, sp: .8 },
-    { t: 'A designer who loves anime', d: 'Naruto, more times than I can count, and a minimal poster series of it.', img: './site/img/naruto_02.png', more: ['./site/img/naruto_01.png', './site/img/naruto_02.png', './site/img/naruto_03.png', './site/img/naruto_04.png', './site/img/naruto_05.png', './site/img/naruto_06.png', './site/img/naruto_07.png', './site/img/naruto_08.png', './site/img/naruto_09.png', './site/img/naruto_10.png', './site/img/naruto_11.png', './site/img/naruto_12.png'], grid: 'posters', face: 'strips', pics: ['./site/img/naruto_01.png', './site/img/naruto_02.png', './site/img/naruto_04.png', './site/img/naruto_06.png'], c: '#ff8fb0', orbit: 2, ph: 4.1, sp: .65 },
+    { t: 'Weekends are for books', d: 'Mostly non-fiction; fiction when I need to unwind.', more: ['./site/img/book_1.jpg', './site/img/book_2.jpg', './site/img/book_3.jpg', './site/img/book_4.jpg', './site/img/book_5.jpg', './site/img/book_6.jpg', './site/img/book_7.jpg', './site/img/book_8.jpg', './site/img/book_9.jpg', './site/img/book_10.jpg', './site/img/book_11.jpg', './site/img/book_12.jpg'], grid: 'books', face: 'books', c: '#ffd36b', orbit: 0, ph: .2, sp: 1 },
+    { t: 'Breaks mean a controller', d: 'To slay gods or kick goals. God of War forever; most hours in FIFA.', more: ['./site/img/gow.png', './site/img/fifa.png'], grid: 'games', face: 'games', c: '#7fb4ff', orbit: 1, ph: 2.4, sp: .8 },
+    { t: 'A designer who loves anime', d: 'Naruto, more times than I can count, and a minimal poster series of it.', more: ['./site/img/naruto_01.png', './site/img/naruto_02.png', './site/img/naruto_03.png', './site/img/naruto_04.png', './site/img/naruto_05.png', './site/img/naruto_06.png', './site/img/naruto_07.png', './site/img/naruto_08.png', './site/img/naruto_09.png', './site/img/naruto_10.png', './site/img/naruto_11.png', './site/img/naruto_12.png'], grid: 'posters', face: 'anime', c: '#ff8fb0', orbit: 2, ph: 4.1, sp: .65 },
     { t: 'I lift every day', d: 'Physically fit, and sane while shipping products.', face: 'training', grid: 'workout', c: '#9fe8d2', orbit: 1, ph: 5.6, sp: 1.2 },
-    { t: 'People matter the most', d: 'Family, friends, teammates, and the stories they carry.', img: './site/img/team_gofood.jpg', more: ['./site/img/team_gofood.jpg', './site/img/team_cult.jpg', './site/img/team_iit.jpg'], grid: 'photos', face: 'photo', pics: ['./site/img/team_gofood.jpg'], c: '#c9a0ff', orbit: 2, ph: 1.0, sp: .65 },
+    { t: 'People matter the most', d: 'Family, friends, teammates, and the stories they carry.', more: ['./site/img/team_gofood.jpg', './site/img/team_cult.jpg', './site/img/team_iit.jpg'], grid: 'photos', face: 'people', c: '#c9a0ff', orbit: 2, ph: 1.0, sp: .65 },
   ]
   const ORB = [[19, 22], [31, 34], [44, 46]]   // radii (% of width, % of height)
   const hob = $('hobbies'), hcard = $('hcard')
   hob.querySelector('.horbits').innerHTML = ORB.map(([rx, ry]) => `<ellipse cx="50" cy="50" rx="${rx}" ry="${ry}" vector-effect="non-scaling-stroke"/>`).join('') +
     `<defs><linearGradient id="nimbus-trail-color" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#f4b947" stop-opacity="0"/><stop offset=".45" stop-color="#ffc95d" stop-opacity=".28"/><stop offset="1" stop-color="#ffe9a1" stop-opacity=".85"/></linearGradient></defs><path class="nimbus-trail-halo" vector-effect="non-scaling-stroke"/><path class="nimbus-trail" vector-effect="non-scaling-stroke"/>`
-  const nimbusTrail = hob.querySelector('.nimbus-trail'), nimbusHalo = hob.querySelector('.nimbus-trail-halo')
-  const nimbusColor = hob.querySelector('#nimbus-trail-color')
-  const GOKU_FLYING = `<span class="goku-flight" role="img" aria-label="Goku flying on Nimbus"><img class="goku-real" data-src="./site/img/goku-nimbus-3d.webp" width="384" height="256" alt="" decoding="async" /><img class="goku-toon" data-src="./site/img/goku-nimbus-toon.webp" width="384" height="256" alt="" decoding="async" /></span>`
+  const nimbusTrail = { line: hob.querySelector('.nimbus-trail'), halo: hob.querySelector('.nimbus-trail-halo'), color: hob.querySelector('#nimbus-trail-color'), arc: .58, angle: null }
+  const GOKU_FLYING = `<span class="goku-flight" role="img" aria-label="Goku flying on Nimbus"><img class="goku-real" data-src="./site/img/goku-nimbus-physical.webp" width="384" height="256" alt="" decoding="async" /><img class="goku-toon" data-src="./site/img/goku-nimbus-toon.webp" width="384" height="256" alt="" decoding="async" /></span>`
+  const WORLD_DETAILS = {
+    anime: `<svg class="world-detail world-ribbons" viewBox="0 0 48 26" aria-hidden="true"><path d="M46 5 C31 0 23 12 5 7 L1 12 C21 21 30 6 46 8 Z" fill="#263b5a" stroke="#152139" stroke-width=".8"/><path d="M46 8 C30 13 28 22 9 18 L6 24 C29 28 34 14 46 11 Z" fill="#152139"/><path d="M8 10 Q25 16 39 6" fill="none" stroke="#6482a7" stroke-width=".6"/></svg>`,
+  }
+  const CONTROLLER_PROPULSION = `<svg class="controller-exhaust" viewBox="0 0 100 100" aria-hidden="true"><defs><linearGradient id="controller-propulsion" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#b9f3ff"/><stop offset=".25" stop-color="#56cbff" stop-opacity=".8"/><stop offset=".65" stop-color="#276fff" stop-opacity=".35"/><stop offset="1" stop-color="#1650ff" stop-opacity="0"/></linearGradient></defs><g fill="url(#controller-propulsion)"><path d="M14 74 Q17 72 20 74 Q19 82 17 91 Q15 82 14 74 Z"/><path d="M80 74 Q83 72 86 74 Q85 82 83 91 Q81 82 80 74 Z"/></g><g fill="#d3f9ff"><path d="M16 74 L18 74 Q18 78 17 82 Q16 78 16 74 Z"/><path d="M82 74 L84 74 Q84 78 83 82 Q82 78 82 74 Z"/></g></svg>`
+  const hobbyArt = (key, classes = '') => `<span class="hobby-art ${classes}"><img class="art-real" data-src="./site/img/hobby-${key}-real.webp" width="384" height="384" alt="" decoding="async" /><img class="art-toon" data-src="./site/img/hobby-${key}-toon.webp" width="384" height="384" alt="" decoding="async" /></span>`
+  const hobbyWorld = key => `<span class="hobby-world world-${key}" aria-hidden="true">${key === 'games' ? CONTROLLER_PROPULSION : ''}${key === 'books' ? hobbyArt(key, 'book-wing book-wing-left') + hobbyArt(key, 'book-wing book-wing-right') : hobbyArt(key)}${WORLD_DETAILS[key] || ''}</span>`
+  const PEOPLE_CONSTELLATION = `<span class="hobby-constellation" aria-hidden="true"><svg viewBox="0 0 124 124"><path d="M29 42 L93 31 L62 94 Z" fill="none" stroke="#c9a0ff" stroke-opacity=".65" stroke-width="1" stroke-dasharray="2 4"/><g fill="#efe5ff"><circle cx="8" cy="72" r="1.8"/><circle cx="111" cy="65" r="2"/><circle cx="49" cy="5" r="1.6"/><circle cx="104" cy="105" r="1.5"/></g></svg><span class="photo-frame"><img data-src="./site/img/hobby-people-gofood.webp" width="192" height="128" alt="" decoding="async" /></span><span class="photo-frame"><img data-src="./site/img/hobby-people-cult.webp" width="192" height="144" alt="" decoding="async" /></span><span class="photo-frame"><img data-src="./site/img/hobby-people-iit.webp" width="192" height="120" alt="" decoding="async" /></span></span>`
   const GOKU_EXPANDED = `<video class="hc-workout" src="./site/img/goku-super-saiyan-loop.mp4" poster="./site/img/goku-super-saiyan-poster.jpg" aria-label="Goku in Super Saiyan form with a pulsing golden aura" muted loop playsinline preload="none" disablepictureinpicture disableremoteplayback></video>`
   const hobbyMotion = matchMedia('(prefers-reduced-motion: reduce)')
   let hobbyMediaActive = false
@@ -1656,16 +1694,22 @@ html.theme-toon .rolechip { border: 2px solid #15132a; background: #1f1757; }
   hobbyMotion.addEventListener('change', syncHobbyMedia)
   let hobPaused = false, hobClock = 0, hobPrev = 0
   const hobEls = HOBBIES.map((h, i) => {
-    const el = document.createElement('button'); el.className = 'hob' + (h.face === 'training' ? ' hob-training' : ''); el.style.setProperty('--c', h.c)
-    const face = h.face === 'training' ? `<span class="f-training">${GOKU_FLYING}</span>` : `<span class="f-${h.face}">${h.pics.map(src => `<img data-src="${src}" decoding="async" alt="" />`).join('')}</span>`
-    el.innerHTML = `<span class="hob-b">${face}<span class="hob-shade"></span></span><em>${h.t}</em>`
-    const toonArt = el.querySelector('.goku-toon')
-    toonArt?.addEventListener('load', () => {
-      toonArt.decode().then(() => {
-        el.querySelector('.goku-flight').classList.add('toon-ready')
+    const el = document.createElement('button'); el.className = 'hob' + (h.face === 'training' ? ' hob-training' : ' hob-world hob-' + h.face); el.style.setProperty('--c', h.c)
+    const face = h.face === 'training' ? `<span class="f-training">${GOKU_FLYING}</span>` : h.face === 'people' ? PEOPLE_CONSTELLATION : hobbyWorld(h.face)
+    el.innerHTML = `<span class="hob-b">${face}</span><em>${h.t}</em>`
+    const realArt = el.querySelector('.art-real')
+    realArt?.addEventListener('load', () => {
+      realArt.decode().then(() => {
+        el.querySelector('.hobby-world').classList.add('art-ready')
         requestFrame()
       }).catch(() => {})
     }, { once: true })
+    el.querySelectorAll('.art-toon, .goku-toon').forEach(toonArt => toonArt.addEventListener('load', () => {
+      toonArt.decode().then(() => {
+        toonArt.closest('.hobby-art, .goku-flight').classList.add('toon-ready')
+        requestFrame()
+      }).catch(() => {})
+    }, { once: true }))
     el.setAttribute('aria-label', h.t)
     const show = () => { hobPaused = true; hobEls.forEach(o => o.el.classList.toggle('on', o.el === el))
       hcard.style.setProperty('--c', h.c); hcard.querySelector('b').textContent = h.t; hcard.querySelector('p').textContent = h.d
@@ -1683,7 +1727,7 @@ html.theme-toon .rolechip { border: 2px solid #15132a; background: #1f1757; }
       hcard.style.left = x + 'px'; hcard.style.top = y + 'px'; hcard.dataset.side = right ? 'right' : 'left'
       hcard.classList.add('show'); syncHobbyMedia() }
     el.addEventListener('pointerenter', show); el.addEventListener('focus', show); el.addEventListener('click', show)
-    hob.appendChild(el); return { el, flight: el.querySelector('.f-training'), ...h }
+    hob.appendChild(el); return { el, flight: el.querySelector('.f-training'), bank: el.querySelector('.world-games, .world-books'), trail: h.face === 'training' ? nimbusTrail : null, ...h }
   })
   hob.addEventListener('pointerleave', () => { hobPaused = false; hcard.classList.remove('show'); hobEls.forEach(o => o.el.classList.remove('on')); syncHobbyMedia() })
   function drawHobbies(t) {
@@ -1695,22 +1739,31 @@ html.theme-toon .rolechip { border: 2px solid #15132a; background: #1f1757; }
       const x = W * (.5 + Math.cos(a) * rx / 100), y = H * (.5 + Math.sin(a) * ry / 100), depth = (Math.sin(a) + 1) / 2
       o.el.style.transform = `translate(${x}px, ${y}px) translate(-50%, -50%) scale(${.86 + depth * .22})`
       o.el.style.zIndex = Math.round(10 + depth * 10)
-      // Nimbus's trail stays behind Goku as he rounds either end of the orbit.
+      if (o.bank) {
+        // Keep the face readable as it hovers; only a shallow bank follows the orbit.
+        // The short jets share this transform so their bases stay at the grips.
+        o.bank.style.transform = o.face === 'games'
+          ? `rotateX(16deg) rotateY(-12deg) rotateZ(${Math.cos(a) * 7}deg)`
+          : `rotate(${Math.cos(a) * 9}deg)`
+      }
+      // The trail follows the object's orbit through either turn.
       if (o.flight) {
         const facing = `scaleX(${Math.sin(a) < 0 ? 1 : -1})`
         if (o.flight.style.transform !== facing) o.flight.style.transform = facing
-        // A short section of the existing ellipse trails the cloud. Two simple
-        // strokes give it depth without blur, particles, or another render loop.
-        const points = Array.from({ length: 19 }, (_, i) => {
-          const angle = a - .58 + i * .58 / 18
-          return [50 + Math.cos(angle) * rx, 50 + Math.sin(angle) * ry]
-        })
-        const d = points.map(([px, py], i) => `${i ? 'L' : 'M'}${px.toFixed(3)},${py.toFixed(3)}`).join(' ')
-        if (nimbusTrail.getAttribute('d') !== d) {
-          nimbusTrail.setAttribute('d', d); nimbusHalo.setAttribute('d', d)
-          const first = points[0], last = points.at(-1)
-          for (const [key, value] of [['x1', first[0]], ['y1', first[1]], ['x2', last[0]], ['y2', last[1]]]) nimbusColor.setAttribute(key, value)
+      }
+      const trail = o.trail
+      if (trail && trail.angle !== a) {
+        trail.angle = a
+        let d = ''
+        for (let i = 0; i <= 18; i++) {
+          const angle = a - trail.arc + i * trail.arc / 18
+          d += `${i ? ' L' : 'M'}${(50 + Math.cos(angle) * rx).toFixed(3)},${(50 + Math.sin(angle) * ry).toFixed(3)}`
         }
+        trail.line.setAttribute('d', d); trail.halo.setAttribute('d', d)
+        trail.color.setAttribute('x1', 50 + Math.cos(a - trail.arc) * rx)
+        trail.color.setAttribute('y1', 50 + Math.sin(a - trail.arc) * ry)
+        trail.color.setAttribute('x2', 50 + Math.cos(a) * rx)
+        trail.color.setAttribute('y2', 50 + Math.sin(a) * ry)
       }
     })
   }

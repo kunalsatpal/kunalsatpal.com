@@ -1,0 +1,50 @@
+[
+  {
+    "key": "anime",
+    "path": "/Users/archityagi/.codex/generated_images/01a12389-bbba-7240-a97f-fb7ad05995f9/exec-3c26c34d-09fe-4b1d-8d86-344820198a15.png",
+    "prompt": "Use case: style-transfer. Edit target: the attached anime miniature hobby world. Change ONLY its rendering style to match the Toon theme of a playful space portfolio: dark navy outlines (#15132a), clean rounded silhouettes, saturated warm colors, flat two-tone cel shading, illustrated rather than photographic materials. Preserve the exact subject, pose, camera, framing, object placement, proportions and island geometry of the reference. Keep every object in the same place so the same tiny page, football or headband ribbon animation overlays can align with both versions. Do not add or remove any objects. For the football world continue to OMIT the ball; for Naruto keep the headband tails short. Preserve actual alpha transparency; no sky or background, no rectangular frame, no text, no badge, no glow. Output the same square composition, with the complete subject contained."
+  },
+  {
+    "key": "anime",
+    "path": "/Users/archityagi/.codex/generated_images/01a12389-bbba-7240-a97f-fb7ad05995f9/exec-3c26c34d-09fe-4b1d-8d86-344820198a15.png",
+    "prompt": "Use case: style-transfer. Edit target: the attached Naruto on a moon hobby illustration. Change ONLY the rendering to a photorealistic studio product photograph of an actual premium painted PVC collectible figurine seated on a textured stone moon. It must read as a physical THREE-DIMENSIONAL object: sculpted hair and face, tangible fabric folds, matte skin paint, brushed metallic headband reflecting the soft studio light, worn stone craters, realistic ambient occlusion and dimensional contact shadows. Remove the drawn/anime-illustration finish; no outlines, no cel shading, no flat painted shadow blocks. Naruto remains recognizable with the same blond hair, orange-and-black outfit and pose. Preserve exact framing, pose, composition, moon size and object placement of the input, including the short headband tie, so the existing ribbon layer aligns. Square framing; complete figurine contained. Preserve actual transparent alpha; no background, no additional props, no text, no outer glow."
+  },
+  {
+    "key": "goku",
+    "path": "/Users/archityagi/Desktop/Kunal/site/img/goku-nimbus-3d.webp",
+    "prompt": "Use case: style-transfer. Edit target: attached Goku on Nimbus portfolio cutout. Change ONLY the material and rendering style to a photorealistic studio product photograph of a highly detailed actual painted PVC Goku collectible riding a sculpted golden Nimbus cloud. Sculpted spiky hair, tangible cloth folds, matte painted skin, shiny blue boot accents, rich dimensional golden cloud material, realistic contact shadows, soft studio light from upper left and defined 3D form. It must feel like a tangible physical object rather than an anime drawing; no ink outlines, no cel shading, no flat painted shadow blocks. Preserve the SAME seated pose, right-facing orientation, hand position shading his eyes, orange outfit, cloud trail, proportions, transparent cutout and 3:2 framing. Do not add any props, background, outer glow, text or border. Keep the complete cutout contained with the same margins. Actual transparent alpha."
+  },
+  {
+    "key": "goku_cutout",
+    "path": "/Users/archityagi/.codex/generated_images/01a12389-bbba-7240-a97f-fb7ad05995f9/exec-936008b8-aa5a-4dcd-a1fa-ebe5058e516e.png",
+    "prompt": "Use case: background-extraction. Edit target: attached realistic Goku collectible on a golden Nimbus cloud. Remove ONLY the diffuse dark/golden environment haze and all outer glow surrounding the figurine and cloud. Produce a crisp isolated cutout with genuine transparent alpha everywhere outside the physical sculpted Goku and Nimbus, including between the hair tips and around the cloud trail. Keep every physical object, pose, facial expression, composition, colors, 3D material finish, and highlights INSIDE the figure/cloud unchanged. Preserve the 3:2 framing and same size and position. No new background, no drop shadow outside the object, no new props, no outline."
+  },
+  {
+    "key": "books_real",
+    "prompt": "Use case: stylized-concept. Input image 1 is a composition reference, specifically the LOWER open flying book, not an edit target. Create ONE original realistic dimensional flying hardcover book for a portfolio's Real theme. Take the open-book perspective, softly curved pages, fanned page stacks and warm peach/ivory palette as inspiration. A rose-tinted cloth cover, creamy paper, clearly visible thickness, pages slightly lifted and fanning out as if beating like butterfly wings; the BOOK itself is the flying object, no insect wings. Three-quarter view from in front and slightly above, strong physical paper/cloth materials and studio shading; preserve a clear readable open-book silhouette at 80px. Keep the central fold near the image center and nearly vertical, with a broad symmetrical spread for hinging the halves in CSS. Square centered composition, complete book with 12% clear margins. ONLY one open book, no second closed book, no furniture, no moon, no stand, no extra objects, no glow, no surrounding backdrop, no text labels. Create original artwork, not a reproduction of the reference; no watermark or checker pattern. Genuine transparent alpha.",
+    "reference": "User-supplied flying-book illustration; lower open book as composition inspiration",
+    "source": "/Users/archityagi/.codex/generated_images/01a12389-bbba-7240-a97f-fb7ad05995f9/exec-445b39f1-1c42-4930-a302-e4507de69cf3.png",
+    "asset": "site/img/hobby-books-real.webp"
+  },
+  {
+    "key": "books_toon",
+    "prompt": "Use case: style-transfer. Edit target: supplied realistic flying open book. Change only its material rendering to the matching Toon theme: crisp dark navy outlines, clean two-tone cel shading, warm ivory paper and rose-peach cover. Preserve the exact fanned lifted pages, open-book silhouette, centered spine, camera, full square framing, dimensions and pose so the same hinged CSS page animation works on both themes. Keep it clearly a BOOK with page stacks and cover, no insect wings, extra objects, furniture, glow, trail, background, watermark, text labels or checker pattern. Preserve actual transparent alpha.",
+    "reference": "/Users/archityagi/.codex/generated_images/01a12389-bbba-7240-a97f-fb7ad05995f9/exec-445b39f1-1c42-4930-a302-e4507de69cf3.png",
+    "source": "/Users/archityagi/.codex/generated_images/01a12389-bbba-7240-a97f-fb7ad05995f9/exec-efc913b7-0b12-4fa7-ac59-e1b1cf1bb892.png",
+    "asset": "site/img/hobby-books-toon.webp"
+  },
+  {
+    "key": "games_real",
+    "prompt": "Use case: product-mockup. Input image 1 is an angle/shape reference only: the supplied Sony PS5 DualSense controller front view. Create a clean original photorealistic studio rendering of the SAME white PS5 DualSense controller in that STRAIGHT FRONT VIEW: face square to camera, two symmetric grips pointing DOWN, touchpad at the top, level horizontal shoulder line, no three-quarter perspective or tilted camera. Keep the familiar white molded plastic, black center and analog sticks, directional pad and four face symbols, blue integrated LEDs. Transparent cutout, soft dimensional material shading, no hands or surrounding environment. It will fly like a small rocket; two blue propulsion jets will be coded beneath the grips, so do not paint any jet, flame, motion line, trail, glow or shadow outside the controller. Square composition with the full controller centered horizontally, 10% margin on each side, TOP of controller at roughly 15% of canvas and grip TIPS at roughly 76% of canvas, to leave clear space below for the coded propulsion. Do not include packaging or the reference's caption. Genuine transparent alpha, no background color, no text outside controller, no watermark. Keep the front face legible at 96px.",
+    "reference": "https://m.media-amazon.com/images/I/61Q1Pa4X4-L.jpg",
+    "source": "/Users/archityagi/.codex/generated_images/01a12389-bbba-7240-a97f-fb7ad05995f9/exec-bd95c335-b36c-440e-b4ec-f225c50f7970.png",
+    "asset": "site/img/hobby-games-real.webp"
+  },
+  {
+    "key": "games_toon",
+    "prompt": "Use case: style-transfer. Edit target: supplied straight-front white PS5 DualSense cutout. Change only the surface rendering into a crisp Toon illustration with dark navy ink contours, clean simple cel shading, white shell, black center/analog sticks and slender blue LEDs. Preserve the EXACT symmetric STRAIGHT FRONT VIEW, level shoulder line, downward grips, button layout, proportions, object position and square framing. No perspective change, camera tilt, added angle, hands, jet, trail, environment, glow or text outside controller. Actual transparent alpha.",
+    "reference": "/Users/archityagi/.codex/generated_images/01a12389-bbba-7240-a97f-fb7ad05995f9/exec-bd95c335-b36c-440e-b4ec-f225c50f7970.png",
+    "source": "/Users/archityagi/.codex/generated_images/01a12389-bbba-7240-a97f-fb7ad05995f9/exec-64e4bb48-afcf-42a4-82fe-919cb91fab68.png",
+    "asset": "site/img/hobby-games-toon.webp"
+  }
+]
