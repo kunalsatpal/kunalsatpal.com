@@ -402,62 +402,6 @@
   .panel .go { display: inline-block; margin-top: 22px; padding: 11px 18px; border-radius: 14px; background: #fff; color: #050608; font-weight: 500; }
   .panel .back { display: inline-block; margin-top: 22px; margin-left: 12px; color: var(--muted); font-size: 16px; }
 
-  /* ---------- Resume modal ---------- */
-  .resume-modal { z-index: 90; padding: 20px; }
-  .resume-panel { position: relative; width: min(1040px, 100%); max-height: min(900px, calc(100svh - 40px)); overflow: auto; padding: clamp(22px, 4vw, 48px);
-    border: 1px solid rgba(255,255,255,.13); border-radius: 28px; color: #f4f6ff;
-    background: radial-gradient(90% 65% at 100% 0%, rgba(95,224,163,.12), transparent 60%), linear-gradient(160deg, rgba(17,25,37,.99), rgba(5,8,16,.99));
-    box-shadow: 0 0 0 1px rgba(255,255,255,.04), 0 40px 120px -20px rgba(0,0,0,.9), 0 0 90px -38px rgba(95,224,163,.35);
-    transform: translateY(18px) scale(.97); transition: transform .45s cubic-bezier(.2,.8,.2,1); }
-  .resume-modal.open .resume-panel { transform: none; }
-  .resume-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 24px; padding: 0 56px 30px 0; border-bottom: 1px solid var(--line); }
-  .resume-eyebrow { color: var(--mint); font: 500 11px/1.4 "JetBrains Mono", monospace; letter-spacing: .14em; text-transform: uppercase; }
-  .resume-head h2 { margin-top: 9px; font: 700 clamp(34px, 5vw, 58px)/1 "Inter Tight", sans-serif; letter-spacing: -.045em; }
-  .resume-head p { margin-top: 10px; color: var(--muted); font-size: 16px; }
-  .resume-contact { display: flex; flex-wrap: wrap; gap: 8px 16px; margin-top: 16px; color: rgba(255,255,255,.72); font-size: 13px; }
-  .resume-contact a { color: var(--mint); }
-  .resume-actions { display: flex; align-items: center; gap: 10px; flex: 0 0 auto; }
-  .resume-download { display: inline-flex; align-items: center; gap: 9px; padding: 11px 15px; border-radius: 14px; color: #06100d; background: var(--mint); font-size: 14px; font-weight: 700; white-space: nowrap; }
-  .resume-download:hover { background: #c7f5e8; }
-  .resume-download svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
-  .resume-close { position: absolute; top: 28px; right: 28px; width: 38px; height: 38px; display: grid; place-items: center; border: 1px solid rgba(255,255,255,.16); border-radius: 50%; background: rgba(255,255,255,.05); }
-  .resume-close svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; }
-  .resume-close:hover { border-color: var(--mint); color: var(--mint); }
-  .resume-grid { display: grid; grid-template-columns: minmax(0, 1.65fr) minmax(220px, .8fr); gap: 34px; margin-top: 30px; }
-  .resume-section + .resume-section { margin-top: 30px; }
-  .resume-section h3 { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; color: var(--mint); font: 500 11px/1.4 "JetBrains Mono", monospace; letter-spacing: .12em; text-transform: uppercase; }
-  .resume-section h3::before { content: ""; width: 7px; height: 7px; flex: 0 0 7px; border-radius: 50%; background: var(--mint); box-shadow: 0 0 12px var(--mint); }
-  .resume-role { position: relative; padding: 0 0 24px 20px; border-left: 1px solid rgba(159,232,210,.25); }
-  .resume-role:last-child { padding-bottom: 0; border-left-color: transparent; }
-  .resume-role::before { content: ""; position: absolute; top: 5px; left: -5px; width: 9px; height: 9px; border-radius: 50%; background: #111c20; border: 1px solid var(--mint); box-shadow: 0 0 12px rgba(159,232,210,.35); }
-  .resume-role h4 { font: 600 19px/1.25 "Inter Tight", sans-serif; }
-  .resume-role .resume-role-meta { margin-top: 5px; color: var(--faint); font: 500 11px/1.5 "JetBrains Mono", monospace; letter-spacing: .035em; }
-  .resume-role p, .resume-role li { color: rgba(255,255,255,.76); font-size: 14px; line-height: 1.55; }
-  .resume-role ul { display: grid; gap: 7px; margin: 11px 0 0; padding: 0; list-style: none; }
-  .resume-role li { position: relative; padding-left: 15px; }
-  .resume-role li::before { content: ""; position: absolute; top: .65em; left: 1px; width: 5px; height: 5px; border: 1px solid var(--mint); border-radius: 50%; }
-  .resume-side-card { padding: 18px; border: 1px solid rgba(255,255,255,.09); border-radius: 18px; background: rgba(255,255,255,.035); }
-  .resume-side-card + .resume-side-card { margin-top: 14px; }
-  .resume-side-card h4 { font: 600 16px/1.3 "Inter Tight", sans-serif; }
-  .resume-side-card p, .resume-side-card li { color: var(--muted); font-size: 13px; line-height: 1.55; }
-  .resume-side-card p + p { margin-top: 7px; }
-  .resume-side-card ul { display: grid; gap: 8px; margin: 12px 0 0; padding: 0; list-style: none; }
-  .resume-side-card li { padding-left: 13px; position: relative; }
-  .resume-side-card li::before { content: ""; position: absolute; left: 0; top: .68em; width: 4px; height: 4px; border-radius: 50%; background: var(--mint); }
-  .resume-side-card .resume-year { display: block; margin-top: 5px; color: var(--faint); font: 500 10px/1.4 "JetBrains Mono", monospace; }
-  @media (max-width: 700px) {
-    .resume-modal { padding: 10px; }
-    .resume-panel { max-height: calc(100svh - 20px); padding: 24px 18px; border-radius: 22px; }
-    .resume-head { display: block; padding: 0 42px 22px 0; }
-    .resume-actions { margin-top: 18px; }
-    .resume-close { top: 20px; right: 16px; }
-    .resume-grid { grid-template-columns: 1fr; gap: 28px; margin-top: 24px; }
-    .resume-side { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
-    .resume-side-card + .resume-side-card { margin-top: 0; }
-  }
-  @media (max-width: 420px) { .resume-side { grid-template-columns: 1fr; } .resume-contact { display: grid; gap: 5px; } }
-
-
   /* ---------- Skip the flight: the short version ---------- */
   .overview { position: fixed; inset: 0; z-index: 70; overflow-y: auto; background: #04050a; opacity: 0; pointer-events: none; transition: opacity .4s; }
   .overview.open { opacity: 1; pointer-events: auto; }
@@ -1052,7 +996,7 @@ html.theme-toon .rolechip { border: 2px solid #15132a; background: #1f1757; }
   <button class="styletoggle" id="styleToggle" aria-label="Switch between realistic and cartoon universe" aria-pressed="false"><span class="st-real" title="Realistic"><svg viewBox="0 0 20 20" aria-hidden="true"><defs><radialGradient id="stg" cx=".35" cy=".3" r=".8"><stop offset="0" stop-color="#fff"/><stop offset=".55" stop-color="#9aa3b5"/><stop offset="1" stop-color="#2a2f3b"/></radialGradient></defs><circle cx="10" cy="10" r="6" fill="url(#stg)"/><ellipse cx="10" cy="10" rx="9" ry="3" fill="none" stroke="currentColor" stroke-width="1.2" transform="rotate(-18 10 10)"/></svg></span><span class="st-knob"></span><span class="st-toon" title="Cartoon"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 1.8 C 10.9 6.4, 13.6 9.1, 18.2 10 C 13.6 10.9, 10.9 13.6, 10 18.2 C 9.1 13.6, 6.4 10.9, 1.8 10 C 6.4 9.1, 9.1 6.4, 10 1.8 Z" fill="currentColor" stroke="#15132a" stroke-width="1.4" stroke-linejoin="round"/></svg></span></button>
   <span class="grow"></span>
   <button class="skip" id="skipBtn" aria-controls="overview">Skip the flight</button>
-  <button class="resume-trigger" type="button" data-resume-open aria-haspopup="dialog">Resume</button><a class="contact" href="#" data-go="hello">Contact</a>
+  <a href="https://kunalsatpal.com/kunalsatpal_resume.pdf">Resume</a><a class="contact" href="#" data-go="hello">Contact</a>
 </nav>
 
 <div class="starmap" id="starmap" role="group" aria-label="Route map"><svg id="mapsvg" role="group" aria-label="Journey stops"></svg></div>
@@ -1122,136 +1066,6 @@ html.theme-toon .rolechip { border: 2px solid #15132a; background: #1f1757; }
       <a class="go" id="mLink" href="#">Land on the surface →</a>
     </div>
   </div>
-</div>
-
-<!-- Resume -->
-<div class="modal resume-modal" id="resumeModal" role="dialog" aria-modal="true" aria-labelledby="resumeTitle" aria-hidden="true">
-  <div class="backdrop" data-resume-close></div>
-  <section class="resume-panel" tabindex="-1">
-    <button class="resume-close" type="button" data-resume-close aria-label="Close resume"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
-    <header class="resume-head">
-      <div>
-        <span class="resume-eyebrow">A career in orbit · Bangalore, India</span>
-        <h2 id="resumeTitle">Kunal Satpal</h2>
-        <p>Staff Product Designer at Hinge Health</p>
-        <div class="resume-contact"><a href="mailto:kunalsatpal1@gmail.com">kunalsatpal1@gmail.com</a><a href="https://kunalsatpal.com">kunalsatpal.com</a></div>
-      </div>
-      <div class="resume-actions">
-        <a class="resume-download" href="https://kunalsatpal.com/kunalsatpal_resume.pdf" download="Kunal-Satpal-Resume.pdf">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m0 0 4-4m-4 4-4-4M5 17v3h14v-3"/></svg>
-          Download PDF
-        </a>
-      </div>
-    </header>
-    <div class="resume-grid">
-      <div>
-        <section class="resume-section">
-          <h3>Work experience</h3>
-          <article class="resume-role">
-            <h4>Hinge Health</h4>
-            <p class="resume-role-meta">Staff Product Designer · Senior Product Designer → Staff Product Designer · December 2023 – Present</p>
-            <ul>
-              <li>Oversee CareHub, used by therapists and coaches to provide care to 25 million members.</li>
-              <li>Streamlined therapist workflows, improving efficiency by 6% and saving $400K/month.</li>
-              <li>Created AI member insights to support therapist decisions, improving efficiency by 1%.</li>
-              <li>Led three tech talks and joined a panel discussion to build design awareness.</li>
-            </ul>
-          </article>
-          <article class="resume-role">
-            <h4>Gojek · GoFood Growth</h4>
-            <p class="resume-role-meta">Senior Product Designer · July 2022 – November 2023</p>
-            <ul>
-              <li>Led GoFood growth and promotions, focused on activation and retention for 600K daily users.</li>
-              <li>Overhauled the promo page; visits grew from x to 2.5× and conversion from x% to 2×%.</li>
-              <li>Ran 20+ experiments in a year, improving promo perception and increasing redemption by 2%.</li>
-            </ul>
-          </article>
-          <article class="resume-role">
-            <h4>Cult.fit</h4>
-            <p class="resume-role-meta">Product Designer 2 → Senior Product Designer · 2020 – 2022</p>
-            <ul>
-              <li>Redesigned marketplace onboarding, reducing turnaround from 10–15 days to 3–4 days.</li>
-              <li>Co-developed the app and web design system with four designers.</li>
-              <li>Designed Wellness navigation and landing pages, increasing category visits by 5%.</li>
-              <li>Created wellness cross-sell channels; cart abandonment drove 4% more conversions.</li>
-            </ul>
-          </article>
-          <article class="resume-role">
-            <h4>Cult.fit · Product Design Intern</h4>
-            <p class="resume-role-meta">Earlier experience</p>
-            <ul>
-              <li>Designed Fitclub V2, workout history and weekly reports to support engagement.</li>
-              <li>Designed a No Cost EMI payment flow, targeting a contact-ratio reduction from x% to x−1%.</li>
-              <li>Researched referral motivations and designed a referral system to support conversion and retention.</li>
-            </ul>
-          </article>
-          <article class="resume-role">
-            <h4>West Agile Labs</h4>
-            <p class="resume-role-meta">Contract Product Designer · Remote · October 2018 – January 2019</p>
-            <ul>
-              <li>Designed a cataloguing dashboard to help sales teams monitor the business and present products.</li>
-              <li>Worked in two-week Scrum sprints with two managers and another designer.</li>
-            </ul>
-          </article>
-          <article class="resume-role">
-            <h4>Information Management Group · IIT Roorkee</h4>
-            <p class="resume-role-meta">Head of Design · January 2017 – March 2020</p>
-            <ul>
-              <li>Led 12+ designers and built products for more than 10,000 students and faculty.</li>
-              <li>Designed the placement portal, reaching about 200K page visits per day during placements.</li>
-            </ul>
-          </article>
-          <article class="resume-role">
-            <h4>Pibit</h4>
-            <p class="resume-role-meta">Founding Product Designer · Roorkee · April 2017 – November 2017</p>
-            <ul>
-              <li>Designed an online presence and real-time offers for local merchants.</li>
-              <li>Grew the platform to 22 clients and 10,000+ users in Roorkee and Dehradun.</li>
-            </ul>
-          </article>
-        </section>
-      </div>
-      <aside class="resume-side">
-        <section class="resume-section">
-          <h3>Education</h3>
-          <div class="resume-side-card">
-            <h4>Indian Institute of Technology Roorkee</h4>
-            <p>B.Tech in Chemical Engineering</p>
-            <span class="resume-year">2016 – 2020 · GPA 7.44</span>
-          </div>
-        </section>
-        <section class="resume-section">
-          <h3>Tools & skills</h3>
-          <div class="resume-side-card">
-            <ul>
-              <li>Figma, Sketch, Principle, InVision, Zeplin, Marvel</li>
-              <li>Illustrator, Photoshop, After Effects</li>
-              <li>HTML, CSS, JavaScript</li>
-              <li>English and Hindi</li>
-            </ul>
-          </div>
-        </section>
-        <section class="resume-section">
-          <h3>Initiatives</h3>
-          <div class="resume-side-card">
-            <h4>Rise Design</h4>
-            <p>Conducted remote design-thinking workshops to build awareness and use of the mindset.</p>
-          </div>
-        </section>
-        <section class="resume-section">
-          <h3>Achievements</h3>
-          <div class="resume-side-card">
-            <ul>
-              <li>KVPY Scholar · Rank 492 among 150K applicants</li>
-              <li>JEE Mains & Advanced · Rank 3,732</li>
-              <li>Site of the Day · CSS Lights</li>
-              <li>Site of the Day · Design Nominees</li>
-            </ul>
-          </div>
-        </section>
-      </aside>
-    </div>
-  </section>
 </div>
 
 <!-- Skip the flight -->
@@ -1783,42 +1597,6 @@ html.theme-toon .rolechip { border: 2px solid #15132a; background: #1f1757; }
     const f = [...modal.querySelectorAll('a[href], button')].filter(x => x.offsetParent && x.style.display !== 'none'), first = f[0], last = f[f.length - 1]
     if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus() } else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus() }
   })
-  const resumeModal = $('resumeModal')
-  let resumeLastFocus = null
-  function openResume(trigger) {
-    if (resumeModal.classList.contains('open')) return
-    resumeLastFocus = trigger
-    sceneSnap?.cancel()
-    lenis?.stop()
-    document.body.style.overflow = 'hidden'
-    resumeModal.classList.add('open')
-    resumeModal.setAttribute('aria-hidden', 'false')
-    resumeModal.querySelector('.resume-close').focus({ preventScroll: true })
-    syncSuspension()
-  }
-  function closeResume() {
-    if (!resumeModal.classList.contains('open')) return
-    resumeModal.classList.remove('open')
-    resumeModal.setAttribute('aria-hidden', 'true')
-    if (!$('overview').classList.contains('open')) {
-      document.body.style.overflow = ''
-      lenis?.start()
-      sceneSnap?.resume()
-    }
-    resumeLastFocus?.focus({ preventScroll: true })
-    syncSuspension()
-  }
-  document.addEventListener('click', e => {
-    if (!(e.target instanceof Element)) return
-    const trigger = e.target.closest('[data-resume-open]')
-    if (trigger) { e.preventDefault(); openResume(trigger); return }
-    if (e.target.closest('[data-resume-close]')) closeResume()
-  })
-  resumeModal.addEventListener('keydown', e => {
-    if (e.key !== 'Tab') return
-    const f = [...resumeModal.querySelectorAll('a[href], button')].filter(x => x.offsetParent && x.style.display !== 'none'), first = f[0], last = f[f.length - 1]
-    if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus() } else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus() }
-  })
 
   // =====================================================================================
   // Many hats: the stars rearrange into a constellation for each role
@@ -2286,7 +2064,7 @@ html.theme-toon .rolechip { border: 2px solid #15132a; background: #1f1757; }
     syncHobbyMedia()
   }
   function syncSuspension() {
-    const next = pageHidden || document.hidden || $('overview').classList.contains('open') || resumeModal.classList.contains('open')
+    const next = pageHidden || document.hidden || $('overview').classList.contains('open')
     if (next !== suspended) {
       suspended = next
       stage.classList.toggle('render-suspended', suspended)
@@ -2694,11 +2472,8 @@ html.theme-toon .rolechip { border: 2px solid #15132a; background: #1f1757; }
   document.querySelectorAll('.proof').forEach(c => { c.removeAttribute('data-go'); c.addEventListener('click', e => e.preventDefault()) })
   document.querySelectorAll('[data-go]').forEach(a => a.addEventListener('click', e => { e.preventDefault(); closeOverview(); warpTo(indexOf(a.dataset.go)) }))
   addEventListener('keydown', e => {
-    if (e.key === 'Escape') {
-      if (resumeModal.classList.contains('open')) { closeResume(); return }
-      leave(); closeOverview(); return
-    }
-    if (modal.classList.contains('open') || $('overview').classList.contains('open') || resumeModal.classList.contains('open')) return
+    if (e.key === 'Escape') { leave(); closeOverview(); return }
+    if (modal.classList.contains('open') || $('overview').classList.contains('open')) return
     if (e.target.closest('a, button, input, textarea, select, [contenteditable="true"], [role="button"]')) return
     const here = sceneSnap.state().targetIndex ?? nearest(progress() * U)
     if (['ArrowDown', 'ArrowRight', 'PageDown'].includes(e.key) || (e.key === ' ' && !e.shiftKey)) { e.preventDefault(); warpTo(here + 1) }
@@ -2720,7 +2495,7 @@ html.theme-toon .rolechip { border: 2px solid #15132a; background: #1f1757; }
     <div class="rows">${PLANETS.map(p => `<div class="row"><div><h3><span class="dot" style="background:${p.glow}"></span>${p.name}</h3><p class="rr">${p.role}</p><p class="yy">${p.years}</p></div>
       <ul>${p.moons.map(m => `<li><b>${m.t}</b> · ${m.stat || m.s}${m.href ? `<a href="${m.href}">Case study →</a>` : ''}</li>`).join('')}</ul></div>`).join('')}</div>
     <p style="margin-top:22px;color:var(--muted)">Also: ${STOPS.slice(2).map(s => s.name).join(', ')}.</p>
-    <div class="end"><a class="primary" href="mailto:kunalsatpal1@gmail.com">kunalsatpal1@gmail.com</a><button class="resume-trigger" type="button" data-resume-open aria-haspopup="dialog">Resume</button><a href="https://www.linkedin.com/in/kunalsatpal1/">LinkedIn</a><button id="backToFlight">Back to the flight</button></div>`
+    <div class="end"><a class="primary" href="mailto:kunalsatpal1@gmail.com">kunalsatpal1@gmail.com</a><a href="https://kunalsatpal.com/kunalsatpal_resume.pdf">Resume</a><a href="https://www.linkedin.com/in/kunalsatpal1/">LinkedIn</a><button id="backToFlight">Back to the flight</button></div>`
   const overview = $('overview')
   function openOverview() { sceneSnap?.cancel(); overview.classList.add('open'); overview.setAttribute('aria-hidden', 'false'); lenis?.stop(); document.body.style.overflow = 'hidden'; overview.scrollTop = 0; $('backToFlight').focus({ preventScroll: true }); $('skipBtn').textContent = 'Back to the flight'; syncSuspension() }
   function closeOverview() { if (!overview.classList.contains('open')) return; overview.classList.remove('open'); overview.setAttribute('aria-hidden', 'true'); lenis?.start(); document.body.style.overflow = ''; $('skipBtn').textContent = 'Skip the flight'; syncSuspension() }
