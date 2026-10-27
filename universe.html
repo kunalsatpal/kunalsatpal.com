@@ -967,7 +967,7 @@ html.theme-toon .rolechip { border: 2px solid #15132a; background: #1f1757; }
   html.theme-toon.settled .planet *, html.theme-toon.settled .ringsvg *,
   html.theme-toon .mini .msurf { animation-play-state: paused !important; }
   /* Freeze decorations that repaint every frame while their scene is flying. */
-  .scene.motion-layer .travel, .scene.motion-layer .lp-light, .scene.motion-layer .msurf,
+  .scene.motion-layer .travel:not(.flight-alive), .scene.motion-layer .lp-light, .scene.motion-layer .msurf,
   .scene.motion-layer .mini, .scene.motion-layer .moon.open i::after, .scene.motion-layer .mini.open i::after { animation-play-state: paused !important; }
   /* About role word: star-rise swap (replaces the glitch). */
   .gword, .hatproof { transition: opacity .2s ease, transform .2s ease, filter .2s ease; }
@@ -1262,7 +1262,7 @@ html.theme-toon .rolechip { border: 2px solid #15132a; background: #1f1757; }
         return [50 + Math.cos(a) * RX, 50 + Math.sin(a) * RY + b] })
       const d = toPath(pts)
       return `<path d="${d}" fill="none" stroke="${c}" stroke-opacity=".35" stroke-width="1.1" stroke-linejoin="round"/>
-        <path class="travel" d="${d}" pathLength="100" fill="none" stroke="#e6fff3" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round" stroke-dasharray="7 93" style="filter: drop-shadow(0 0 2px ${c})"/>`
+        <path class="travel flight-alive" d="${d}" pathLength="100" fill="none" stroke="#e6fff3" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round" stroke-dasharray="7 93" style="filter: drop-shadow(0 0 2px ${c})"/>`
     },
     // Gojek: a route — dashed road, a green pickup pin and a red GoFood drop pin, a ride gliding between.
     route: c => {
@@ -1270,7 +1270,7 @@ html.theme-toon .rolechip { border: 2px solid #15132a; background: #1f1757; }
       const pin = (a, col) => { const x = 50 + Math.cos(a) * RX, y = 50 + Math.sin(a) * RY
         return `<g transform="translate(${x.toFixed(2)} ${y.toFixed(2)})"><path d="M0 0 C -2.6 -3.2, -2.6 -6.4, 0 -6.6 C 2.6 -6.4, 2.6 -3.2, 0 0 Z" fill="${col}"/><circle cx="0" cy="-4.4" r=".9" fill="#0a1a0d"/></g>` }
       return `<path d="${d}" fill="none" stroke="${c}" stroke-opacity=".5" stroke-width="1" stroke-dasharray="2.2 2.2"/>
-        <path class="travel slow" d="${d}" pathLength="100" fill="none" stroke="#eaffea" stroke-width="2.2" stroke-linecap="round" stroke-dasharray="1.2 98.8" style="filter: drop-shadow(0 0 2.5px ${c})"/>
+        <path class="travel slow flight-alive" d="${d}" pathLength="100" fill="none" stroke="#eaffea" stroke-width="2.2" stroke-linecap="round" stroke-dasharray="1.2 98.8" style="filter: drop-shadow(0 0 2.5px ${c})"/>
         ${pin(Math.PI * .78, '#00aa13')}${pin(Math.PI * .22, '#ee2737')}`
     },
     // Cult.fit: a running track — a wide red lane band, white lane lines, a start/finish stripe and a glowing runner.
@@ -1281,7 +1281,7 @@ html.theme-toon .rolechip { border: 2px solid #15132a; background: #1f1757; }
       return e(0, `stroke="#7a1830" stroke-width="10"`) + e(0, `stroke="#e0405f" stroke-width="8.4"`) +
         [-3.6, -1.2, 1.2, 3.6].map(d => e(d, `stroke="#fff" stroke-opacity=".8" stroke-width=".35"`)).join('') +
         `<g transform="translate(${fx.toFixed(2)} ${fy.toFixed(2)}) rotate(28)">${[0, 1, 2, 3].map(r => [0, 1].map(k => `<rect x="${k * 1.1 - 1.1}" y="${r * 1.1 - 2.2 - 1.1}" width="1.1" height="1.1" fill="${(r + k) % 2 ? '#111' : '#fff'}"/>`).join('')).join('')}</g>` +
-        `<path class="travel slow" d="${lane}" pathLength="100" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-dasharray=".5 99.5" style="filter: drop-shadow(0 0 3px #fff) drop-shadow(0 0 6px ${c})"/>`
+        `<path class="travel slow flight-alive" d="${lane}" pathLength="100" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-dasharray=".5 99.5" style="filter: drop-shadow(0 0 3px #fff) drop-shadow(0 0 6px ${c})"/>`
     },
     // IIT Roorkee · IMG: a circuit trace — square steps with nodes, a signal running along it.
     circuit: c => {
